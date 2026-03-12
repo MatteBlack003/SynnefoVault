@@ -1,24 +1,555 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Synnefo Mock Exams</title>
-    <style>
-        body { font-family: sans-serif; padding: 2rem; background: #f0f0f0; }
-        .card { background: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synnefo Mock Exams | Secure Archive</title>
+  <meta name="description" content="Access the newest question papers and practice tests across all IT and Business training departments." />
+
+  <!-- Preconnect to Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Monument+Extended:wght@800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       Synnefo Mock Exams — WebGL 3D Archive Experience
+       ============================================================ */
+    :root {
+      --bg-color: #d9dee3; /* Bright misty fog */
+      --text-main: #1a1a1a;
+      --text-muted: #6b7280;
+      --accent: #000000;
+      
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-display: sans-serif; /* Fallback for heavy display text */
+
+      --border-thin: 1px solid rgba(0,0,0,0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      overflow: hidden; /* No scrolling, 100% 3D experience */
+      user-select: none;
+      cursor: crosshair;
+    }
+
+    /* === WEBGL CANVAS === */
+    #webgl-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    /* === HUD OVERLAY === */
+    #hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none; /* Let clicks pass through to UI elements */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 2rem;
+    }
+
+    .hud-element {
+      pointer-events: auto;
+    }
+
+    /* --- TOP BAR --- */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 2rem;
+      letter-spacing: -1px;
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .status-panel {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      line-height: 1.5;
+    }
+
+    .status-active {
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    /* --- CROSSHAIRS & BRACKETS --- */
+    .crosshair-h, .crosshair-v {
+      position: absolute;
+      background: rgba(0,0,0,0.1);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .crosshair-h { top: 50%; left: 0; width: 100%; height: 1px; }
+    .crosshair-v { top: 0; left: 50%; width: 1px; height: 100%; }
+    
+    .target-brackets {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 400px;
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: 4px;
+      pointer-events: none;
+    }
+    .target-brackets::before, .target-brackets::after {
+      content: ''; position: absolute; width: 20px; height: 20px; border: 1.5px solid rgba(0,0,0,0.3);
+    }
+    .target-brackets::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+    .target-brackets::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+    /* --- BOTTOM BAR (NAVIGATION) --- */
+    .bottom-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      gap: 2rem;
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border: var(--border-thin);
+      padding: 1rem 2rem;
+      border-radius: 50px;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      padding: 0.5rem;
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    .nav-btn::before, .nav-btn::after {
+      content: '';
+      position: absolute;
+      opacity: 0;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .nav-btn::before { content: '['; left: -10px; }
+    .nav-btn::after { content: ']'; right: -10px; }
+
+    .nav-btn:hover::before, .nav-btn.active::before { opacity: 1; left: 0px; }
+    .nav-btn:hover::after, .nav-btn.active::after { opacity: 1; right: 0px; }
+
+    /* --- DATA PANEL (EXAM LINKS) --- */
+    .data-panel {
+      position: absolute;
+      top: 50%;
+      right: 10%;
+      transform: translateY(-50%);
+      width: 350px;
+      max-height: 60vh;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(20px);
+      border: var(--border-thin);
+      border-radius: 8px;
+      padding: 2rem;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    }
+    
+    .data-panel.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    .data-panel h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.5rem;
+      border-bottom: var(--border-thin);
+      padding-bottom: 0.5rem;
+    }
+
+    .exam-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .exam-list a {
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      transition: opacity 0.2s;
+    }
+    .exam-list a::before {
+      content: '>';
+      margin-right: 8px;
+      font-weight: 700;
+      color: rgba(0,0,0,0.3);
+    }
+    .exam-list a:hover {
+      opacity: 0.6;
+    }
+
+    /* Hide standard lists stored for JS logic */
+    .raw-data { display: none; }
+
+  </style>
+
+  <!-- Import Three.js & GSAP directly securely without build step -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://esm.sh/three@0.160.0",
+        "gsap": "https://esm.sh/gsap@3.12.5"
+      }
+    }
+  </script>
+
 </head>
 <body>
-    <h1>Synnefo Mock Exams</h1>
-    <div id="cardGrid">
-        <div class="card"><h2>Networking</h2><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
-        <div class="card"><h2>Cyber Security</h2><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
-        <div class="card"><h2>DevOps</h2><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
-        <div class="card"><h2>Flutter</h2><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
-        <div class="card"><h2>MERN Stack</h2><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
-        <div class="card"><h2>Python</h2><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
-        <div class="card"><h2>Digital Marketing</h2><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
+
+  <!-- RAW DATA STORAGE FOR PYTHON TO INJECT INTO -->
+  <div class="raw-data" id="data-networking"><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
+  <div class="raw-data" id="data-cyber-security"><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
+  <div class="raw-data" id="data-devops"><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
+  <div class="raw-data" id="data-flutter"><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
+  <div class="raw-data" id="data-mern-stack"><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
+  <div class="raw-data" id="data-python"><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
+  <div class="raw-data" id="data-digital-marketing"><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
+
+  <!-- WEBGL CANVAS CONTAINER -->
+  <div id="webgl-container"></div>
+
+  <!-- HUD OVERLAY -->
+  <div id="hud">
+    
+    <div class="top-bar">
+      <div class="logo hud-element">SYNNEFO</div>
+      <div class="status-panel hud-element">
+        <div>SYS.ARCHIVE_01</div>
+        <div>SECURE LINK: <span class="status-active">ESTABLISHED</span></div>
+        <div id="fps-counter">SCAN RATE: 60Hz</div>
+      </div>
     </div>
+
+    <div class="crosshair-h"></div><div class="crosshair-v"></div>
+    <div class="target-brackets"></div>
+
+    <!-- DATA PANEL THAT POPS UP -->
+    <div class="data-panel hud-element" id="dataPanel">
+      <h2 id="panelTitle">Select Department</h2>
+      <ul class="exam-list" id="panelList">
+        <!-- JS will populate this -->
+      </ul>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="nav-container hud-element">
+        <button class="nav-btn" data-target="networking">Networking</button>
+        <button class="nav-btn" data-target="cyber-security">Cyber Security</button>
+        <button class="nav-btn" data-target="devops">DevOps</button>
+        <button class="nav-btn" data-target="flutter">Flutter</button>
+        <button class="nav-btn" data-target="mern-stack">MERN Stack</button>
+        <button class="nav-btn" data-target="python">Python</button>
+        <button class="nav-btn" data-target="digital-marketing">Digital Marketing</button>
+      </div>
+      <div class="status-panel hud-element" style="text-align: center; font-size: 0.65rem;">
+        TARGET A DEPARTMENT TO EXTRACT ARCHIVE DATA
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import gsap from 'gsap';
+
+    // ──────────────────────────────────────
+    // 1. THREE.JS SCENE SETUP
+    // ──────────────────────────────────────
+    const container = document.getElementById('webgl-container');
+    const scene = new THREE.Scene();
+    
+    // Exact Igloo misty fog color
+    const fogColor = new THREE.Color('#d9dee3'); 
+    scene.background = fogColor;
+    scene.fog = new THREE.FogExp2(fogColor, 0.04);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 100);
+    camera.position.set(0, 2, 10);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    // ──────────────────────────────────────
+    // 2. SCENE GEOMETRY (The "Data Core")
+    // ──────────────────────────────────────
+    const coreGroup = new THREE.Group();
+    scene.add(coreGroup);
+
+    // Main particle core (abstract sculpted look like the Igloo screenshot)
+    const particleCount = 12000;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+
+    const colorDark = new THREE.Color('#4a5568');
+    const colorLight = new THREE.Color('#8892a4');
+
+    for(let i = 0; i < particleCount; i++) {
+        // Create a rough humanoid/object shape via math
+        const u = Math.random();
+        const v = Math.random();
+        const theta = 2 * Math.PI * u;
+        const phi = Math.acos(2 * v - 1);
+        
+        let r = 2.0;
+        // Tweak radius to look bumpy/sculpted
+        r += Math.sin(theta * 3) * 0.3;
+        r += Math.cos(phi * 4) * 0.4;
+        
+        // Add random scatter
+        r += (Math.random() - 0.5) * 0.5;
+
+        // Shape it slightly like a vertical object (taller)
+        let x = r * Math.sin(phi) * Math.cos(theta);
+        let y = r * Math.cos(phi) * 1.5; 
+        let z = r * Math.sin(phi) * Math.sin(theta);
+
+        positions[i*3] = x;
+        positions[i*3+1] = y;
+        positions[i*3+2] = z;
+
+        // Colors
+        const mixedColor = colorDark.clone().lerp(colorLight, Math.random());
+        colors[i*3] = mixedColor.r;
+        colors[i*3+1] = mixedColor.g;
+        colors[i*3+2] = mixedColor.b;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const material = new THREE.PointsMaterial({
+        size: 0.05,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+        sizeAttenuation: true
+    });
+
+    const particleSystem = new THREE.Points(geometry, material);
+    coreGroup.add(particleSystem);
+
+    // Turntable Base Rings
+    for(let j=1; j<=4; j++) {
+        const ringGeo = new THREE.RingGeometry(j + 0.5, j + 0.52, 64);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.1, side: THREE.DoubleSide });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.y = -3;
+        scene.add(ring);
+    }
+
+    // Floating UI markers around the core
+    const markerGeo = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+    const markerMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1a });
+    const markers = [];
+    for(let m=0; m<7; m++) {
+        const marker = new THREE.Mesh(markerGeo, markerMat);
+        const angle = (m / 7) * Math.PI * 2;
+        marker.position.set(Math.cos(angle)*3, (Math.random() - 0.5)*2, Math.sin(angle)*3);
+        coreGroup.add(marker);
+        markers.push(marker);
+    }
+
+    // ──────────────────────────────────────
+    // 3. LIGHTING
+    // ──────────────────────────────────────
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const pointLight = new THREE.PointLight(0xffffff, 1, 20);
+    pointLight.position.set(5, 5, 5);
+    scene.add(pointLight);
+
+    // ──────────────────────────────────────
+    // 4. INTERACTION & ANIMATION LOOP
+    // ──────────────────────────────────────
+    let mouseX = 0;
+    let mouseY = 0;
+    
+    document.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+        mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+    });
+
+    const clock = new THREE.Clock();
+
+    function animate() {
+        requestAnimationFrame(animate);
+        const time = clock.getElapsedTime();
+
+        // Slowly rotate the core
+        coreGroup.rotation.y = time * 0.1;
+
+        // Subtle camera float based on mouse (parallax)
+        gsap.to(camera.position, {
+            x: mouseX * 2,
+            y: 2 + mouseY * 1,
+            duration: 1,
+            ease: "power2.out"
+        });
+        camera.lookAt(0, 0, 0);
+
+        // Animate particles slightly
+        const positions = particleSystem.geometry.attributes.position.array;
+        for(let i=0; i<particleCount; i++) {
+            positions[i*3+1] += Math.sin(time * 2 + positions[i*3]) * 0.001; 
+        }
+        particleSystem.geometry.attributes.position.needsUpdate = true;
+
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // ──────────────────────────────────────
+    // 5. UI LOGIC (HUD + GSAP)
+    // ──────────────────────────────────────
+    const navBtns = document.querySelectorAll('.nav-btn');
+    const dataPanel = document.getElementById('dataPanel');
+    const panelTitle = document.getElementById('panelTitle');
+    const panelList = document.getElementById('panelList');
+    const targetBrackets = document.querySelector('.target-brackets');
+
+    navBtns.forEach((btn, index) => {
+        btn.addEventListener('click', () => {
+            // Remove active from all
+            navBtns.forEach(b => b.classList.remove('active'));
+            // Set active
+            btn.classList.add('active');
+
+            const targetId = btn.getAttribute('data-target');
+            
+            // WebGL camera effect: Zoom in dramatically!
+            gsap.to(camera.position, {
+                z: 6, // closer
+                duration: 1.5,
+                ease: "power4.inOut"
+            });
+            gsap.to(camera.rotation, {
+                z: (Math.random() - 0.5) * 0.2, // slight tilt
+                duration: 1.5,
+                ease: "power4.inOut"
+            });
+            
+            // HUD effect: Spin and shrink brackets to target
+            gsap.fromTo(targetBrackets, 
+                { scale: 1.5, rotate: 45, opacity: 0 },
+                { scale: 1, rotate: 0, opacity: 1, duration: 1, ease: "back.out(1.7)" }
+            );
+
+            // Fetch data from hidden DOM generated by Python
+            const rawDataEl = document.getElementById(`data-${targetId}`);
+            let htmlContent = '<p class="status-active" style="font-size:0.7em;">[NO DATA]</p>';
+            if(rawDataEl && rawDataEl.innerHTML) {
+                const list = rawDataEl.querySelector('ul');
+                if(list && list.children.length > 0) {
+                    htmlContent = list.innerHTML;
+                }
+            }
+
+            // Animate Data Panel out, update content, animate in
+            gsap.to(dataPanel, {
+                opacity: 0,
+                x: 50,
+                duration: 0.3,
+                onComplete: () => {
+                    panelTitle.textContent = btn.textContent + " // ARCHIVE";
+                    panelList.innerHTML = htmlContent;
+                    
+                    dataPanel.classList.add('is-visible');
+                    gsap.to(dataPanel, {
+                        opacity: 1,
+                        x: 0,
+                        duration: 0.6,
+                        ease: "power3.out"
+                    });
+                }
+            });
+
+            // Highlight the corresponding 3D marker
+            markers.forEach((m, i) => {
+                if(i === index) {
+                    m.material.color.setHex(0xffffff);
+                    m.scale.set(2,2,2);
+                } else {
+                    m.material.color.setHex(0x1a1a1a);
+                    m.scale.set(1,1,1);
+                }
+            });
+        });
+    });
+
+  </script>
 </body>
 </html>
