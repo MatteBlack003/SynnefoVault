@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Synnefo Solutions | Mock Exams</title>
+    <title>SYNNEFO_NEXUS // Mock Exams</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-base: #030712;
-            --bg-gradient-1: #0f172a;
-            --bg-gradient-2: #1e1b4b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --card-bg: rgba(30, 41, 59, 0.4);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --accent: #60a5fa;
-            --accent-glow: rgba(96, 165, 250, 0.5);
-            --font-main: 'Outfit', sans-serif;
-            --font-display: 'Space Grotesk', sans-serif;
+            --bg-color: #050505;
+            --grid-color: rgba(0, 255, 204, 0.05);
+            --primary: #00ffcc;
+            --primary-dim: rgba(0, 255, 204, 0.15);
+            --secondary: #ff00ff;
+            --text-main: #e0e0e0;
+            --text-muted: #888888;
+            --panel-bg: rgba(10, 15, 20, 0.85);
+            --font-head: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
         }
 
         * {
@@ -31,187 +30,188 @@
         }
         
         body {
-            background-color: var(--bg-base);
+            background-color: var(--bg-color);
             color: var(--text-main);
-            font-family: var(--font-main);
+            font-family: var(--font-body);
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-position: center bottom;
         }
 
-        /* Animated Background Elements */
-        .bg-glow {
+        /* Scanline Overlay */
+        .scanlines {
             position: fixed;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-            border-radius: 50%;
-            top: -200px;
-            left: -200px;
-            filter: blur(100px);
-            z-index: -1;
-            opacity: 0.5;
-            animation: float 20s infinite alternate;
-        }
-        
-        .bg-glow-2 {
-            position: fixed;
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
-            border-radius: 50%;
-            bottom: -300px;
-            right: -200px;
-            filter: blur(120px);
-            z-index: -1;
-            opacity: 0.5;
-            animation: float 25s infinite alternate-reverse;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.1) 50%,
+                rgba(0,0,0,0.1)
+            );
+            background-size: 100% 4px;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.3;
         }
 
-        @keyframes float {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(100px, 50px); }
-        }
-
-        /* Container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 2rem;
             position: relative;
-            z-index: 1;
+            z-index: 10;
         }
 
-        /* Header / Hero */
+        /* Header / HUD */
         header {
-            padding: 8rem 0 4rem;
+            padding: 6rem 0 3rem;
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            animation: fadeDown 1s ease-out forwards;
+            position: relative;
         }
 
-        @keyframes fadeDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .badge {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.5rem 1rem;
-            border-radius: 100px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            letter-spacing: 1px;
+        .sys-status {
+            display: inline-block;
+            color: var(--primary);
+            font-family: var(--font-head);
+            font-size: 0.8rem;
+            letter-spacing: 4px;
             text-transform: uppercase;
-            margin-bottom: 1.5rem;
-            color: #93c5fd;
-            backdrop-filter: blur(10px);
+            border: 1px solid var(--primary);
+            padding: 0.4rem 1.5rem;
+            margin-bottom: 2rem;
+            background: var(--primary-dim);
+            position: relative;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.8; box-shadow: 0 0 5px var(--primary); }
+            50% { opacity: 1; box-shadow: 0 0 15px var(--primary); }
+            100% { opacity: 0.8; box-shadow: 0 0 5px var(--primary); }
         }
 
         h1 {
-            font-family: var(--font-display);
-            font-size: clamp(3rem, 5vw, 5rem);
-            font-weight: 700;
+            font-family: var(--font-head);
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 900;
             line-height: 1.1;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -1px;
+            margin-bottom: 1rem;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: 'NEXUS';
+            position: absolute;
+            left: -2px;
+            top: 2px;
+            color: var(--secondary);
+            z-index: -1;
+            opacity: 0.7;
+            text-shadow: none;
+            filter: blur(2px);
+            clip-path: polygon(0 0, 100% 0, 100% 40%, 0 40%);
+            animation: glitch 3s infinite alternate-reverse;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
         }
 
         p.subtitle {
             color: var(--text-muted);
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             max-width: 600px;
-            font-weight: 300;
+            margin: 0 auto;
+            font-weight: 500;
+            letter-spacing: 1px;
+            font-family: monospace;
         }
 
-        /* Search / Filter */
+        /* Search / Filter CMD */
         .search-container {
             width: 100%;
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto 4rem;
             position: relative;
-            z-index: 10;
-            animation: fadeUp 1s ease-out 0.2s forwards;
-            opacity: 0;
-            transform: translateY(30px);
+        }
+
+        .search-container::before {
+            content: '>';
+            position: absolute;
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-family: var(--font-head);
+            font-size: 1.5rem;
+            font-weight: bold;
+            z-index: 2;
         }
 
         .search-input {
             width: 100%;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--text-muted);
+            border-left: 4px solid var(--primary);
             padding: 1.25rem 1.5rem 1.25rem 3.5rem;
-            border-radius: 16px;
-            color: var(--text-main);
-            font-size: 1.1rem;
-            font-family: var(--font-main);
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-family: var(--font-head);
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: rgba(0, 255, 204, 0.3);
         }
 
         .search-input:focus {
-            outline: none;
-            border-color: var(--accent);
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 1.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            width: 20px;
-            height: 20px;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-dim), inset 0 0 10px var(--primary-dim);
         }
 
         /* Grid */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2.5rem;
             padding-bottom: 6rem;
         }
 
-        /* Glassmorphism Cards */
+        /* Cyberpunk Panels */
         .card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 2.5rem;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: var(--panel-bg);
+            border: 1px solid #222;
+            padding: 2rem;
+            transition: all 0.3s ease;
             position: relative;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
-            height: 100%;
-            /* Pure CSS animation for entrance */
-            opacity: 0;
-            transform: translateY(40px);
-            animation: fadeUp 0.8s ease-out forwards;
+            clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
         }
-
-        @keyframes fadeUp {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card:nth-child(1) { animation-delay: 0.3s; }
-        .card:nth-child(2) { animation-delay: 0.4s; }
-        .card:nth-child(3) { animation-delay: 0.5s; }
-        .card:nth-child(4) { animation-delay: 0.6s; }
-        .card:nth-child(5) { animation-delay: 0.7s; }
-        .card:nth-child(6) { animation-delay: 0.8s; }
-        .card:nth-child(7) { animation-delay: 0.9s; }
 
         .card::before {
             content: '';
@@ -219,67 +219,74 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
-            pointer-events: none;
+            height: 2px;
+            background: #333;
+            transition: all 0.3s ease;
         }
-        
+
         .card::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--accent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            bottom: 0;
+            right: 0;
+            width: 30px;
+            height: 30px;
+            background: transparent;
+            border-right: 2px solid #333;
+            border-bottom: 2px solid #333;
+            transition: all 0.3s ease;
         }
 
         .card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+            background: rgba(15, 25, 30, 0.95);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border-color: #333;
         }
         
-        .card:hover::after {
-            opacity: 1;
+        .card:hover::before {
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
         }
 
-        .card:nth-child(1)::after { background: linear-gradient(90deg, #3b82f6, #93c5fd); }
-        .card:nth-child(2)::after { background: linear-gradient(90deg, #ef4444, #fca5a5); }
-        .card:nth-child(3)::after { background: linear-gradient(90deg, #10b981, #6ee7b7); }
-        .card:nth-child(4)::after { background: linear-gradient(90deg, #0ea5e9, #7dd3fc); }
-        .card:nth-child(5)::after { background: linear-gradient(90deg, #8b5cf6, #c4b5fd); }
-        .card:nth-child(6)::after { background: linear-gradient(90deg, #f59e0b, #fcd34d); }
-        .card:nth-child(7)::after { background: linear-gradient(90deg, #ec4899, #f9a8d4); }
+        .card:hover::after {
+            border-color: var(--primary);
+            box-shadow: 2px 2px 5px var(--primary);
+        }
+
+        .card[data-department="cyber-security"]:hover::before { background: var(--secondary); box-shadow: 0 0 10px var(--secondary); }
+        .card[data-department="cyber-security"]:hover::after { border-color: var(--secondary); box-shadow: 2px 2px 5px var(--secondary); }
+        
+        /* Custom Colors for departments */
+        .card[data-department="networking"] .icon { color: #3b82f6; }
+        .card[data-department="cyber-security"] .icon { color: var(--secondary); text-shadow: 0 0 15px var(--secondary); }
+        .card[data-department="devops"] .icon { color: #f59e0b; }
+        .card[data-department="flutter"] .icon { color: #0ea5e9; }
+        .card[data-department="mern-stack"] .icon { color: #10b981; }
+        .card[data-department="python"] .icon { color: #eab308; }
+        .card[data-department="digital-marketing"] .icon { color: #ec4899; }
 
         .card-header {
             display: flex;
             align-items: center;
             gap: 1rem;
-            margin-bottom: 2rem;
-            position: relative;
-            z-index: 2;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 1rem;
         }
 
-        .icon-wrapper {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .icon {
+            font-size: 1.8rem;
+            text-shadow: 0 0 10px currentColor;
         }
 
         .card h2 {
-            font-family: var(--font-display);
-            font-size: 1.5rem;
-            font-weight: 600;
-            letter-spacing: -0.5px;
+            font-family: var(--font-head);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .exam-list {
@@ -287,9 +294,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
-            position: relative;
-            z-index: 2;
+            gap: 0.5rem;
         }
 
         .exam-list li {
@@ -297,16 +302,17 @@
         }
 
         .exam-list a {
-            color: var(--text-muted);
+            color: var(--text-main);
             text-decoration: none;
-            display: none; /* Changed: block for links */
-            padding: 1rem 1.25rem;
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid transparent;
+            display: block; 
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 2px solid transparent;
             transition: all 0.2s ease;
-            font-size: 0.95rem;
-            font-weight: 400;
+            font-size: 1.1rem;
+            position: relative;
+            font-family: var(--font-body);
+            font-weight: 600;
         }
         
         .exam-list li > a {
@@ -315,93 +321,83 @@
         }
 
         .exam-list a::before {
-            content: '📄';
+            content: '[FILE]';
             margin-right: 0.75rem;
-            font-size: 1.1rem;
-            filter: grayscale(1) opacity(0.5);
+            font-family: var(--font-head);
+            font-size: 0.7rem;
+            color: var(--text-muted);
             transition: all 0.2s ease;
         }
 
         .exam-list a:hover {
-            color: var(--text-main);
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.1);
-            transform: translateX(5px);
+            background: var(--primary-dim);
+            border-left-color: var(--primary);
+            color: #fff;
+            padding-left: 1.5rem;
         }
 
         .exam-list a:hover::before {
-            filter: grayscale(0) opacity(1);
+            color: var(--primary);
         }
 
         .empty-state {
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-style: italic;
             padding: 1rem;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 12px;
-            border: 1px dashed rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px dashed #333;
+            font-family: var(--font-body);
         }
 
         /* Footer */
         footer {
             text-align: center;
-            padding: 3rem 2rem;
+            padding: 2rem;
             color: var(--text-muted);
-            font-size: 0.95rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            position: relative;
-            z-index: 1;
+            font-size: 1rem;
+            border-top: 1px dashed #333;
+            font-family: var(--font-head);
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
         
         .lead-instructions {
             max-width: 800px;
             margin: 0 auto 4rem;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--primary);
             padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            backdrop-filter: blur(10px);
-            opacity: 0;
-            animation: fadeUp 0.8s ease-out 1s forwards;
+            position: relative;
         }
-
-        .lead-icon {
-            font-size: 2rem;
-            background: rgba(255,255,255,0.1);
-            padding: 1rem;
-            border-radius: 50%;
+        
+        .lead-instructions::before {
+            content: 'SYS_MSG_';
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--bg-color);
+            padding: 0 10px;
+            color: var(--primary);
+            font-family: var(--font-head);
+            font-size: 0.9rem;
         }
 
         .lead-text strong {
-            color: #c4b5fd;
+            color: #fff;
             display: block;
-            margin-bottom: 0.25rem;
-            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+            font-family: var(--font-head);
+            text-transform: uppercase;
         }
         
         .lead-text p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            font-family: monospace;
         }
 
-        @media (max-width: 768px) {
-            header {
-                padding: 6rem 0 3rem;
-            }
-            .grid {
-                grid-template-columns: 1fr;
-            }
-            .lead-instructions {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-        
         /* Hidden class for search filter */
         .hidden {
             display: none !important;
@@ -409,19 +405,17 @@
     </style>
 </head>
 <body>
-    <div class="bg-glow"></div>
-    <div class="bg-glow-2"></div>
+    <div class="scanlines"></div>
 
     <div class="container">
         <header>
-            <div class="badge">Synnefo Solutions</div>
-            <h1>Mock Exams Hub</h1>
-            <p class="subtitle">Access the newest question papers and practice tests across all IT and Business training departments.</p>
+            <div class="sys-status">SYS.ONLINE // PORT 8080</div>
+            <h1>SYNNEFO_NEXUS</h1>
+            <p class="subtitle">DECENTRALIZED DATABASE // SECURE EXAM ARCHIVE</p>
         </header>
 
         <div class="search-container">
-            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <input type="text" id="searchInput" class="search-input" placeholder="Search for exams (e.g. CCNA, React, Python)...">
+            <input type="text" id="searchInput" class="search-input" placeholder="EXECUTE_QUERY...">
         </div>
 
         <main>
@@ -429,7 +423,7 @@
                 
                 <div class="card" data-department="networking">
                     <div class="card-header">
-                        <div class="icon-wrapper">🌐</div>
+                        <div class="icon">🌐</div>
                         <h2>Networking</h2>
                     </div>
                     <ul class="exam-list">
@@ -439,8 +433,8 @@
 
                 <div class="card" data-department="cyber-security">
                     <div class="card-header">
-                        <div class="icon-wrapper">🔐</div>
-                        <h2>Cyber Security</h2>
+                        <div class="icon">🔐</div>
+                        <h2>Cyber_Sec</h2>
                     </div>
                     <ul class="exam-list">
                         <p class="empty-state">No exams uploaded yet.</p>
@@ -449,7 +443,7 @@
 
                 <div class="card" data-department="devops">
                     <div class="card-header">
-                        <div class="icon-wrapper">⚙️</div>
+                        <div class="icon">⚙️</div>
                         <h2>DevOps</h2>
                     </div>
                     <ul class="exam-list">
@@ -459,7 +453,7 @@
 
                 <div class="card" data-department="flutter">
                     <div class="card-header">
-                        <div class="icon-wrapper">📱</div>
+                        <div class="icon">📱</div>
                         <h2>Flutter</h2>
                     </div>
                     <ul class="exam-list">
@@ -469,8 +463,8 @@
 
                 <div class="card" data-department="mern-stack">
                     <div class="card-header">
-                        <div class="icon-wrapper">💻</div>
-                        <h2>MERN Stack</h2>
+                        <div class="icon">💻</div>
+                        <h2>MERN_Stack</h2>
                     </div>
                     <ul class="exam-list">
                         <p class="empty-state">No exams uploaded yet.</p>
@@ -479,7 +473,7 @@
 
                 <div class="card" data-department="python">
                     <div class="card-header">
-                        <div class="icon-wrapper">🐍</div>
+                        <div class="icon">🐍</div>
                         <h2>Python</h2>
                     </div>
                     <ul class="exam-list">
@@ -489,8 +483,8 @@
 
                 <div class="card" data-department="digital-marketing">
                     <div class="card-header">
-                        <div class="icon-wrapper">📈</div>
-                        <h2>Digital Marketing</h2>
+                        <div class="icon">📈</div>
+                        <h2>Digi_Market</h2>
                     </div>
                     <ul class="exam-list">
                         <p class="empty-state">No exams uploaded yet.</p>
@@ -500,16 +494,15 @@
             </div>
 
             <div class="lead-instructions">
-                <div class="lead-icon">✨</div>
                 <div class="lead-text">
-                    <strong>Auto-Updating Magic</strong>
-                    <p>Team leads just need to upload their files to their department's folder in the GitHub repository. This site will instantly and automatically update to show the new files.</p>
+                    <strong>// UPLOAD_PROTOCOL</strong>
+                    <p>Transmit files to designated directory node within repository structure. Synchronization to root NEXUS interface is automatic upon commit.</p>
                 </div>
             </div>
         </main>
 
         <footer>
-            <p>&copy; 2026 Synnefo Solutions. All rights reserved. Crafted for excellence.</p>
+            <p>SYNNEFO_CORP © 2026 // END OF TRANSMISSION</p>
         </footer>
     </div>
 
@@ -529,6 +522,7 @@
                 const matchesDepartment = departmentName.includes(searchTerm);
 
                 links.forEach(listItem => {
+                    if(!listItem) return;
                     const linkText = listItem.innerText.toLowerCase();
                     if (linkText.includes(searchTerm) || matchesDepartment) {
                         listItem.classList.remove('hidden');
