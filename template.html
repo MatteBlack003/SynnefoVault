@@ -84,18 +84,17 @@
       color: var(--text-main);
     }
 
-    .status-panel {
-      text-align: right;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      line-height: 1.5;
-    }
-
-    .status-active {
+    .header-title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.5rem;
+      letter-spacing: 4px;
       color: var(--text-main);
-      font-weight: 700;
+      opacity: 0.9;
+      text-transform: uppercase;
+      border: 1px solid var(--text-main);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
     }
 
     /* --- CROSSHAIRS & BRACKETS --- */
@@ -147,41 +146,33 @@
     }
 
     .nav-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 8px;
+      padding: 1rem 2rem;
+      color: var(--text-main);
       font-family: var(--font-mono);
-      font-size: 0.85rem;
+      font-size: 1.1rem;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.2em;
       cursor: pointer;
       position: relative;
-      transition: all 0.3s;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       text-align: center;
       display: inline-block;
-      width: max-content;
+      width: 320px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     }
 
     .nav-btn:hover, .nav-btn.active {
-      color: var(--text-main);
-      font-weight: 700;
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(0,0,0,0.2);
       transform: scale(1.05);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+      z-index: 2;
     }
-
-    .nav-btn::before, .nav-btn::after {
-      content: '';
-      position: absolute;
-      opacity: 0;
-      transition: all 0.3s ease;
-      font-size: 1.2rem;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-    .nav-btn::before { content: '['; left: -15px; }
-    .nav-btn::after { content: ']'; right: -15px; }
-
-    .nav-btn:hover::before, .nav-btn.active::before { opacity: 1; left: -20px; }
-    .nav-btn:hover::after, .nav-btn.active::after { opacity: 1; right: -20px; }
 
     /* --- DATA PANEL (EXAM LINKS) --- */
     .data-panel {
@@ -272,11 +263,7 @@
     
     <div class="top-bar">
       <div class="logo hud-element">SYNNEFO</div>
-      <div class="status-panel hud-element">
-        <div>SYS.ARCHIVE_02</div>
-        <div>SECURE LINK: <span class="status-active">ESTABLISHED</span></div>
-        <div id="fps-counter">SCAN RATE: OPTIMAL</div>
-      </div>
+      <div class="header-title hud-element">MOCK TESTS</div>
     </div>
 
     <div class="crosshair-h"></div><div class="crosshair-v"></div>
