@@ -4,78 +4,204 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Synnefo Solutions | Mock Exams</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Lenis & GSAP CDN -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
     <style>
         :root {
-            --bg-color: #0f172a;
+            --bg-base: #030712;
+            --bg-gradient-1: #0f172a;
+            --bg-gradient-2: #1e1b4b;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --card-bg: #1e293b;
-            --card-border: #334155;
-            --accent: #3b82f6;
-            --accent-hover: #60a5fa;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent: #60a5fa;
+            --accent-glow: rgba(96, 165, 250, 0.5);
+            --font-main: 'Outfit', sans-serif;
+            --font-display: 'Space Grotesk', sans-serif;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
         }
 
+        html.lenis {
+            height: auto;
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto;
+        }
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+        .lenis.lenis-stopped {
+            overflow: hidden;
+        }
+        
         body {
-            background-color: var(--bg-color);
+            background-color: var(--bg-base);
             color: var(--text-main);
+            font-family: var(--font-main);
             line-height: 1.6;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
         }
 
+        /* Animated Background Elements */
+        .bg-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -200px;
+            left: -200px;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.5;
+            animation: float 20s infinite alternate;
+        }
+        
+        .bg-glow-2 {
+            position: fixed;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -300px;
+            right: -200px;
+            filter: blur(120px);
+            z-index: -1;
+            opacity: 0.5;
+            animation: float 25s infinite alternate-reverse;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(100px, 50px); }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header / Hero */
         header {
+            padding: 8rem 0 4rem;
             text-align: center;
-            padding: 4rem 2rem 2rem;
-            background: radial-gradient(circle at top, #1e293b 0%, transparent 70%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            color: #93c5fd;
+            backdrop-filter: blur(10px);
         }
 
         h1 {
-            font-size: 2.5rem;
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 5vw, 5rem);
             font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
         }
 
         p.subtitle {
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             max-width: 600px;
-            margin: 0 auto;
+            font-weight: 300;
         }
 
-        main {
-            flex: 1;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+        /* Search / Filter */
+        .search-container {
             width: 100%;
+            max-width: 600px;
+            margin: 0 auto 4rem;
+            position: relative;
+            z-index: 10;
         }
 
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.25rem 1.5rem 1.25rem 3.5rem;
+            border-radius: 16px;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            font-family: var(--font-main);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Grid */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            padding-bottom: 6rem;
         }
 
+        /* Glassmorphism Cards */
         .card {
-            background-color: var(--card-bg);
+            background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 24px;
+            padding: 2.5rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .card::before {
@@ -84,40 +210,81 @@
             top: 0;
             left: 0;
             width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+            pointer-events: none;
+        }
+        
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 4px;
             background: var(--accent);
-            opacity: 0.8;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .card:nth-child(1)::before { background: #3b82f6; } /* Networking - Blue */
-        .card:nth-child(2)::before { background: #ef4444; } /* Cyber Security - Red */
-        .card:nth-child(3)::before { background: #10b981; } /* DevOps - Green */
-        .card:nth-child(4)::before { background: #0ea5e9; } /* Flutter - Light Blue */
-        .card:nth-child(5)::before { background: #8b5cf6; } /* MERN - Purple */
-        .card:nth-child(6)::before { background: #f59e0b; } /* Python - Yellow */
-        .card:nth-child(7)::before { background: #ec4899; } /* Digital Marketing - Pink */
-
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-            border-color: var(--accent-hover);
+            transform: translateY(-10px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+        }
+        
+        .card:hover::after {
+            opacity: 1;
+        }
+
+        .card:nth-child(1)::after { background: linear-gradient(90deg, #3b82f6, #93c5fd); } /* Networking */
+        .card:nth-child(2)::after { background: linear-gradient(90deg, #ef4444, #fca5a5); } /* Cyber Security */
+        .card:nth-child(3)::after { background: linear-gradient(90deg, #10b981, #6ee7b7); } /* DevOps */
+        .card:nth-child(4)::after { background: linear-gradient(90deg, #0ea5e9, #7dd3fc); } /* Flutter */
+        .card:nth-child(5)::after { background: linear-gradient(90deg, #8b5cf6, #c4b5fd); } /* MERN */
+        .card:nth-child(6)::after { background: linear-gradient(90deg, #f59e0b, #fcd34d); } /* Python */
+        .card:nth-child(7)::after { background: linear-gradient(90deg, #ec4899, #f9a8d4); } /* Digital Marketing */
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .card h2 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
         }
 
         .exam-list {
             list-style: none;
-            margin-bottom: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            position: relative;
+            z-index: 2;
         }
 
         .exam-list li {
-            margin-bottom: 0.5rem;
+            width: 100%;
         }
 
         .exam-list a {
@@ -125,116 +292,285 @@
             text-decoration: none;
             display: flex;
             align-items: center;
-            transition: color 0.2s;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
             font-size: 0.95rem;
+            font-weight: 400;
         }
 
         .exam-list a::before {
             content: '📄';
-            margin-right: 0.5rem;
-            font-size: 0.8rem;
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+            filter: grayscale(1) opacity(0.5);
+            transition: all 0.2s ease;
         }
 
         .exam-list a:hover {
             color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .exam-list a:hover::before {
+            filter: grayscale(0) opacity(1);
         }
 
         .empty-state {
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-style: italic;
+            padding: 1rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
         }
 
+        /* Footer */
         footer {
             text-align: center;
-            padding: 2rem;
+            padding: 3rem 2rem;
             color: var(--text-muted);
-            font-size: 0.9rem;
-            border-top: 1px solid var(--card-border);
-            margin-top: 2rem;
+            font-size: 0.95rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            z-index: 1;
         }
         
         .lead-instructions {
-            background-color: rgba(167, 139, 250, 0.1);
-            border: 1px dashed #a78bfa;
-            border-radius: 8px;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .lead-icon {
+            font-size: 2rem;
+            background: rgba(255,255,255,0.1);
             padding: 1rem;
-            margin-top: 2rem;
-            font-size: 0.9rem;
+            border-radius: 50%;
+        }
+
+        .lead-text strong {
+            color: #c4b5fd;
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 1.1rem;
+        }
+        
+        .lead-text p {
             color: var(--text-muted);
-            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 6rem 0 3rem;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .lead-instructions {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        /* Hidden class for search filter */
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 <body>
+    <div class="bg-glow"></div>
+    <div class="bg-glow-2"></div>
 
-    <header>
-        <h1>Synnefo Mock Exams</h1>
-        <p class="subtitle">Access the latest question papers and practice tests for all Synnefo Solutions training departments.</p>
-    </header>
+    <div class="container">
+        <header class="gsap-hero">
+            <div class="badge">Synnefo Solutions</div>
+            <h1>Mock Exams Hub</h1>
+            <p class="subtitle">Access the newest question papers and practice tests across all IT and Business training departments.</p>
+        </header>
 
-    <main>
-        <div class="grid">
-            
-            <div class="card">
-                <h2>🌐 Networking</h2>
-                <ul class="exam-list">
-                    $networking_links
-                </ul>
-            </div>
-
-            <div class="card">
-                <h2>🔐 Cyber Security</h2>
-                <ul class="exam-list">
-                    $cyber_security_links
-                </ul>
-            </div>
-
-            <div class="card">
-                <h2>⚙️ DevOps</h2>
-                <ul class="exam-list">
-                    $devops_links
-                </ul>
-            </div>
-
-            <div class="card">
-                <h2>📱 Flutter</h2>
-                <ul class="exam-list">
-                    $flutter_links
-                </ul>
-            </div>
-
-            <div class="card">
-                <h2>💻 MERN Stack</h2>
-                <ul class="exam-list">
-                    $mern_stack_links
-                </ul>
-            </div>
-
-            <div class="card">
-                <h2>🐍 Python</h2>
-                <ul class="exam-list">
-                    $python_links
-                </ul>
-            </div>
-
-            <div class="card">
-                <h2>📈 Digital Marketing</h2>
-                <ul class="exam-list">
-                    $digital_marketing_links
-                </ul>
-            </div>
-
+        <div class="search-container gsap-hero">
+            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search for exams (e.g. CCNA, React, Python)...">
         </div>
 
-        <div class="lead-instructions">
-            <strong>✨ Auto-Updating Magic:</strong> Team leads just need to upload their files to their department's folder in the repository. This site will update automatically!
-        </div>
-    </main>
+        <main>
+            <div class="grid" id="cardGrid">
+                
+                <div class="card gsap-card" data-department="networking">
+                    <div class="card-header">
+                        <div class="icon-wrapper">🌐</div>
+                        <h2>Networking</h2>
+                    </div>
+                    <ul class="exam-list">
+                        $networking_links
+                    </ul>
+                </div>
 
-    <footer>
-        <p>&copy; 2026 Synnefo Solutions. All rights reserved.</p>
-    </footer>
+                <div class="card gsap-card" data-department="cyber-security">
+                    <div class="card-header">
+                        <div class="icon-wrapper">🔐</div>
+                        <h2>Cyber Security</h2>
+                    </div>
+                    <ul class="exam-list">
+                        $cyber_security_links
+                    </ul>
+                </div>
 
+                <div class="card gsap-card" data-department="devops">
+                    <div class="card-header">
+                        <div class="icon-wrapper">⚙️</div>
+                        <h2>DevOps</h2>
+                    </div>
+                    <ul class="exam-list">
+                        $devops_links
+                    </ul>
+                </div>
+
+                <div class="card gsap-card" data-department="flutter">
+                    <div class="card-header">
+                        <div class="icon-wrapper">📱</div>
+                        <h2>Flutter</h2>
+                    </div>
+                    <ul class="exam-list">
+                        $flutter_links
+                    </ul>
+                </div>
+
+                <div class="card gsap-card" data-department="mern-stack">
+                    <div class="card-header">
+                        <div class="icon-wrapper">💻</div>
+                        <h2>MERN Stack</h2>
+                    </div>
+                    <ul class="exam-list">
+                        $mern_stack_links
+                    </ul>
+                </div>
+
+                <div class="card gsap-card" data-department="python">
+                    <div class="card-header">
+                        <div class="icon-wrapper">🐍</div>
+                        <h2>Python</h2>
+                    </div>
+                    <ul class="exam-list">
+                        $python_links
+                    </ul>
+                </div>
+
+                <div class="card gsap-card" data-department="digital-marketing">
+                    <div class="card-header">
+                        <div class="icon-wrapper">📈</div>
+                        <h2>Digital Marketing</h2>
+                    </div>
+                    <ul class="exam-list">
+                        $digital_marketing_links
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="lead-instructions gsap-hero">
+                <div class="lead-icon">✨</div>
+                <div class="lead-text">
+                    <strong>Auto-Updating Magic</strong>
+                    <p>Team leads just need to upload their files to their department's folder in the GitHub repository. This site will instantly and automatically update to show the new files.</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Synnefo Solutions. All rights reserved. Crafted for excellence.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts for Interactivity -->
+    <script>
+        // 1. Initialize Lenis Smooth Scrolling
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+            direction: 'vertical', 
+            gestureDirection: 'vertical', 
+            smooth: true,
+        })
+
+        function raf(time) {
+            lenis.raf(time)
+            requestAnimationFrame(raf)
+        }
+        requestAnimationFrame(raf)
+
+        // 2. GSAP Entrance Animations
+        document.addEventListener("DOMContentLoaded", (event) => {
+            gsap.from(".gsap-hero", {
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                stagger: 0.2,
+                ease: "power3.out"
+            });
+
+            gsap.from(".gsap-card", {
+                y: 100,
+                opacity: 0,
+                duration: 1,
+                stagger: 0.1,
+                ease: "power4.out",
+                delay: 0.4
+            });
+        });
+
+        // 3. Search / Filter Functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.card');
+
+            cards.forEach(card => {
+                const departmentName = card.querySelector('h2').innerText.toLowerCase();
+                const links = card.querySelectorAll('.exam-list a');
+                let hasVisibleLink = false;
+
+                const matchesDepartment = departmentName.includes(searchTerm);
+
+                links.forEach(link => {
+                    const linkText = link.innerText.toLowerCase();
+                    if (linkText.includes(searchTerm) || matchesDepartment) {
+                        link.parentElement.classList.remove('hidden');
+                        hasVisibleLink = true;
+                    } else {
+                        link.parentElement.classList.add('hidden');
+                    }
+                });
+
+                const emptyState = card.querySelector('.empty-state');
+                
+                if (hasVisibleLink || (matchesDepartment && links.length > 0)) {
+                    card.classList.remove('hidden');
+                    if(emptyState) emptyState.classList.add('hidden');
+                } else if (matchesDepartment && emptyState) {
+                    card.classList.remove('hidden');
+                    emptyState.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
