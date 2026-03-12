@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synnefo Solutions | Mock Exams</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            padding: 4rem 2rem 2rem;
+            background: radial-gradient(circle at top, #1e293b 0%, transparent 70%);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent);
+            opacity: 0.8;
+        }
+
+        .card:nth-child(1)::before { background: #3b82f6; } /* Networking - Blue */
+        .card:nth-child(2)::before { background: #ef4444; } /* Cyber Security - Red */
+        .card:nth-child(3)::before { background: #10b981; } /* DevOps - Green */
+        .card:nth-child(4)::before { background: #0ea5e9; } /* Flutter - Light Blue */
+        .card:nth-child(5)::before { background: #8b5cf6; } /* MERN - Purple */
+        .card:nth-child(6)::before { background: #f59e0b; } /* Python - Yellow */
+        .card:nth-child(7)::before { background: #ec4899; } /* Digital Marketing - Pink */
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-hover);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .exam-list {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .exam-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        .exam-list a {
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .exam-list a::before {
+            content: '📄';
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .exam-list a:hover {
+            color: var(--text-main);
+        }
+
+        .empty-state {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--card-border);
+            margin-top: 2rem;
+        }
+        
+        .lead-instructions {
+            background-color: rgba(167, 139, 250, 0.1);
+            border: 1px dashed #a78bfa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Synnefo Mock Exams</h1>
+        <p class="subtitle">Access the latest question papers and practice tests for all Synnefo Solutions training departments.</p>
+    </header>
+
+    <main>
+        <div class="grid">
+            
+            <div class="card">
+                <h2>🌐 Networking</h2>
+                <ul class="exam-list">
+                    <p class="empty-state">No exams uploaded yet.</p>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>🔐 Cyber Security</h2>
+                <ul class="exam-list">
+                    <p class="empty-state">No exams uploaded yet.</p>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>⚙️ DevOps</h2>
+                <ul class="exam-list">
+                    <p class="empty-state">No exams uploaded yet.</p>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>📱 Flutter</h2>
+                <ul class="exam-list">
+                    <p class="empty-state">No exams uploaded yet.</p>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>💻 MERN Stack</h2>
+                <ul class="exam-list">
+                    <p class="empty-state">No exams uploaded yet.</p>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>🐍 Python</h2>
+                <ul class="exam-list">
+                    <p class="empty-state">No exams uploaded yet.</p>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>📈 Digital Marketing</h2>
+                <ul class="exam-list">
+                    <p class="empty-state">No exams uploaded yet.</p>
+                </ul>
+            </div>
+
+        </div>
+
+        <div class="lead-instructions">
+            <strong>✨ Auto-Updating Magic:</strong> Team leads just need to upload their files to their department's folder in the repository. This site will update automatically!
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Synnefo Solutions. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
