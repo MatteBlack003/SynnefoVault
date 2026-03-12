@@ -8,9 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <!-- Lenis & GSAP CDN -->
-    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     
     <style>
         :root {
@@ -31,19 +28,6 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-
-        html.lenis {
-            height: auto;
-        }
-        .lenis.lenis-smooth {
-            scroll-behavior: auto;
-        }
-        .lenis.lenis-smooth [data-lenis-prevent] {
-            overscroll-behavior: contain;
-        }
-        .lenis.lenis-stopped {
-            overflow: hidden;
         }
         
         body {
@@ -106,6 +90,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            animation: fadeDown 1s ease-out forwards;
+        }
+
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .badge {
@@ -148,6 +138,9 @@
             margin: 0 auto 4rem;
             position: relative;
             z-index: 10;
+            animation: fadeUp 1s ease-out 0.2s forwards;
+            opacity: 0;
+            transform: translateY(30px);
         }
 
         .search-input {
@@ -202,7 +195,23 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            /* Pure CSS animation for entrance */
+            opacity: 0;
+            transform: translateY(40px);
+            animation: fadeUp 0.8s ease-out forwards;
         }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card:nth-child(1) { animation-delay: 0.3s; }
+        .card:nth-child(2) { animation-delay: 0.4s; }
+        .card:nth-child(3) { animation-delay: 0.5s; }
+        .card:nth-child(4) { animation-delay: 0.6s; }
+        .card:nth-child(5) { animation-delay: 0.7s; }
+        .card:nth-child(6) { animation-delay: 0.8s; }
+        .card:nth-child(7) { animation-delay: 0.9s; }
 
         .card::before {
             content: '';
@@ -237,13 +246,13 @@
             opacity: 1;
         }
 
-        .card:nth-child(1)::after { background: linear-gradient(90deg, #3b82f6, #93c5fd); } /* Networking */
-        .card:nth-child(2)::after { background: linear-gradient(90deg, #ef4444, #fca5a5); } /* Cyber Security */
-        .card:nth-child(3)::after { background: linear-gradient(90deg, #10b981, #6ee7b7); } /* DevOps */
-        .card:nth-child(4)::after { background: linear-gradient(90deg, #0ea5e9, #7dd3fc); } /* Flutter */
-        .card:nth-child(5)::after { background: linear-gradient(90deg, #8b5cf6, #c4b5fd); } /* MERN */
-        .card:nth-child(6)::after { background: linear-gradient(90deg, #f59e0b, #fcd34d); } /* Python */
-        .card:nth-child(7)::after { background: linear-gradient(90deg, #ec4899, #f9a8d4); } /* Digital Marketing */
+        .card:nth-child(1)::after { background: linear-gradient(90deg, #3b82f6, #93c5fd); }
+        .card:nth-child(2)::after { background: linear-gradient(90deg, #ef4444, #fca5a5); }
+        .card:nth-child(3)::after { background: linear-gradient(90deg, #10b981, #6ee7b7); }
+        .card:nth-child(4)::after { background: linear-gradient(90deg, #0ea5e9, #7dd3fc); }
+        .card:nth-child(5)::after { background: linear-gradient(90deg, #8b5cf6, #c4b5fd); }
+        .card:nth-child(6)::after { background: linear-gradient(90deg, #f59e0b, #fcd34d); }
+        .card:nth-child(7)::after { background: linear-gradient(90deg, #ec4899, #f9a8d4); }
 
         .card-header {
             display: flex;
@@ -290,8 +299,7 @@
         .exam-list a {
             color: var(--text-muted);
             text-decoration: none;
-            display: flex;
-            align-items: center;
+            display: none; /* Changed: block for links */
             padding: 1rem 1.25rem;
             border-radius: 12px;
             background: rgba(0, 0, 0, 0.2);
@@ -299,6 +307,11 @@
             transition: all 0.2s ease;
             font-size: 0.95rem;
             font-weight: 400;
+        }
+        
+        .exam-list li > a {
+            display: flex;
+            align-items: center;
         }
 
         .exam-list a::before {
@@ -353,6 +366,8 @@
             align-items: center;
             gap: 1.5rem;
             backdrop-filter: blur(10px);
+            opacity: 0;
+            animation: fadeUp 0.8s ease-out 1s forwards;
         }
 
         .lead-icon {
@@ -398,13 +413,13 @@
     <div class="bg-glow-2"></div>
 
     <div class="container">
-        <header class="gsap-hero">
+        <header>
             <div class="badge">Synnefo Solutions</div>
             <h1>Mock Exams Hub</h1>
             <p class="subtitle">Access the newest question papers and practice tests across all IT and Business training departments.</p>
         </header>
 
-        <div class="search-container gsap-hero">
+        <div class="search-container">
             <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             <input type="text" id="searchInput" class="search-input" placeholder="Search for exams (e.g. CCNA, React, Python)...">
         </div>
@@ -412,7 +427,7 @@
         <main>
             <div class="grid" id="cardGrid">
                 
-                <div class="card gsap-card" data-department="networking">
+                <div class="card" data-department="networking">
                     <div class="card-header">
                         <div class="icon-wrapper">🌐</div>
                         <h2>Networking</h2>
@@ -422,7 +437,7 @@
                     </ul>
                 </div>
 
-                <div class="card gsap-card" data-department="cyber-security">
+                <div class="card" data-department="cyber-security">
                     <div class="card-header">
                         <div class="icon-wrapper">🔐</div>
                         <h2>Cyber Security</h2>
@@ -432,7 +447,7 @@
                     </ul>
                 </div>
 
-                <div class="card gsap-card" data-department="devops">
+                <div class="card" data-department="devops">
                     <div class="card-header">
                         <div class="icon-wrapper">⚙️</div>
                         <h2>DevOps</h2>
@@ -442,7 +457,7 @@
                     </ul>
                 </div>
 
-                <div class="card gsap-card" data-department="flutter">
+                <div class="card" data-department="flutter">
                     <div class="card-header">
                         <div class="icon-wrapper">📱</div>
                         <h2>Flutter</h2>
@@ -452,7 +467,7 @@
                     </ul>
                 </div>
 
-                <div class="card gsap-card" data-department="mern-stack">
+                <div class="card" data-department="mern-stack">
                     <div class="card-header">
                         <div class="icon-wrapper">💻</div>
                         <h2>MERN Stack</h2>
@@ -462,7 +477,7 @@
                     </ul>
                 </div>
 
-                <div class="card gsap-card" data-department="python">
+                <div class="card" data-department="python">
                     <div class="card-header">
                         <div class="icon-wrapper">🐍</div>
                         <h2>Python</h2>
@@ -472,7 +487,7 @@
                     </ul>
                 </div>
 
-                <div class="card gsap-card" data-department="digital-marketing">
+                <div class="card" data-department="digital-marketing">
                     <div class="card-header">
                         <div class="icon-wrapper">📈</div>
                         <h2>Digital Marketing</h2>
@@ -484,7 +499,7 @@
 
             </div>
 
-            <div class="lead-instructions gsap-hero">
+            <div class="lead-instructions">
                 <div class="lead-icon">✨</div>
                 <div class="lead-text">
                     <strong>Auto-Updating Magic</strong>
@@ -500,42 +515,7 @@
 
     <!-- Scripts for Interactivity -->
     <script>
-        // 1. Initialize Lenis Smooth Scrolling
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
-            direction: 'vertical', 
-            gestureDirection: 'vertical', 
-            smooth: true,
-        })
-
-        function raf(time) {
-            lenis.raf(time)
-            requestAnimationFrame(raf)
-        }
-        requestAnimationFrame(raf)
-
-        // 2. GSAP Entrance Animations
-        document.addEventListener("DOMContentLoaded", (event) => {
-            gsap.from(".gsap-hero", {
-                y: 50,
-                opacity: 0,
-                duration: 1,
-                stagger: 0.2,
-                ease: "power3.out"
-            });
-
-            gsap.from(".gsap-card", {
-                y: 100,
-                opacity: 0,
-                duration: 1,
-                stagger: 0.1,
-                ease: "power4.out",
-                delay: 0.4
-            });
-        });
-
-        // 3. Search / Filter Functionality
+        // Search / Filter Functionality
         const searchInput = document.getElementById('searchInput');
         searchInput.addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
@@ -543,18 +523,18 @@
 
             cards.forEach(card => {
                 const departmentName = card.querySelector('h2').innerText.toLowerCase();
-                const links = card.querySelectorAll('.exam-list a');
+                const links = card.querySelectorAll('.exam-list li');
                 let hasVisibleLink = false;
 
                 const matchesDepartment = departmentName.includes(searchTerm);
 
-                links.forEach(link => {
-                    const linkText = link.innerText.toLowerCase();
+                links.forEach(listItem => {
+                    const linkText = listItem.innerText.toLowerCase();
                     if (linkText.includes(searchTerm) || matchesDepartment) {
-                        link.parentElement.classList.remove('hidden');
+                        listItem.classList.remove('hidden');
                         hasVisibleLink = true;
                     } else {
-                        link.parentElement.classList.add('hidden');
+                        listItem.classList.add('hidden');
                     }
                 });
 
