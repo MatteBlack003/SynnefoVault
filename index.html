@@ -3,28 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Synnefo Mock Exams | Secure Archive</title>
+  <title>Synnefo Mock Tests</title>
   <meta name="description" content="Access the newest question papers and practice tests across all IT and Business training departments." />
 
   <!-- Preconnect to Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Monument+Extended:wght@800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Monument+Extended:wght@800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
 
   <style>
     /* ============================================================
-       Synnefo Mock Exams — Particles.js Experience
+       Synnefo Mock Exams — Terminal OS Layout
        ============================================================ */
     :root {
-      --bg-color: #d9dee3; /* Igloo style light misty background */
-      --text-main: #1a1a1a;
-      --text-muted: #6b7280;
-      --accent: #000000;
+      --bg-color: #0d1117; /* Deep space github dark */
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --card-bg: rgba(22, 27, 34, 0.7);
       
       --font-mono: 'JetBrains Mono', monospace;
-      --font-display: sans-serif; /* Fallback for heavy display text */
+      --font-display: 'Monument Extended', sans-serif;
+      --font-ui: 'Outfit', sans-serif;
 
-      --border-thin: 1px solid rgba(0,0,0,0.1);
+      --border-thin: 1px solid rgba(255,255,255,0.1);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -32,10 +34,9 @@
     body {
       background: var(--bg-color);
       color: var(--text-main);
-      font-family: var(--font-mono);
-      overflow: hidden; /* No scrolling, immersive experience */
+      font-family: var(--font-ui);
+      overflow: hidden; 
       user-select: none;
-      cursor: crosshair;
     }
 
     /* === PARTICLES CONTAINER === */
@@ -46,10 +47,10 @@
       width: 100%;
       height: 100%;
       z-index: 0;
-      background: radial-gradient(circle, #e2e8f0 0%, #cbd5e1 100%);
+      background: radial-gradient(circle at 50% 50%, #161b22 0%, #0d1117 100%);
     }
 
-    /* === HUD OVERLAY === */
+    /* === FOREGROUND HUD === */
     #hud {
       position: absolute;
       top: 0;
@@ -57,191 +58,250 @@
       width: 100%;
       height: 100%;
       z-index: 10;
-      pointer-events: none; /* Let clicks pass through to UI elements */
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 2rem;
+      pointer-events: none;
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      grid-template-rows: auto 1fr;
+      padding: 0;
     }
 
     .hud-element {
       pointer-events: auto;
     }
 
-    /* --- TOP BAR --- */
-    .top-bar {
+    /* --- TOP HEADER (Spans full width) --- */
+    header {
+      grid-column: 1 / -1;
+      grid-row: 1;
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      width: 100%;
+      align-items: center;
+      padding: 2rem 3rem;
+      border-bottom: var(--border-thin);
+      background: rgba(13, 17, 23, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
     }
 
     .logo {
       font-family: var(--font-display);
       font-weight: 800;
-      font-size: 2rem;
+      font-size: 1.8rem;
       letter-spacing: -1px;
-      color: var(--text-main);
+      color: #fff;
+    }
+
+    .system-status {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border-left: var(--border-thin);
+      padding-left: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: #3fb950;
+      border-radius: 50%;
+      margin-right: 6px;
+      box-shadow: 0 0 10px #3fb950;
     }
 
     .header-title {
       font-family: var(--font-display);
       font-weight: 800;
-      font-size: 1.5rem;
-      letter-spacing: 4px;
-      color: var(--text-main);
-      opacity: 0.9;
-      text-transform: uppercase;
-      border: 1px solid var(--text-main);
+      font-size: 1.2rem;
+      letter-spacing: 2px;
+      color: var(--accent);
+      border: 1px solid var(--accent);
       padding: 0.5rem 1rem;
       border-radius: 4px;
+      background: rgba(88, 166, 255, 0.1);
     }
 
-    /* --- CROSSHAIRS & BRACKETS --- */
-    .crosshair-h, .crosshair-v {
-      position: absolute;
-      background: rgba(0,0,0,0.1);
-      z-index: 1;
-      pointer-events: none;
-    }
-    .crosshair-h { top: 50%; left: 0; width: 100%; height: 1px; }
-    .crosshair-v { top: 0; left: 50%; width: 1px; height: 100%; }
-    
-    .target-brackets {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 300px;
-      height: 400px;
-      border: 1px solid rgba(0,0,0,0.05);
-      border-radius: 4px;
-      pointer-events: none;
-    }
-    .target-brackets::before, .target-brackets::after {
-      content: ''; position: absolute; width: 20px; height: 20px; border: 1.5px solid rgba(0,0,0,0.3);
-    }
-    .target-brackets::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
-    .target-brackets::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
-
-    /* --- CENTER NAVIGATION --- */
-    .center-nav {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+    /* --- LEFT SIDEBAR (Departments) --- */
+    .sidebar {
+      grid-column: 1;
+      grid-row: 2;
+      border-right: var(--border-thin);
+      background: rgba(13, 17, 23, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 2rem;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
-      z-index: 10;
+      gap: 1rem;
+      overflow-y: auto;
     }
-    
+
     .nav-label {
-      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
       color: var(--text-muted);
       letter-spacing: 0.2em;
       margin-bottom: 0.5rem;
-      text-align: center;
+      text-transform: uppercase;
     }
 
     .nav-btn {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(0,0,0,0.1);
-      border-radius: 8px;
-      padding: 1rem 2rem;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-left: 3px solid transparent;
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem;
       color: var(--text-main);
-      font-family: var(--font-mono);
+      font-family: var(--font-ui);
       font-size: 1.1rem;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
+      text-align: left;
       cursor: pointer;
       position: relative;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      text-align: center;
-      display: inline-block;
-      width: 320px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .nav-btn:hover, .nav-btn.active {
-      background: rgba(255, 255, 255, 0.95);
-      border-color: rgba(0,0,0,0.2);
-      transform: scale(1.05);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.08);
-      z-index: 2;
+    .nav-btn::after {
+      content: '→';
+      font-family: var(--font-mono);
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: all 0.3s ease;
+      color: var(--accent);
     }
 
-    /* --- DATA PANEL (EXAM LINKS) --- */
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    .nav-btn.active {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: rgba(88, 166, 255, 0.2);
+      border-left-color: var(--accent);
+      padding-left: 2rem;
+    }
+
+    .nav-btn:hover::after, .nav-btn.active::after {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* --- MAIN CONTENT AREA (Data Panel) --- */
+    .main-content {
+      grid-column: 2;
+      grid-row: 2;
+      padding: 4rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
     .data-panel {
-      position: absolute;
-      top: 50%;
-      right: 5%;
-      transform: translateY(-50%);
-      width: 350px;
-      max-height: 70vh;
-      background: rgba(255,255,255,0.6);
+      width: 100%;
+      max-width: 800px;
+      background: var(--card-bg);
       backdrop-filter: blur(20px);
-      border: var(--border-thin);
-      border-radius: 8px;
-      padding: 2rem;
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 3rem;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+      transform: translateY(20px);
       opacity: 0;
       pointer-events: none;
       visibility: hidden;
-      overflow-y: auto;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.05);
     }
     
     .data-panel.is-visible {
       opacity: 1;
       pointer-events: auto;
       visibility: visible;
+      transform: translateY(0);
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .data-panel h2 {
-      font-size: 1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 1.5rem;
+      font-family: var(--font-display);
+      font-size: 2rem;
+      letter-spacing: -1px;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
       border-bottom: var(--border-thin);
-      padding-bottom: 0.5rem;
+      color: #fff;
     }
 
     .exam-list {
       list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
     }
 
     .exam-list a {
-      color: var(--text-main);
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      color: var(--text-muted);
       text-decoration: none;
-      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
       display: flex;
       align-items: center;
-      transition: opacity 0.2s;
+      padding: 1rem 1.5rem;
+      border-radius: 6px;
+      transition: all 0.2s ease;
     }
+
     .exam-list a::before {
-      content: '>';
-      margin-right: 8px;
-      font-weight: 700;
-      color: rgba(0,0,0,0.3);
+      content: '📄';
+      margin-right: 12px;
+      font-size: 1.1rem;
+      opacity: 0.7;
+      transition: all 0.3s;
     }
+
     .exam-list a:hover {
-      opacity: 0.6;
+      background: rgba(88, 166, 255, 0.05);
+      border-color: rgba(88, 166, 255, 0.3);
+      color: var(--text-main);
+      transform: translateY(-2px);
+    }
+    
+    .exam-list a:hover::before {
+      opacity: 1;
     }
 
     /* Hide standard lists stored for JS logic */
     .raw-data { display: none; }
+    
+    /* Crosshairs overlay for aesthetic */
+    .crosshair {
+        position: absolute;
+        width: 30px; height: 30px;
+        border: 2px solid rgba(255,255,255,0.1);
+        pointer-events: none;
+    }
+    .ch-tl { top: 4rem; left: 4rem; border-right: none; border-bottom: none; }
+    .ch-br { bottom: 4rem; right: 4rem; border-left: none; border-top: none; }
 
   </style>
 
-  <!-- IMPORTANT: Load particles.js and GSAP via CDN -->
+  <!-- IMPORTANT: Load particles.js -->
   <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
 </head>
 <body>
@@ -261,17 +321,21 @@
   <!-- HUD OVERLAY -->
   <div id="hud">
     
-    <div class="top-bar">
-      <div class="logo hud-element">SYNNEFO</div>
-      <div class="header-title hud-element">MOCK TESTS</div>
-    </div>
+    <!-- HEADER -->
+    <header class="hud-element">
+      <div class="logo-container">
+        <div class="logo">SYNNEFO</div>
+        <div class="system-status">
+            <div><span class="status-dot"></span> SECURE SERVER LINKED</div>
+            <div>AUTH: ROOT_ACCESS_GRANTED</div>
+        </div>
+      </div>
+      <div class="header-title">MOCK TESTS</div>
+    </header>
 
-    <div class="crosshair-h"></div><div class="crosshair-v"></div>
-    <div class="target-brackets"></div>
-
-    <!-- CENTER NAVIGATION -->
-    <div class="center-nav hud-element">
-      <div class="nav-label">TARGET DEPT.</div>
+    <!-- SIDEBAR (DEPARTMENTS) -->
+    <div class="sidebar hud-element">
+      <div class="nav-label">Directories</div>
       <button class="nav-btn" data-target="networking">Networking</button>
       <button class="nav-btn" data-target="cyber-security">Cyber Security</button>
       <button class="nav-btn" data-target="devops">DevOps</button>
@@ -281,54 +345,47 @@
       <button class="nav-btn" data-target="digital-marketing">Digital Marketing</button>
     </div>
 
-    <!-- DATA PANEL THAT POPS UP -->
-    <div class="data-panel hud-element" id="dataPanel">
-      <h2 id="panelTitle">Select Department</h2>
-      <ul class="exam-list" id="panelList">
-        <!-- JS will populate this -->
-      </ul>
+    <!-- MAIN CONTENT (DATA PANEL) -->
+    <div class="main-content">
+        <div class="crosshair ch-tl"></div>
+        <div class="crosshair ch-br"></div>
+        
+        <div class="data-panel hud-element" id="dataPanel">
+          <h2 id="panelTitle">Select a Directory</h2>
+          <ul class="exam-list" id="panelList">
+            <!-- JS will populate this -->
+          </ul>
+        </div>
     </div>
 
   </div>
 
   <script>
     // ──────────────────────────────────────
-    // 1. INITIALIZE PARTICLES.JS
+    // 1. INITIALIZE PARTICLES.JS (Dark "Cyber" Web)
     // ──────────────────────────────────────
     particlesJS("particles-js", {
       "particles": {
-        "number": {
-          "value": 110,
-          "density": { "enable": true, "value_area": 800 }
-        },
-        "color": { "value": "#8892b0" },
+        "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+        "color": { "value": "#58a6ff" }, /* Accent blue connecting dots */
         "shape": { "type": "circle" },
-        "opacity": {
-          "value": 0.4,
-          "random": false,
-          "anim": { "enable": true, "speed": 1, "opacity_min": 0.1, "sync": false }
-        },
-        "size": {
-          "value": 2,
-          "random": true,
-          "anim": { "enable": false }
-        },
+        "opacity": { "value": 0.5, "random": false, "anim": { "enable": false } },
+        "size": { "value": 3, "random": true, "anim": { "enable": false } },
         "line_linked": {
           "enable": true,
-          "distance": 160,
-          "color": "#8892b0",
-          "opacity": 0.25,
+          "distance": 150,
+          "color": "#8b949e", /* Subtle gray web */
+          "opacity": 0.2,
           "width": 1
         },
         "move": {
           "enable": true,
-          "speed": 0.8,
+          "speed": 1.2,
           "direction": "none",
           "random": false,
           "straight": false,
           "out_mode": "out",
-          "bounce": false,
-          "attract": { "enable": false }
+          "bounce": false
         }
       },
       "interactivity": {
@@ -339,7 +396,7 @@
           "resize": true
         },
         "modes": {
-          "grab": { "distance": 220, "line_linked": { "opacity": 0.7 } },
+          "grab": { "distance": 200, "line_linked": { "opacity": 0.5 } },
           "push": { "particles_nb": 3 }
         }
       },
@@ -347,15 +404,14 @@
     });
 
     // ──────────────────────────────────────
-    // 2. HUD INTERACTION LOGIC (GSAP)
+    // 2. HUD INTERACTION LOGIC (Vanilla JS)
     // ──────────────────────────────────────
     const navBtns = document.querySelectorAll('.nav-btn');
     const dataPanel = document.getElementById('dataPanel');
     const panelTitle = document.getElementById('panelTitle');
     const panelList = document.getElementById('panelList');
-    const targetBrackets = document.querySelector('.target-brackets');
 
-    navBtns.forEach((btn, index) => {
+    navBtns.forEach((btn) => {
         btn.addEventListener('click', () => {
             // Remove active from all
             navBtns.forEach(b => b.classList.remove('active'));
@@ -364,15 +420,9 @@
 
             const targetId = btn.getAttribute('data-target');
             
-            // Spin and shrink brackets to target
-            gsap.fromTo(targetBrackets, 
-                { scale: 1.5, rotate: 45, opacity: 0 },
-                { scale: 1, rotate: 0, opacity: 1, duration: 1, ease: "back.out(1.7)" }
-            );
-
             // Fetch data from hidden DOM generated by Python
             const rawDataEl = document.getElementById(`data-${targetId}`);
-            let htmlContent = '<p class="status-active" style="font-size:0.7em;">[NO DATA]</p>';
+            let htmlContent = '<p style="color:var(--text-muted); font-family:var(--font-mono);">No testing material found.</p>';
             if(rawDataEl && rawDataEl.innerHTML) {
                 const list = rawDataEl.querySelector('ul');
                 if(list && list.children.length > 0) {
@@ -381,23 +431,13 @@
             }
 
             // Animate Data Panel out, update content, animate in
-            gsap.to(dataPanel, {
-                opacity: 0,
-                x: 50,
-                duration: 0.3,
-                onComplete: () => {
-                    panelTitle.textContent = btn.textContent + " // ARCHIVE";
-                    panelList.innerHTML = htmlContent;
-                    
-                    dataPanel.classList.add('is-visible');
-                    gsap.to(dataPanel, {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.6,
-                        ease: "power3.out"
-                    });
-                }
-            });
+            dataPanel.classList.remove('is-visible');
+            
+            setTimeout(() => {
+                panelTitle.textContent = btn.textContent;
+                panelList.innerHTML = htmlContent;
+                dataPanel.classList.add('is-visible');
+            }, 300); // Wait for CSS opacity transition
         });
     });
 
