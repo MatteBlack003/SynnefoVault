@@ -44,5 +44,45 @@ def generate():
     with open(os.path.join(base_dir, "index.html"), "w", encoding="utf-8") as f:
         f.write(html)
 
-if __name__ == "__main__":
+import argparse
+import time
+
+def watch_directories():
+    print("Watching directories for changes... (Press Ctrl+C to stop)")
+    last_state = {}
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Run once initially
     generate()
+    
+    try:
+        while True:
+            current_state = {}
+            for dept in DEPARTMENTS.keys():
+                dept_path = os.path.join(base_dir, dept)
+                if os.path.exists(dept_path):
+                    files = [f for f in os.listdir(dept_path) if os.path.isfile(os.path.join(dept_path, f)) and not f.startswith('.')]
+                    current_state[dept] = set(files)
+                else:
+                    current_state[dept] = set()
+            
+            if not last_state:
+                last_state = current_state
+            elif current_state != last_state:
+                print("\n[+] Change detected! Regenerating index.html...")
+                generate()
+                last_state = current_state
+                
+            time.sleep(2)
+    except KeyboardInterrupt:
+        print("\nWatcher stopped.")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate Synnefo Mock Exams Index")
+    parser.add_argument("--watch", action="store_true", help="Continuously watch for file additions/deletions and auto-update index.html")
+    args = parser.parse_args()
+    
+    if args.watch:
+        watch_directories()
+    else:
+        generate()
