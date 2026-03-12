@@ -1,550 +1,808 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNNEFO_NEXUS // Mock Exams</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Synnefo Solutions | Mock Exams</title>
+  <meta name="description" content="Access the newest question papers and practice tests across all IT and Business training departments." />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+  
+  <style>
+    /* ============================================================
+       Synnefo Mock Exams — Igloo.inc-inspired Design System
+       ============================================================ */
+    :root {
+      --bg-deep: #060a13;
+      --bg-primary: #0a0e17;
+      --bg-card: rgba(15, 23, 42, 0.55);
+      --bg-card-hover: rgba(20, 30, 55, 0.8);
+
+      --accent: #4fc3f7;
+      --accent-bright: #00e5ff;
+      --accent-glow: rgba(79, 195, 247, 0.15);
+      --accent-dim: rgba(79, 195, 247, 0.4);
+
+      --text-primary: #e8edf5;
+      --text-secondary: #8892a4;
+      --text-dim: #4a5568;
+      --text-white: #ffffff;
+
+      --border: rgba(79, 195, 247, 0.08);
+      --border-hover: rgba(79, 195, 247, 0.25);
+
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--text-secondary);
+      line-height: 1.7;
+      overflow-x: hidden;
+      min-height: 100vh;
+      cursor: none; /* Hide default cursor */
+    }
+
+    body.is-loading {
+      overflow: hidden;
+    }
+
+    a, input {
+      cursor: none;
+    }
+
+    img { max-width: 100%; display: block; }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* === DOT GRID OVERLAY === */
+    .dot-grid {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image: radial-gradient(circle, rgba(79, 195, 247, 0.06) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
     
-    <style>
-        :root {
-            --bg-color: #050505;
-            --grid-color: rgba(0, 255, 204, 0.05);
-            --primary: #00ffcc;
-            --primary-dim: rgba(0, 255, 204, 0.15);
-            --secondary: #ff00ff;
-            --text-main: #e0e0e0;
-            --text-muted: #888888;
-            --panel-bg: rgba(10, 15, 20, 0.85);
-            --font-head: 'Orbitron', sans-serif;
-            --font-body: 'Rajdhani', sans-serif;
-        }
+    .glow-blob {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+      filter: blur(80px);
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: var(--font-body);
-            line-height: 1.6;
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-            background-image: 
-                linear-gradient(var(--grid-color) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-            background-size: 50px 50px;
-            background-position: center bottom;
-        }
+    /* === CUSTOM CURSOR (DOT + RING) === */
+    .cursor-dot {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      pointer-events: none;
+      z-index: 10000;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s var(--ease-spring), height 0.3s var(--ease-spring);
+    }
 
-        /* Scanline Overlay */
-        .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(
-                to bottom,
-                rgba(255,255,255,0),
-                rgba(255,255,255,0) 50%,
-                rgba(0,0,0,0.1) 50%,
-                rgba(0,0,0,0.1)
-            );
-            background-size: 100% 4px;
-            z-index: 9999;
-            pointer-events: none;
-            opacity: 0.3;
-        }
+    .cursor-ring {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(79, 195, 247, 0.4);
+      pointer-events: none;
+      z-index: 10000;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s var(--ease-out), height 0.3s var(--ease-out), border-color 0.3s, background 0.3s;
+    }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            position: relative;
-            z-index: 10;
-        }
+    .cursor-ring.is-hovering {
+      width: 60px;
+      height: 60px;
+      border-color: var(--accent-bright);
+      background: rgba(79, 195, 247, 0.1);
+    }
+    
+    .cursor-ring.is-typing {
+      width: 70px;
+      height: 70px;
+      border-radius: 8px;
+      border-color: var(--accent);
+    }
 
-        /* Header / HUD */
-        header {
-            padding: 6rem 0 3rem;
-            text-align: center;
-            position: relative;
-        }
+    /* === PRELOADER === */
+    .preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--bg-deep);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      transition: opacity 0.8s var(--ease-out), visibility 0.8s;
+    }
 
-        .sys-status {
-            display: inline-block;
-            color: var(--primary);
-            font-family: var(--font-head);
-            font-size: 0.8rem;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            border: 1px solid var(--primary);
-            padding: 0.4rem 1.5rem;
-            margin-bottom: 2rem;
-            background: var(--primary-dim);
-            position: relative;
-            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
-            animation: pulse 2s infinite;
-        }
+    .preloader.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
 
-        @keyframes pulse {
-            0% { opacity: 0.8; box-shadow: 0 0 5px var(--primary); }
-            50% { opacity: 1; box-shadow: 0 0 15px var(--primary); }
-            100% { opacity: 0.8; box-shadow: 0 0 5px var(--primary); }
-        }
+    .preloader__inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
 
-        h1 {
-            font-family: var(--font-head);
-            font-size: clamp(2.5rem, 5vw, 4.5rem);
-            font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 1rem;
-            color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
-            position: relative;
-            display: inline-block;
-        }
+    .preloader__logo {
+      font-family: var(--font-mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-white);
+      letter-spacing: 0.2em;
+    }
 
-        h1::after {
-            content: 'NEXUS';
-            position: absolute;
-            left: -2px;
-            top: 2px;
-            color: var(--secondary);
-            z-index: -1;
-            opacity: 0.7;
-            text-shadow: none;
-            filter: blur(2px);
-            clip-path: polygon(0 0, 100% 0, 100% 40%, 0 40%);
-            animation: glitch 3s infinite alternate-reverse;
-        }
+    .preloader__bracket { color: var(--accent); }
 
-        @keyframes glitch {
-            0% { transform: translate(0) }
-            20% { transform: translate(-2px, 2px) }
-            40% { transform: translate(-2px, -2px) }
-            60% { transform: translate(2px, 2px) }
-            80% { transform: translate(2px, -2px) }
-            100% { transform: translate(0) }
-        }
+    .preloader__bar-track {
+      width: 250px;
+      height: 2px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 2px;
+      overflow: hidden;
+    }
 
-        p.subtitle {
-            color: var(--text-muted);
-            font-size: 1.3rem;
-            max-width: 600px;
-            margin: 0 auto;
-            font-weight: 500;
-            letter-spacing: 1px;
-            font-family: monospace;
-        }
+    .preloader__bar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+      border-radius: 2px;
+      transition: width 0.1s ease-out;
+    }
+    
+    .preloader__counter {
+      color: var(--accent);
+    }
 
-        /* Search / Filter CMD */
-        .search-container {
-            width: 100%;
-            max-width: 700px;
-            margin: 0 auto 4rem;
-            position: relative;
-        }
+    /* === LAYOUT === */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 5%;
+      position: relative;
+      z-index: 1;
+    }
 
-        .search-container::before {
-            content: '>';
-            position: absolute;
-            left: 1.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--primary);
-            font-family: var(--font-head);
-            font-size: 1.5rem;
-            font-weight: bold;
-            z-index: 2;
-        }
+    /* === HERO SECTION === */
+    header {
+      padding: 18vh 0 8vh;
+      text-align: center;
+      position: relative;
+      animation: fadeUp 1s 1s both var(--ease-out);
+    }
+    
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-        .search-input {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid var(--text-muted);
-            border-left: 4px solid var(--primary);
-            padding: 1.25rem 1.5rem 1.25rem 3.5rem;
-            color: var(--primary);
-            font-size: 1.2rem;
-            font-family: var(--font-head);
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            outline: none;
-        }
+    .hero__label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
 
-        .search-input::placeholder {
-            color: rgba(0, 255, 204, 0.3);
-        }
+    .hero__label-line {
+      width: 48px;
+      height: 1px;
+      background: var(--accent-dim);
+    }
 
-        .search-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px var(--primary-dim), inset 0 0 10px var(--primary-dim);
-        }
+    .hero__label-text {
+      color: var(--accent);
+    }
 
-        /* Grid */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2.5rem;
-            padding-bottom: 6rem;
-        }
+    h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: var(--text-white);
+      letter-spacing: -0.02em;
+    }
+    
+    .accent-text {
+      background: linear-gradient(135deg, var(--accent), var(--accent-bright));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-        /* Cyberpunk Panels */
-        .card {
-            background: var(--panel-bg);
-            border: 1px solid #222;
-            padding: 2rem;
-            transition: all 0.3s ease;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
-        }
+    p.subtitle {
+      color: var(--text-secondary);
+      font-size: clamp(1rem, 1.5vw, 1.25rem);
+      max-width: 600px;
+      margin: 0 auto;
+      font-weight: 300;
+      letter-spacing: 0.02em;
+    }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: #333;
-            transition: all 0.3s ease;
-        }
+    /* === SEARCH BAR === */
+    .search-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto 5rem;
+      position: relative;
+      animation: fadeUp 1s 1.2s both var(--ease-out);
+    }
 
-        .card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 30px;
-            height: 30px;
-            background: transparent;
-            border-right: 2px solid #333;
-            border-bottom: 2px solid #333;
-            transition: all 0.3s ease;
-        }
+    .search-input {
+      width: 100%;
+      background: rgba(10, 14, 23, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      padding: 1.25rem 1.5rem 1.25rem 3.5rem;
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      font-family: var(--font-body);
+      transition: all 0.4s var(--ease-out);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
 
-        .card:hover {
-            background: rgba(15, 25, 30, 0.95);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            border-color: #333;
-        }
-        
-        .card:hover::before {
-            background: var(--primary);
-            box-shadow: 0 0 10px var(--primary);
-        }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: rgba(15, 23, 42, 0.75);
+      box-shadow: 0 0 0 1px var(--accent-dim), 0 8px 30px rgba(79, 195, 247, 0.1);
+    }
+    
+    .search-input::placeholder {
+        color: var(--text-dim);
+    }
 
-        .card:hover::after {
-            border-color: var(--primary);
-            box-shadow: 2px 2px 5px var(--primary);
-        }
+    .search-icon {
+      position: absolute;
+      left: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+    }
 
-        .card[data-department="cyber-security"]:hover::before { background: var(--secondary); box-shadow: 0 0 10px var(--secondary); }
-        .card[data-department="cyber-security"]:hover::after { border-color: var(--secondary); box-shadow: 2px 2px 5px var(--secondary); }
-        
-        /* Custom Colors for departments */
-        .card[data-department="networking"] .icon { color: #3b82f6; }
-        .card[data-department="cyber-security"] .icon { color: var(--secondary); text-shadow: 0 0 15px var(--secondary); }
-        .card[data-department="devops"] .icon { color: #f59e0b; }
-        .card[data-department="flutter"] .icon { color: #0ea5e9; }
-        .card[data-department="mern-stack"] .icon { color: #10b981; }
-        .card[data-department="python"] .icon { color: #eab308; }
-        .card[data-department="digital-marketing"] .icon { color: #ec4899; }
+    /* === GLASSMORPHISM CARDS === */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      padding-bottom: 6rem;
+    }
 
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 1rem;
-        }
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 28px;
+      transition: all 0.5s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      
+      /* Staggered entrance */
+      opacity: 0;
+      animation: fadeUp 1s both var(--ease-out);
+    }
 
-        .icon {
-            font-size: 1.8rem;
-            text-shadow: 0 0 10px currentColor;
-        }
+    .card:nth-child(1) { animation-delay: 1.3s; }
+    .card:nth-child(2) { animation-delay: 1.4s; }
+    .card:nth-child(3) { animation-delay: 1.5s; }
+    .card:nth-child(4) { animation-delay: 1.6s; }
+    .card:nth-child(5) { animation-delay: 1.7s; }
+    .card:nth-child(6) { animation-delay: 1.8s; }
+    .card:nth-child(7) { animation-delay: 1.9s; }
 
-        .card h2 {
-            font-family: var(--font-head);
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
+    /* Top glowing line */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      transform: scaleX(0);
+      transition: transform 0.6s var(--ease-out);
+    }
 
-        .exam-list {
-            list-style: none;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
+    /* HUD Corner markers */
+    .card::after, .card .hud-corner {
+      content: '';
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      border: 1px solid var(--accent-dim);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .card::after { top: 15px; right: 15px; border-bottom: 0; border-left: 0; }
+    .card .hud-corner { bottom: 15px; left: 15px; border-top: 0; border-right: 0;}
 
-        .exam-list li {
-            width: 100%;
-        }
+    .card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-hover);
+      box-shadow:
+        0 8px 40px rgba(79, 195, 247, 0.1),
+        0 0 0 1px rgba(79, 195, 247, 0.05),
+        inset 0 1px 0 rgba(255,255,255,0.03);
+      transform: translateY(-5px);
+    }
+    
+    .card:hover::before { transform: scaleX(1); }
+    .card:hover::after, .card:hover .hud-corner { opacity: 1; }
 
-        .exam-list a {
-            color: var(--text-main);
-            text-decoration: none;
-            display: block; 
-            padding: 0.75rem 1rem;
-            background: rgba(255, 255, 255, 0.02);
-            border-left: 2px solid transparent;
-            transition: all 0.2s ease;
-            font-size: 1.1rem;
-            position: relative;
-            font-family: var(--font-body);
-            font-weight: 600;
-        }
-        
-        .exam-list li > a {
-            display: flex;
-            align-items: center;
-        }
+    /* Custom colors per department */
+    .card:nth-child(1)::before { background: linear-gradient(90deg, transparent, #3b82f6, transparent); }
+    .card:nth-child(2)::before { background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+    .card:nth-child(3)::before { background: linear-gradient(90deg, transparent, #10b981, transparent); }
+    .card:nth-child(4)::before { background: linear-gradient(90deg, transparent, #0ea5e9, transparent); }
+    .card:nth-child(5)::before { background: linear-gradient(90deg, transparent, #8b5cf6, transparent); }
+    .card:nth-child(6)::before { background: linear-gradient(90deg, transparent, #eab308, transparent); }
+    .card:nth-child(7)::before { background: linear-gradient(90deg, transparent, #ec4899, transparent); }
 
-        .exam-list a::before {
-            content: '[FILE]';
-            margin-right: 0.75rem;
-            font-family: var(--font-head);
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            transition: all 0.2s ease;
-        }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 2;
+    }
 
-        .exam-list a:hover {
-            background: var(--primary-dim);
-            border-left-color: var(--primary);
-            color: #fff;
-            padding-left: 1.5rem;
-        }
+    .icon-wrapper {
+      font-size: 1.8rem;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+    }
 
-        .exam-list a:hover::before {
-            color: var(--primary);
-        }
+    .card h2 {
+      font-family: var(--font-heading);
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--text-white);
+      letter-spacing: 0.02em;
+    }
 
-        .empty-state {
-            color: var(--text-muted);
-            font-size: 1rem;
-            font-style: italic;
-            padding: 1rem;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px dashed #333;
-            font-family: var(--font-body);
-        }
+    .exam-list {
+      list-style: none;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      z-index: 2;
+    }
 
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-muted);
-            font-size: 1rem;
-            border-top: 1px dashed #333;
-            font-family: var(--font-head);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        
-        .lead-instructions {
-            max-width: 800px;
-            margin: 0 auto 4rem;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid var(--primary);
-            padding: 1.5rem;
-            position: relative;
-        }
-        
-        .lead-instructions::before {
-            content: 'SYS_MSG_';
-            position: absolute;
-            top: -12px;
-            left: 20px;
-            background: var(--bg-color);
-            padding: 0 10px;
-            color: var(--primary);
-            font-family: var(--font-head);
-            font-size: 0.9rem;
-        }
+    .exam-list li {
+      width: 100%;
+    }
 
-        .lead-text strong {
-            color: #fff;
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 1.2rem;
-            font-family: var(--font-head);
-            text-transform: uppercase;
-        }
-        
-        .lead-text p {
-            color: var(--text-main);
-            font-size: 1.1rem;
-            font-family: monospace;
-        }
+    .exam-list a {
+      color: var(--text-primary);
+      text-decoration: none;
+      display: flex;     /* Changed display */
+      align-items: center;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: rgba(10, 14, 23, 0.4);
+      border: 1px solid rgba(255,255,255,0.03);
+      transition: all 0.3s var(--ease-out);
+      font-size: 0.95rem;
+      position: relative;
+      overflow: hidden;
+    }
 
-        /* Hidden class for search filter */
-        .hidden {
-            display: none !important;
-        }
-    </style>
+    .exam-list a::before {
+      content: '[]';
+      margin-right: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent-dim);
+      transition: color 0.3s;
+      letter-spacing: -2px; /* Pull brackets together */
+    }
+
+    /* Small background hover tint */
+    .exam-list a::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(79, 195, 247, 0.1), transparent);
+        opacity: 0;
+        transition: opacity 0.3s;
+        z-index: -1;
+    }
+
+    .exam-list a:hover {
+      color: var(--text-white);
+      border-color: var(--border-hover);
+      transform: translateX(4px);
+    }
+    
+    .exam-list a:hover::after { opacity: 1; }
+    .exam-list a:hover::before { color: var(--accent); letter-spacing: 1px; } /* Open brackets */
+
+    .empty-state {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      font-style: italic;
+      padding: 1rem;
+      background: rgba(10, 14, 23, 0.4);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* === SCROLL PROGRESS BAR === */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+      z-index: 1001;
+      animation: none; /* Controlled by JS */
+    }
+
+    /* === FOOTER & INSTRUCTIONS === */
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+      margin-top: 40px;
+    }
+    
+    .lead-instructions {
+      max-width: 800px;
+      margin: 0 auto 60px;
+      background: rgba(10, 14, 23, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-left: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      animation: fadeUp 1s 2s both var(--ease-out);
+    }
+
+    .lead-icon {
+      font-size: 1.5rem;
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 50%;
+      color: var(--accent);
+    }
+
+    .lead-text strong {
+      color: var(--text-white);
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+      font-family: var(--font-heading);
+    }
+    
+    .lead-text p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    /* Hidden class for search filter */
+    .hidden {
+      display: none !important;
+    }
+  </style>
 </head>
-<body>
-    <div class="scanlines"></div>
+<body class="is-loading">
 
-    <div class="container">
-        <header>
-            <div class="sys-status">SYS.ONLINE // PORT 8080</div>
-            <h1>SYNNEFO_NEXUS</h1>
-            <p class="subtitle">DECENTRALIZED DATABASE // SECURE EXAM ARCHIVE</p>
-        </header>
+  <!-- IGLLOO.INC PRELOADER -->
+  <div class="preloader" id="preloader">
+    <div class="preloader__inner">
+      <div class="preloader__logo">
+        <span class="preloader__bracket">[</span><span class="preloader__text">SYNNEFO_EXAMS</span><span class="preloader__bracket">]</span>
+      </div>
+      <div class="preloader__bar-track">
+        <div class="preloader__bar-fill" id="preloaderBar"></div>
+      </div>
+      <div class="preloader__counter mono" id="preloaderCounter">0%</div>
+    </div>
+  </div>
 
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="EXECUTE_QUERY...">
-        </div>
+  <!-- IGLOO.INC DOT GRID & CUSTOM CURSOR -->
+  <div class="dot-grid" aria-hidden="true"></div>
+  <div class="glow-blob" aria-hidden="true"></div>
+  <div class="scroll-progress" id="scrollProgress"></div>
 
-        <main>
-            <div class="grid" id="cardGrid">
-                
-                <div class="card" data-department="networking">
-                    <div class="card-header">
-                        <div class="icon">🌐</div>
-                        <h2>Networking</h2>
-                    </div>
-                    <ul class="exam-list">
-                        $networking_links
-                    </ul>
-                </div>
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
 
-                <div class="card" data-department="cyber-security">
-                    <div class="card-header">
-                        <div class="icon">🔐</div>
-                        <h2>Cyber_Sec</h2>
-                    </div>
-                    <ul class="exam-list">
-                        $cyber_security_links
-                    </ul>
-                </div>
+  <div class="container">
+    <header>
+      <div class="hero__label">
+        <span class="hero__label-line"></span>
+        <span class="hero__label-text mono">PORTAL_01 // SECURE_ARCHIVE</span>
+        <span class="hero__label-line"></span>
+      </div>
+      <h1>Mock <span class="accent-text">Exams</span> Hub</h1>
+      <p class="subtitle">Access the newest question papers and practice tests across all IT and Business training departments at Synnefo Solutions.</p>
+    </header>
 
-                <div class="card" data-department="devops">
-                    <div class="card-header">
-                        <div class="icon">⚙️</div>
-                        <h2>DevOps</h2>
-                    </div>
-                    <ul class="exam-list">
-                        $devops_links
-                    </ul>
-                </div>
-
-                <div class="card" data-department="flutter">
-                    <div class="card-header">
-                        <div class="icon">📱</div>
-                        <h2>Flutter</h2>
-                    </div>
-                    <ul class="exam-list">
-                        $flutter_links
-                    </ul>
-                </div>
-
-                <div class="card" data-department="mern-stack">
-                    <div class="card-header">
-                        <div class="icon">💻</div>
-                        <h2>MERN_Stack</h2>
-                    </div>
-                    <ul class="exam-list">
-                        $mern_stack_links
-                    </ul>
-                </div>
-
-                <div class="card" data-department="python">
-                    <div class="card-header">
-                        <div class="icon">🐍</div>
-                        <h2>Python</h2>
-                    </div>
-                    <ul class="exam-list">
-                        $python_links
-                    </ul>
-                </div>
-
-                <div class="card" data-department="digital-marketing">
-                    <div class="card-header">
-                        <div class="icon">📈</div>
-                        <h2>Digi_Market</h2>
-                    </div>
-                    <ul class="exam-list">
-                        $digital_marketing_links
-                    </ul>
-                </div>
-
-            </div>
-
-            <div class="lead-instructions">
-                <div class="lead-text">
-                    <strong>// UPLOAD_PROTOCOL</strong>
-                    <p>Transmit files to designated directory node within repository structure. Synchronization to root NEXUS interface is automatic upon commit.</p>
-                </div>
-            </div>
-        </main>
-
-        <footer>
-            <p>SYNNEFO_CORP © 2026 // END OF TRANSMISSION</p>
-        </footer>
+    <div class="search-container">
+      <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      <input type="text" id="searchInput" class="search-input interactive-el" placeholder="Search specific topics or exams...">
     </div>
 
-    <!-- Scripts for Interactivity -->
-    <script>
-        // Search / Filter Functionality
-        const searchInput = document.getElementById('searchInput');
-        searchInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.card');
+    <main>
+      <div class="grid" id="cardGrid">
+        
+        <div class="card interactive-el" data-department="networking">
+          <div class="hud-corner"></div>
+          <div class="card-header">
+            <div class="icon-wrapper">🌐</div>
+            <h2>Networking</h2>
+          </div>
+          <ul class="exam-list">
+              $networking_links
+          </ul>
+        </div>
 
-            cards.forEach(card => {
-                const departmentName = card.querySelector('h2').innerText.toLowerCase();
-                const links = card.querySelectorAll('.exam-list li');
-                let hasVisibleLink = false;
+        <div class="card interactive-el" data-department="cyber-security">
+          <div class="hud-corner"></div>
+          <div class="card-header">
+            <div class="icon-wrapper">🔐</div>
+            <h2>Cyber Security</h2>
+          </div>
+          <ul class="exam-list">
+              $cyber_security_links
+          </ul>
+        </div>
 
-                const matchesDepartment = departmentName.includes(searchTerm);
+        <div class="card interactive-el" data-department="devops">
+          <div class="hud-corner"></div>
+          <div class="card-header">
+            <div class="icon-wrapper">⚙️</div>
+            <h2>DevOps</h2>
+          </div>
+          <ul class="exam-list">
+              $devops_links
+          </ul>
+        </div>
 
-                links.forEach(listItem => {
-                    if(!listItem) return;
-                    const linkText = listItem.innerText.toLowerCase();
-                    if (linkText.includes(searchTerm) || matchesDepartment) {
-                        listItem.classList.remove('hidden');
-                        hasVisibleLink = true;
-                    } else {
-                        listItem.classList.add('hidden');
-                    }
-                });
+        <div class="card interactive-el" data-department="flutter">
+          <div class="hud-corner"></div>
+          <div class="card-header">
+            <div class="icon-wrapper">📱</div>
+            <h2>Flutter</h2>
+          </div>
+          <ul class="exam-list">
+              $flutter_links
+          </ul>
+        </div>
 
-                const emptyState = card.querySelector('.empty-state');
-                
-                if (hasVisibleLink || (matchesDepartment && links.length > 0)) {
-                    card.classList.remove('hidden');
-                    if(emptyState) emptyState.classList.add('hidden');
-                } else if (matchesDepartment && emptyState) {
-                    card.classList.remove('hidden');
-                    emptyState.classList.remove('hidden');
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
+        <div class="card interactive-el" data-department="mern-stack">
+          <div class="hud-corner"></div>
+          <div class="card-header">
+            <div class="icon-wrapper">💻</div>
+            <h2>MERN Stack</h2>
+          </div>
+          <ul class="exam-list">
+              $mern_stack_links
+          </ul>
+        </div>
+
+        <div class="card interactive-el" data-department="python">
+          <div class="hud-corner"></div>
+          <div class="card-header">
+            <div class="icon-wrapper">🐍</div>
+            <h2>Python</h2>
+          </div>
+          <ul class="exam-list">
+              $python_links
+          </ul>
+        </div>
+
+        <div class="card interactive-el" data-department="digital-marketing">
+          <div class="hud-corner"></div>
+          <div class="card-header">
+            <div class="icon-wrapper">📈</div>
+            <h2>Digital Marketing</h2>
+          </div>
+          <ul class="exam-list">
+              $digital_marketing_links
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="lead-instructions interactive-el">
+        <div class="lead-icon">⚡</div>
+        <div class="lead-text">
+          <strong>AUTO-UPDATING INFRASTRUCTURE</strong>
+          <p>Team leads: Upload PDF files directly to your department's GitHub folder. The architecture automatically syncs and re-deploys via Actions without downtime.</p>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p class="mono">© 2026 SYNNEFO SOLUTIONS // ALL RIGHTS RESERVED</p>
+    </footer>
+  </div>
+
+  <!-- IGLLOO.INC INTERACTIVITY SCRIPTS -->
+  <script>
+    // 1. Preloader Logic
+    document.addEventListener("DOMContentLoaded", () => {
+      const preloader = document.getElementById("preloader");
+      const bar = document.getElementById("preloaderBar");
+      const counter = document.getElementById("preloaderCounter");
+      
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.floor(Math.random() * 10) + 5;
+        if (progress > 100) progress = 100;
+        
+        bar.style.width = progress + "%";
+        counter.textContent = progress + "%";
+        
+        if (progress === 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            preloader.classList.add("fade-out");
+            document.body.classList.remove("is-loading");
+          }, 300);
+        }
+      }, 50);
+    });
+
+    // 2. Custom Magnetic Cursor Logic
+    const cursorDot = document.getElementById('cursorDot');
+    const cursorRing = document.getElementById('cursorRing');
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let ringX = window.innerWidth / 2;
+    let ringY = window.innerHeight / 2;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      // Instant update for dot
+      cursorDot.style.left = mouseX + 'px';
+      cursorDot.style.top = mouseY + 'px';
+    });
+
+    // Smooth animation loop for ring
+    function renderCursor() {
+      ringX += (mouseX - ringX) * 0.15; // easing
+      ringY += (mouseY - ringY) * 0.15;
+      cursorRing.style.left = ringX + 'px';
+      cursorRing.style.top = ringY + 'px';
+      requestAnimationFrame(renderCursor);
+    }
+    requestAnimationFrame(renderCursor);
+
+    // Hover states for cursor
+    const interactiveElements = document.querySelectorAll('a, button, .interactive-el');
+    interactiveElements.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursorDot.classList.add('is-hovering');
+        cursorRing.classList.add('is-hovering');
+      });
+      el.addEventListener('mouseleave', () => {
+        cursorDot.classList.remove('is-hovering');
+        cursorRing.classList.remove('is-hovering');
+      });
+    });
+
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.addEventListener('mouseenter', () => {
+            cursorRing.classList.add('is-typing');
         });
-    </script>
+        input.addEventListener('mouseleave', () => {
+            cursorRing.classList.remove('is-typing');
+        });
+    });
+
+    // 3. Scroll Progress Bar
+    window.addEventListener('scroll', () => {
+      const scrollProgress = document.getElementById('scrollProgress');
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      scrollProgress.style.width = scrolled + '%';
+    });
+
+    // 4. Search / Filter Functionality (Identical to before)
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const cards = document.querySelectorAll('.card');
+
+      cards.forEach(card => {
+        const departmentName = card.querySelector('h2').innerText.toLowerCase();
+        const links = card.querySelectorAll('.exam-list li');
+        let hasVisibleLink = false;
+
+        const matchesDepartment = departmentName.includes(searchTerm);
+
+        links.forEach(listItem => {
+          if(!listItem) return;
+          const linkText = listItem.innerText.toLowerCase();
+          if (linkText.includes(searchTerm) || matchesDepartment) {
+            listItem.classList.remove('hidden');
+            hasVisibleLink = true;
+          } else {
+            listItem.classList.add('hidden');
+          }
+        });
+
+        const emptyState = card.querySelector('.empty-state');
+        
+        if (hasVisibleLink || (matchesDepartment && links.length > 0)) {
+          card.classList.remove('hidden');
+          if(emptyState) emptyState.classList.add('hidden');
+        } else if (matchesDepartment && emptyState) {
+          card.classList.remove('hidden');
+          emptyState.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    });
+  </script>
 </body>
 </html>
