@@ -1,0 +1,37 @@
+name: Auto Update Mock Exams Index
+
+on:
+  push:
+    paths:
+      - 'synnefo-mock-exams/**'
+      - '!synnefo-mock-exams/index.html'
+    branches:
+      - main
+      - master
+
+jobs:
+  update-index:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Run generation script
+        run: |
+          cd synnefo-mock-exams
+          python generate_index.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add synnefo-mock-exams/index.html
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update mock exams index" && git push)
