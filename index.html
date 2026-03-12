@@ -13,10 +13,10 @@
 
   <style>
     /* ============================================================
-       Synnefo Mock Exams — WebGL 3D Archive Experience
+       Synnefo Mock Exams — Particles.js Experience
        ============================================================ */
     :root {
-      --bg-color: #d9dee3; /* Bright misty fog */
+      --bg-color: #d9dee3; /* Igloo style light misty background */
       --text-main: #1a1a1a;
       --text-muted: #6b7280;
       --accent: #000000;
@@ -33,19 +33,20 @@
       background: var(--bg-color);
       color: var(--text-main);
       font-family: var(--font-mono);
-      overflow: hidden; /* No scrolling, 100% 3D experience */
+      overflow: hidden; /* No scrolling, immersive experience */
       user-select: none;
       cursor: crosshair;
     }
 
-    /* === WEBGL CANVAS === */
-    #webgl-container {
+    /* === PARTICLES CONTAINER === */
+    #particles-js {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       z-index: 0;
+      background: radial-gradient(circle, #e2e8f0 0%, #cbd5e1 100%);
     }
 
     /* === HUD OVERLAY === */
@@ -80,8 +81,7 @@
       font-weight: 800;
       font-size: 2rem;
       letter-spacing: -1px;
-      color: #fff;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      color: var(--text-main);
     }
 
     .status-panel {
@@ -139,7 +139,7 @@
       justify-content: center;
       gap: 1.5rem;
       flex-wrap: wrap;
-      background: rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.4);
       backdrop-filter: blur(10px);
       border: var(--border-thin);
       padding: 1rem 2rem;
@@ -188,7 +188,7 @@
       transform: translateY(-50%);
       width: 350px;
       max-height: 60vh;
-      background: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.6);
       backdrop-filter: blur(20px);
       border: var(--border-thin);
       border-radius: 8px;
@@ -245,15 +245,9 @@
 
   </style>
 
-  <!-- Import Three.js & GSAP directly securely without build step -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://esm.sh/three@0.160.0",
-        "gsap": "https://esm.sh/gsap@3.12.5"
-      }
-    }
-  </script>
+  <!-- IMPORTANT: Load particles.js and GSAP via CDN -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
 </head>
 <body>
@@ -267,8 +261,8 @@
   <div class="raw-data" id="data-python"><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
   <div class="raw-data" id="data-digital-marketing"><ul><p class="empty-state">No exams uploaded yet.</p></ul></div>
 
-  <!-- WEBGL CANVAS CONTAINER -->
-  <div id="webgl-container"></div>
+  <!-- PARTICLES.JS CONTAINER -->
+  <div id="particles-js"></div>
 
   <!-- HUD OVERLAY -->
   <div id="hud">
@@ -276,9 +270,9 @@
     <div class="top-bar">
       <div class="logo hud-element">SYNNEFO</div>
       <div class="status-panel hud-element">
-        <div>SYS.ARCHIVE_01</div>
+        <div>SYS.ARCHIVE_02</div>
         <div>SECURE LINK: <span class="status-active">ESTABLISHED</span></div>
-        <div id="fps-counter">SCAN RATE: 60Hz</div>
+        <div id="fps-counter">SCAN RATE: OPTIMAL</div>
       </div>
     </div>
 
@@ -310,170 +304,118 @@
 
   </div>
 
-  <script type="module">
-    import * as THREE from 'three';
-    import gsap from 'gsap';
-
+  <script>
     // ──────────────────────────────────────
-    // 1. THREE.JS SCENE SETUP
+    // 1. INITIALIZE PARTICLES.JS
     // ──────────────────────────────────────
-    const container = document.getElementById('webgl-container');
-    const scene = new THREE.Scene();
-    
-    // Exact Igloo misty fog color
-    const fogColor = new THREE.Color('#d9dee3'); 
-    scene.background = fogColor;
-    scene.fog = new THREE.FogExp2(fogColor, 0.04);
-
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 100);
-    camera.position.set(0, 2, 10);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    container.appendChild(renderer.domElement);
-
-    // ──────────────────────────────────────
-    // 2. SCENE GEOMETRY (The "Data Core")
-    // ──────────────────────────────────────
-    const coreGroup = new THREE.Group();
-    scene.add(coreGroup);
-
-    // Main particle core (abstract sculpted look like the Igloo screenshot)
-    const particleCount = 12000;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    const colors = new Float32Array(particleCount * 3);
-
-    const colorDark = new THREE.Color('#4a5568');
-    const colorLight = new THREE.Color('#8892a4');
-
-    for(let i = 0; i < particleCount; i++) {
-        // Create a rough humanoid/object shape via math
-        const u = Math.random();
-        const v = Math.random();
-        const theta = 2 * Math.PI * u;
-        const phi = Math.acos(2 * v - 1);
-        
-        let r = 2.0;
-        // Tweak radius to look bumpy/sculpted
-        r += Math.sin(theta * 3) * 0.3;
-        r += Math.cos(phi * 4) * 0.4;
-        
-        // Add random scatter
-        r += (Math.random() - 0.5) * 0.5;
-
-        // Shape it slightly like a vertical object (taller)
-        let x = r * Math.sin(phi) * Math.cos(theta);
-        let y = r * Math.cos(phi) * 1.5; 
-        let z = r * Math.sin(phi) * Math.sin(theta);
-
-        positions[i*3] = x;
-        positions[i*3+1] = y;
-        positions[i*3+2] = z;
-
-        // Colors
-        const mixedColor = colorDark.clone().lerp(colorLight, Math.random());
-        colors[i*3] = mixedColor.r;
-        colors[i*3+1] = mixedColor.g;
-        colors[i*3+2] = mixedColor.b;
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-    const material = new THREE.PointsMaterial({
-        size: 0.05,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.8,
-        sizeAttenuation: true
-    });
-
-    const particleSystem = new THREE.Points(geometry, material);
-    coreGroup.add(particleSystem);
-
-    // Turntable Base Rings
-    for(let j=1; j<=4; j++) {
-        const ringGeo = new THREE.RingGeometry(j + 0.5, j + 0.52, 64);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.1, side: THREE.DoubleSide });
-        const ring = new THREE.Mesh(ringGeo, ringMat);
-        ring.rotation.x = -Math.PI / 2;
-        ring.position.y = -3;
-        scene.add(ring);
-    }
-
-    // Floating UI markers around the core
-    const markerGeo = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-    const markerMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1a });
-    const markers = [];
-    for(let m=0; m<7; m++) {
-        const marker = new THREE.Mesh(markerGeo, markerMat);
-        const angle = (m / 7) * Math.PI * 2;
-        marker.position.set(Math.cos(angle)*3, (Math.random() - 0.5)*2, Math.sin(angle)*3);
-        coreGroup.add(marker);
-        markers.push(marker);
-    }
-
-    // ──────────────────────────────────────
-    // 3. LIGHTING
-    // ──────────────────────────────────────
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
-
-    const pointLight = new THREE.PointLight(0xffffff, 1, 20);
-    pointLight.position.set(5, 5, 5);
-    scene.add(pointLight);
-
-    // ──────────────────────────────────────
-    // 4. INTERACTION & ANIMATION LOOP
-    // ──────────────────────────────────────
-    let mouseX = 0;
-    let mouseY = 0;
-    
-    document.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-        mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-    });
-
-    const clock = new THREE.Clock();
-
-    function animate() {
-        requestAnimationFrame(animate);
-        const time = clock.getElapsedTime();
-
-        // Slowly rotate the core
-        coreGroup.rotation.y = time * 0.1;
-
-        // Subtle camera float based on mouse (parallax)
-        gsap.to(camera.position, {
-            x: mouseX * 2,
-            y: 2 + mouseY * 1,
-            duration: 1,
-            ease: "power2.out"
-        });
-        camera.lookAt(0, 0, 0);
-
-        // Animate particles slightly
-        const positions = particleSystem.geometry.attributes.position.array;
-        for(let i=0; i<particleCount; i++) {
-            positions[i*3+1] += Math.sin(time * 2 + positions[i*3]) * 0.001; 
+    particlesJS("particles-js", {
+      "particles": {
+        "number": {
+          "value": 120, // High density for a dense "misty/network" floating core look
+          "density": {
+            "enable": true,
+            "value_area": 800
+          }
+        },
+        "color": {
+          "value": "#4a5568" // Dark slate gray to stand out against the light mist
+        },
+        "shape": {
+          "type": "circle",
+          "stroke": {
+            "width": 0,
+            "color": "#000000"
+          },
+          "polygon": {
+            "nb_sides": 5
+          }
+        },
+        "opacity": {
+          "value": 0.5,
+          "random": true,
+          "anim": {
+            "enable": true,
+            "speed": 1,
+            "opacity_min": 0.1,
+            "sync": false
+          }
+        },
+        "size": {
+          "value": 3,
+          "random": true,
+          "anim": {
+            "enable": false,
+            "speed": 40,
+            "size_min": 0.1,
+            "sync": false
+          }
+        },
+        "line_linked": {
+          "enable": true,
+          "distance": 150,
+          "color": "#6b7280",
+          "opacity": 0.4,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 1.5,
+          "direction": "none",
+          "random": true,
+          "straight": false,
+          "out_mode": "out",
+          "bounce": false,
+          "attract": {
+            "enable": true,
+            "rotateX": 600,
+            "rotateY": 1200
+          }
         }
-        particleSystem.geometry.attributes.position.needsUpdate = true;
-
-        renderer.render(scene, camera);
-    }
-
-    animate();
-
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": {
+            "enable": true,
+            "mode": "grab"
+          },
+          "onclick": {
+            "enable": true,
+            "mode": "push"
+          },
+          "resize": true
+        },
+        "modes": {
+          "grab": {
+            "distance": 200,
+            "line_linked": {
+              "opacity": 0.5
+            }
+          },
+          "bubble": {
+            "distance": 400,
+            "size": 40,
+            "duration": 2,
+            "opacity": 8,
+            "speed": 3
+          },
+          "repulse": {
+            "distance": 200,
+            "duration": 0.4
+          },
+          "push": {
+            "particles_nb": 4
+          },
+          "remove": {
+            "particles_nb": 2
+          }
+        }
+      },
+      "retina_detect": true
     });
 
     // ──────────────────────────────────────
-    // 5. UI LOGIC (HUD + GSAP)
+    // 2. HUD INTERACTION LOGIC (GSAP)
     // ──────────────────────────────────────
     const navBtns = document.querySelectorAll('.nav-btn');
     const dataPanel = document.getElementById('dataPanel');
@@ -490,19 +432,7 @@
 
             const targetId = btn.getAttribute('data-target');
             
-            // WebGL camera effect: Zoom in dramatically!
-            gsap.to(camera.position, {
-                z: 6, // closer
-                duration: 1.5,
-                ease: "power4.inOut"
-            });
-            gsap.to(camera.rotation, {
-                z: (Math.random() - 0.5) * 0.2, // slight tilt
-                duration: 1.5,
-                ease: "power4.inOut"
-            });
-            
-            // HUD effect: Spin and shrink brackets to target
+            // Spin and shrink brackets to target
             gsap.fromTo(targetBrackets, 
                 { scale: 1.5, rotate: 45, opacity: 0 },
                 { scale: 1, rotate: 0, opacity: 1, duration: 1, ease: "back.out(1.7)" }
@@ -534,17 +464,6 @@
                         duration: 0.6,
                         ease: "power3.out"
                     });
-                }
-            });
-
-            // Highlight the corresponding 3D marker
-            markers.forEach((m, i) => {
-                if(i === index) {
-                    m.material.color.setHex(0xffffff);
-                    m.scale.set(2,2,2);
-                } else {
-                    m.material.color.setHex(0x1a1a1a);
-                    m.scale.set(1,1,1);
                 }
             });
         });
