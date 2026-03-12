@@ -125,25 +125,23 @@
     .target-brackets::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
     .target-brackets::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
 
-    /* --- BOTTOM BAR (NAVIGATION) --- */
-    .bottom-bar {
+    /* --- SIDEBAR (NAVIGATION) --- */
+    .side-nav {
+      position: absolute;
+      top: 50%;
+      left: 3rem;
+      transform: translateY(-50%);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      width: 100%;
-      gap: 2rem;
-    }
-
-    .nav-container {
-      display: flex;
-      justify-content: center;
       gap: 1.5rem;
-      flex-wrap: wrap;
-      background: rgba(255,255,255,0.4);
-      backdrop-filter: blur(10px);
-      border: var(--border-thin);
-      padding: 1rem 2rem;
-      border-radius: 50px;
+      z-index: 10;
+    }
+    
+    .nav-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 0.2em;
+      margin-bottom: 0.5rem;
     }
 
     .nav-btn {
@@ -151,18 +149,21 @@
       border: none;
       color: var(--text-muted);
       font-family: var(--font-mono);
-      font-size: 0.75rem;
+      font-size: 0.85rem;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.15em;
       cursor: pointer;
-      padding: 0.5rem;
       position: relative;
       transition: all 0.3s;
+      text-align: left;
+      display: inline-block;
+      width: max-content;
     }
 
     .nav-btn:hover, .nav-btn.active {
       color: var(--text-main);
       font-weight: 700;
+      transform: translateX(10px);
     }
 
     .nav-btn::before, .nav-btn::after {
@@ -170,24 +171,24 @@
       position: absolute;
       opacity: 0;
       transition: all 0.3s ease;
-      font-size: 1rem;
+      font-size: 1.2rem;
       top: 50%;
       transform: translateY(-50%);
     }
-    .nav-btn::before { content: '['; left: -10px; }
-    .nav-btn::after { content: ']'; right: -10px; }
+    .nav-btn::before { content: '['; left: -15px; }
+    .nav-btn::after { content: ']'; right: -15px; }
 
-    .nav-btn:hover::before, .nav-btn.active::before { opacity: 1; left: 0px; }
-    .nav-btn:hover::after, .nav-btn.active::after { opacity: 1; right: 0px; }
+    .nav-btn:hover::before, .nav-btn.active::before { opacity: 1; left: -20px; }
+    .nav-btn:hover::after, .nav-btn.active::after { opacity: 1; right: -20px; }
 
     /* --- DATA PANEL (EXAM LINKS) --- */
     .data-panel {
       position: absolute;
       top: 50%;
-      right: 10%;
+      right: 5%;
       transform: translateY(-50%);
       width: 350px;
-      max-height: 60vh;
+      max-height: 70vh;
       background: rgba(255,255,255,0.6);
       backdrop-filter: blur(20px);
       border: var(--border-thin);
@@ -279,27 +280,24 @@
     <div class="crosshair-h"></div><div class="crosshair-v"></div>
     <div class="target-brackets"></div>
 
+    <!-- SIDE NAVIGATION -->
+    <div class="side-nav hud-element">
+      <div class="nav-label">TARGET DEPT.</div>
+      <button class="nav-btn" data-target="networking">Networking</button>
+      <button class="nav-btn" data-target="cyber-security">Cyber Security</button>
+      <button class="nav-btn" data-target="devops">DevOps</button>
+      <button class="nav-btn" data-target="flutter">Flutter</button>
+      <button class="nav-btn" data-target="mern-stack">MERN Stack</button>
+      <button class="nav-btn" data-target="python">Python</button>
+      <button class="nav-btn" data-target="digital-marketing">Digital Marketing</button>
+    </div>
+
     <!-- DATA PANEL THAT POPS UP -->
     <div class="data-panel hud-element" id="dataPanel">
       <h2 id="panelTitle">Select Department</h2>
       <ul class="exam-list" id="panelList">
         <!-- JS will populate this -->
       </ul>
-    </div>
-
-    <div class="bottom-bar">
-      <div class="nav-container hud-element">
-        <button class="nav-btn" data-target="networking">Networking</button>
-        <button class="nav-btn" data-target="cyber-security">Cyber Security</button>
-        <button class="nav-btn" data-target="devops">DevOps</button>
-        <button class="nav-btn" data-target="flutter">Flutter</button>
-        <button class="nav-btn" data-target="mern-stack">MERN Stack</button>
-        <button class="nav-btn" data-target="python">Python</button>
-        <button class="nav-btn" data-target="digital-marketing">Digital Marketing</button>
-      </div>
-      <div class="status-panel hud-element" style="text-align: center; font-size: 0.65rem;">
-        TARGET A DEPARTMENT TO EXTRACT ARCHIVE DATA
-      </div>
     </div>
 
   </div>
