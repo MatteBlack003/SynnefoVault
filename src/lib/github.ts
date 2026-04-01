@@ -9,30 +9,19 @@ export interface GitHubUploadParams {
 
 export async function uploadToGitHub(params: GitHubUploadParams) {
   const { repoOwner, repoName, path, message, content, token } = params;
-
-  // Convert string to base64 properly (Unicode safe)
   const encodedContent = btoa(unescape(encodeURIComponent(content)));
 
-  // 1. Check if file already exists to get its SHA (required for modifying existing files)
   let sha: string | undefined = undefined;
-  
   try {
     const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' }
     });
-
     if (res.ok) {
       const data = await res.json();
       sha = data.sha;
     }
-  } catch (err) {
-    // Expected to fail if file does not exist
-  }
+  } catch (err) {}
 
-  // 2. Upload/Update the file
   const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`, {
     method: 'PUT',
     headers: {
@@ -40,11 +29,7 @@ export async function uploadToGitHub(params: GitHubUploadParams) {
       'Accept': 'application/vnd.github.v3+json',
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      message,
-      content: encodedContent,
-      sha
-    })
+    body: JSON.stringify({ message, content: encodedContent, sha })
   });
 
   if (!response.ok) {
@@ -53,4 +38,52 @@ export async function uploadToGitHub(params: GitHubUploadParams) {
   }
 
   return response.json();
+}
+
+/**
+ * Used by Team Leaders to permanently wipe the exam from the servers to revoke access.
+ */
+export async function deleteFromGitHub(params: {
+  repoOwner: string;
+  repoName: string;
+  path: string;
+  token: string;
+}) {
+  const { repoOwner, repoName, path, token } = params;
+
+  // 1. You MUST GET the sha of the file before you can DELETE it on GitHub
+  const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`, {
+    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' },
+    cache: 'no-store'
+  });
+
+  if (!res.ok) {
+    if (res.status === 404) return; // Already deleted
+    const err = await res.json();
+    throw new Error(err.message || 'Could not locate file to end exam.');
+  }
+  
+  const data = await res.json();
+  const sha = data.sha;
+
+  // 2. Perform the DELETE
+  const deleteRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: `Admin execution: END STATUS on ${path}`,
+      sha: sha
+    })
+  });
+
+  if (!deleteRes.ok) {
+    const errData = await deleteRes.json();
+    throw new Error(errData.message || 'Failed to physically delete exam file.');
+  }
+
+  return deleteRes.json();
 }
