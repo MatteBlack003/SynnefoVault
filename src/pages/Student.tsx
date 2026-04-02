@@ -14,6 +14,8 @@ const REPO_NAME = 'SynnefoVault';
 // The deployed GitHub Pages URL where catalog.json is served (no rate limits)
 const PAGES_BASE_URL = `https://${REPO_OWNER.toLowerCase()}.github.io/${REPO_NAME}/`;
 
+const CATALOG_STORAGE_KEY = 'synnefo_live_catalog';
+
 interface Catalog {
   [dept: string]: string[];
 }
@@ -31,57 +33,70 @@ export function Student() {
   const [status, setStatus] = useState({ type: '', msg: '' });
   const [loading, setLoading] = useState(false);
 
+  /** Check if a catalog has any exams */
+  const hasExams = (c: Catalog): boolean => Object.values(c).some(files => files.length > 0);
+
   /**
-   * Catalog fetch strategy:
-   * 1. PRIMARY: Fetch catalog.json from raw.githubusercontent.com
-   *    (always up-to-date since admin commits it after every action, no rate limits)
-   * 2. FALLBACK: Load local catalog.json (for dev environments)
-   * 3. ENHANCEMENT: Single Git Trees API call to catch any edge cases
+   * Catalog fetch strategy (checked in priority order):
+   * 1. localStorage (instant — set by admin tab in the same browser)
+   * 2. raw.githubusercontent.com/catalog.json (always fresh, no rate limits)
+   * 3. Local/deployed catalog.json
+   * 4. Git Trees API (last resort, 1 request)
    */
   const fetchCatalog = async () => {
     setCatalogLoading(true);
-    let catalogLoaded = false;
 
-    // Step 1: Fetch catalog.json directly from the repo (always fresh, no rate limits)
+    // Step 1: Check localStorage first (instant, set by admin page)
+    try {
+      const raw = localStorage.getItem(CATALOG_STORAGE_KEY);
+      if (raw) {
+        const data: Catalog = JSON.parse(raw);
+        if (hasExams(data)) {
+          setCatalog(data);
+          setCatalogLoading(false);
+          return; // We have good data, no need to fetch externally
+        }
+      }
+    } catch { /* corrupt localStorage, continue to network sources */ }
+
+    // Step 2: Fetch catalog.json from raw.githubusercontent.com
     try {
       const rawCatalogUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/master/public/catalog.json`;
       const res = await fetch(rawCatalogUrl, { cache: 'no-store' });
       if (res.ok) {
         const data: Catalog = await res.json();
-        setCatalog(data);
-        catalogLoaded = true;
-      }
-    } catch {
-      // raw.githubusercontent.com failed, try fallback
-    }
-
-    // Step 2: Fallback to local/deployed catalog.json (for dev or if raw fails)
-    if (!catalogLoaded) {
-      try {
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const catalogUrl = isLocal 
-          ? (import.meta.env.BASE_URL + 'catalog.json')
-          : (PAGES_BASE_URL + 'catalog.json');
-
-        const res = await fetch(catalogUrl, { cache: 'no-store' });
-        if (res.ok) {
-          const data: Catalog = await res.json();
+        if (hasExams(data)) {
           setCatalog(data);
-          catalogLoaded = true;
+          setCatalogLoading(false);
+          return;
         }
-      } catch {
-        // Local catalog not available either
       }
-    }
+    } catch { /* failed, try next */ }
 
-    // Step 3: If nothing worked, try the Git Trees API as last resort (1 request)
-    if (!catalogLoaded) {
-      try {
-        const liveCatalog = await fetchFullCatalogFromAPI(REPO_OWNER, REPO_NAME, DEPARTMENTS);
-        setCatalog(liveCatalog);
-      } catch {
-        console.warn('All catalog sources failed.');
+    // Step 3: Fallback to local/deployed catalog.json
+    try {
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const catalogUrl = isLocal 
+        ? (import.meta.env.BASE_URL + 'catalog.json')
+        : (PAGES_BASE_URL + 'catalog.json');
+
+      const res = await fetch(catalogUrl, { cache: 'no-store' });
+      if (res.ok) {
+        const data: Catalog = await res.json();
+        if (hasExams(data)) {
+          setCatalog(data);
+          setCatalogLoading(false);
+          return;
+        }
       }
+    } catch { /* failed, try next */ }
+
+    // Step 4: Git Trees API as last resort (1 request)
+    try {
+      const liveCatalog = await fetchFullCatalogFromAPI(REPO_OWNER, REPO_NAME, DEPARTMENTS);
+      setCatalog(liveCatalog);
+    } catch {
+      console.warn('All catalog sources failed.');
     }
 
     setCatalogLoading(false);

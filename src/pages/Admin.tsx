@@ -9,8 +9,24 @@ const DEPARTMENTS = [
 const REPO_OWNER = 'MatteBlack003';
 const REPO_NAME = 'SynnefoVault';
 
+const CATALOG_STORAGE_KEY = 'synnefo_live_catalog';
+
 interface Catalog {
   [dept: string]: string[];
+}
+
+/** Save catalog to localStorage for cross-tab syncing */
+function saveCatalogLocally(catalog: Catalog) {
+  localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(catalog));
+}
+
+/** Load catalog from localStorage */
+function loadCatalogLocally(): Catalog | null {
+  const raw = localStorage.getItem(CATALOG_STORAGE_KEY);
+  if (raw) {
+    try { return JSON.parse(raw); } catch { return null; }
+  }
+  return null;
 }
 
 export function Admin() {
@@ -41,18 +57,38 @@ export function Admin() {
     if (t && o && r) {
       setToken(t); setOwner(o); setRepo(r);
       setIsLoggedIn(true);
-      // Single API call to fetch entire catalog
-      fetchFullCatalogFromAPI(o, r, DEPARTMENTS, t).then(setCatalog);
+      // Load from localStorage first (instant), then refresh from API
+      const localCatalog = loadCatalogLocally();
+      if (localCatalog) setCatalog(localCatalog);
+      fetchFullCatalogFromAPI(o, r, DEPARTMENTS, t).then(apiCatalog => {
+        // Merge: keep anything from local that API doesn't have
+        const merged = mergeCatalogs(localCatalog || {}, apiCatalog);
+        setCatalog(merged);
+        saveCatalogLocally(merged);
+      });
     }
   }, []);
 
-  // Fetch live catalog using a single Git Trees API call
+  // Merge two catalogs by union of files per department
+  const mergeCatalogs = (a: Catalog, b: Catalog): Catalog => {
+    const result: Catalog = {};
+    for (const dept of DEPARTMENTS) {
+      const set = new Set([...(a[dept] || []), ...(b[dept] || [])]);
+      result[dept] = Array.from(set);
+    }
+    return result;
+  };
+
+  // Fetch live catalog from GitHub API (uses admin token = 5000 req/hr)
   const fetchLiveCatalog = async (authToken?: string) => {
     const effectiveToken = authToken || token;
     const effectiveOwner = owner || REPO_OWNER;
     const effectiveRepo = repo || REPO_NAME;
-    const newCatalog = await fetchFullCatalogFromAPI(effectiveOwner, effectiveRepo, DEPARTMENTS, effectiveToken);
-    setCatalog(newCatalog);
+    const apiCatalog = await fetchFullCatalogFromAPI(effectiveOwner, effectiveRepo, DEPARTMENTS, effectiveToken);
+    const localCatalog = loadCatalogLocally();
+    const merged = mergeCatalogs(localCatalog || {}, apiCatalog);
+    setCatalog(merged);
+    saveCatalogLocally(merged);
   };
 
   const handleLogin = () => {
@@ -97,7 +133,6 @@ export function Admin() {
       const reader = new FileReader();
       reader.onload = () => {
         const result = reader.result as string;
-        // Remove the data URL prefix (e.g. "data:application/pdf;base64,")
         const base64 = result.split(',')[1];
         resolve(base64);
       };
@@ -118,10 +153,8 @@ export function Admin() {
     setGeneratedIds([]);
 
     try {
-      // 1. Generate N Student IDs mapped precisely to this specific paper
       const newIds = generateUniqueIDs(studentCount, dept.split('-')[0].substring(0, 3));
       
-      // 2. Prepare content with type marker
       let payloadContent: string;
       if (contentType === 'pdf' && pdfFile) {
         const base64Data = await readFileAsBase64(pdfFile);
@@ -130,13 +163,11 @@ export function Admin() {
         payloadContent = `MD:${content}`;
       }
 
-      // 3. Mathematically bind the IDs into an encrypted Keyring
       const payloadString = await encryptWithKeyring(newIds, payloadContent);
       
       const safeFilename = filename.toLowerCase().replace(/[^a-z0-9-]/g, '-');
       const targetPath = `${dept}/${safeFilename}.enc`;
 
-      // 4. Directly Commit the Keyring File via the Admin Git Account
       await uploadToGitHub({
         repoOwner: owner,
         repoName: repo,
@@ -153,16 +184,17 @@ export function Admin() {
       setFilename('');
       if (fileInputRef.current) fileInputRef.current.value = '';
       
-      // Update local view AND sync catalog.json to the repo
+      // Update local view AND persist to localStorage for cross-tab sync
       const updatedCatalog = { ...catalog };
       const dArr = updatedCatalog[dept] || [];
       updatedCatalog[dept] = [...dArr, `${safeFilename}.enc`];
       setCatalog(updatedCatalog);
+      saveCatalogLocally(updatedCatalog);
 
-      // Commit updated catalog.json so students immediately see the new exam
+      // Also commit catalog.json to the repo (for deployed site / other devices)
       try {
         await updateCatalogInRepo({ repoOwner: owner, repoName: repo, catalog: updatedCatalog, token });
-      } catch { /* non-critical — the exam was already uploaded */ }
+      } catch { /* non-critical */ }
 
     } catch (err: unknown) {
       console.error(err);
@@ -194,11 +226,12 @@ export function Admin() {
         [targetDept]: (catalog[targetDept] || []).filter(f => f !== targetFile)
       };
       setCatalog(updatedCatalog);
+      saveCatalogLocally(updatedCatalog);
 
-      // Commit updated catalog.json so students immediately see the removal
+      // Also commit catalog.json to the repo
       try {
         await updateCatalogInRepo({ repoOwner: owner, repoName: repo, catalog: updatedCatalog, token });
-      } catch { /* non-critical — the exam was already deleted */ }
+      } catch { /* non-critical */ }
 
     } catch(err: unknown) {
       console.error(err);
@@ -335,7 +368,6 @@ export function Admin() {
           </div>
         )}
 
-        {/* Display Generated Keys so the Team Leader can copy them */}
         {generatedIds.length > 0 && (
           <div className="mb-6 bg-[#010409] border border-accent/20 p-4 rounded h-40 overflow-y-auto">
              <div className="text-white text-xs mb-2">Generated Cryptographic Keys for {filename || 'exam'}:</div>
