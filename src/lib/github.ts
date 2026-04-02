@@ -20,7 +20,9 @@ export async function uploadToGitHub(params: GitHubUploadParams) {
       const data = await res.json();
       sha = data.sha;
     }
-  } catch (err) {}
+  } catch {
+    // File doesn't exist yet, which is fine — we'll create it
+  }
 
   const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`, {
     method: 'PUT',
@@ -87,3 +89,121 @@ export async function deleteFromGitHub(params: {
 
   return deleteRes.json();
 }
+
+/**
+ * Updates the catalog.json file in the repo so it always reflects the current state.
+ * This is called after every admin upload/delete action.
+ * The student page reads this via raw.githubusercontent.com (no rate limits).
+ */
+export async function updateCatalogInRepo(params: {
+  repoOwner: string;
+  repoName: string;
+  catalog: Record<string, string[]>;
+  token: string;
+}) {
+  const { repoOwner, repoName, catalog, token } = params;
+  const catalogContent = JSON.stringify(catalog, null, 2);
+
+  await uploadToGitHub({
+    repoOwner,
+    repoName,
+    path: 'public/catalog.json',
+    content: catalogContent,
+    message: 'System: Auto-update catalog.json',
+    token
+  });
+}
+
+/**
+ * Fetches the full exam catalog using a SINGLE GitHub API call (Git Trees API).
+ * This returns the entire repo file tree, from which we filter .enc files.
+ * Uses 1 API request instead of 8 (one per department), staying well within
+ * the unauthenticated rate limit of 60 requests/hour.
+ */
+export async function fetchFullCatalogFromAPI(
+  repoOwner: string,
+  repoName: string,
+  departments: string[],
+  token?: string
+): Promise<Record<string, string[]>> {
+  const headers: Record<string, string> = {
+    'Accept': 'application/vnd.github.v3+json'
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const catalog: Record<string, string[]> = {};
+  for (const d of departments) {
+    catalog[d] = [];
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${repoOwner}/${repoName}/git/trees/master?recursive=1`,
+      { headers, cache: 'no-store' }
+    );
+
+    if (!res.ok) return catalog;
+
+    const data: { tree: Array<{ path: string; type: string }> } = await res.json();
+
+    for (const item of data.tree) {
+      if (item.type !== 'blob' || !item.path.endsWith('.enc')) continue;
+
+      // item.path looks like "networking/test.enc"
+      const parts = item.path.split('/');
+      if (parts.length === 2) {
+        const dept = parts[0];
+        const filename = parts[1];
+        if (catalog[dept] !== undefined) {
+          catalog[dept].push(filename);
+        }
+      }
+    }
+  } catch {
+    // Network error — return whatever we have (empty catalog)
+  }
+
+  return catalog;
+}
+
+/**
+ * Lists .enc files in a department folder from the GitHub repo.
+ * Works without authentication for public repos.
+ * If a token is provided, it will be used (higher rate limits).
+ */
+export async function listEncFiles(
+  repoOwner: string,
+  repoName: string,
+  dept: string,
+  token?: string
+): Promise<string[]> {
+  const headers: Record<string, string> = {
+    'Accept': 'application/vnd.github.v3+json'
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${dept}`,
+      { headers, cache: 'no-store' }
+    );
+
+    if (!res.ok) {
+      // 404 means the folder doesn't exist yet — no exams for this dept
+      if (res.status === 404) return [];
+      return [];
+    }
+
+    const items: Array<{ name: string; type: string }> = await res.json();
+    return items
+      .filter(item => item.type === 'file' && item.name.endsWith('.enc'))
+      .map(item => item.name);
+  } catch {
+    return [];
+  }
+}
+

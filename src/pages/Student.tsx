@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
 import { decryptWithKeyring } from '../lib/crypto';
+import { fetchFullCatalogFromAPI } from '../lib/github';
 import { marked } from 'marked';
-import { Lock, FileText, ChevronRight } from 'lucide-react';
+import { Lock, FileText, ChevronRight, RefreshCw } from 'lucide-react';
 
 const DEPARTMENTS = [
   'networking', 'devops', 'python-full-stack', 'mern-stack', 'flutter', 'cyber-security', 'digital-marketing', 'data-science'
 ];
+
+const REPO_OWNER = 'MatteBlack003';
+const REPO_NAME = 'SynnefoVault';
+
+// The deployed GitHub Pages URL where catalog.json is served (no rate limits)
+const PAGES_BASE_URL = `https://${REPO_OWNER.toLowerCase()}.github.io/${REPO_NAME}/`;
 
 interface Catalog {
   [dept: string]: string[];
@@ -14,26 +21,79 @@ interface Catalog {
 export function Student() {
   const [catalog, setCatalog] = useState<Catalog>({});
   const [activeDept, setActiveDept] = useState('networking');
+  const [catalogLoading, setCatalogLoading] = useState(true);
   
   const [activeFile, setActiveFile] = useState<{ path: string, name: string } | null>(null);
   const [examCode, setExamCode] = useState(''); // This acts as the Student ID
   const [decryptedHtml, setDecryptedHtml] = useState<string | null>(null);
+  const [decryptedPdfUrl, setDecryptedPdfUrl] = useState<string | null>(null);
   
   const [status, setStatus] = useState({ type: '', msg: '' });
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Catalog fetch strategy:
+   * 1. PRIMARY: Fetch catalog.json from raw.githubusercontent.com
+   *    (always up-to-date since admin commits it after every action, no rate limits)
+   * 2. FALLBACK: Load local catalog.json (for dev environments)
+   * 3. ENHANCEMENT: Single Git Trees API call to catch any edge cases
+   */
+  const fetchCatalog = async () => {
+    setCatalogLoading(true);
+    let catalogLoaded = false;
+
+    // Step 1: Fetch catalog.json directly from the repo (always fresh, no rate limits)
+    try {
+      const rawCatalogUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/master/public/catalog.json`;
+      const res = await fetch(rawCatalogUrl, { cache: 'no-store' });
+      if (res.ok) {
+        const data: Catalog = await res.json();
+        setCatalog(data);
+        catalogLoaded = true;
+      }
+    } catch {
+      // raw.githubusercontent.com failed, try fallback
+    }
+
+    // Step 2: Fallback to local/deployed catalog.json (for dev or if raw fails)
+    if (!catalogLoaded) {
+      try {
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const catalogUrl = isLocal 
+          ? (import.meta.env.BASE_URL + 'catalog.json')
+          : (PAGES_BASE_URL + 'catalog.json');
+
+        const res = await fetch(catalogUrl, { cache: 'no-store' });
+        if (res.ok) {
+          const data: Catalog = await res.json();
+          setCatalog(data);
+          catalogLoaded = true;
+        }
+      } catch {
+        // Local catalog not available either
+      }
+    }
+
+    // Step 3: If nothing worked, try the Git Trees API as last resort (1 request)
+    if (!catalogLoaded) {
+      try {
+        const liveCatalog = await fetchFullCatalogFromAPI(REPO_OWNER, REPO_NAME, DEPARTMENTS);
+        setCatalog(liveCatalog);
+      } catch {
+        console.warn('All catalog sources failed.');
+      }
+    }
+
+    setCatalogLoading(false);
+  };
+
   useEffect(() => {
-    fetch(import.meta.env.BASE_URL + 'catalog.json')
-      .then(res => res.json())
-      .then(data => setCatalog(data))
-      .catch((err) => {
-        console.warn('catalog.json not found. Running empty state.', err);
-      });
+    fetchCatalog();
   }, []);
 
   // DRM & Anti-Cheating Engine Protection Layer
   useEffect(() => {
-    if (decryptedHtml && activeFile && examCode) {
+    if ((decryptedHtml || decryptedPdfUrl) && activeFile && examCode) {
       const handleContextMenu = (e: MouseEvent) => {
         e.preventDefault();
         alert("SECURITY ENGINE: RIGHT-CLICK DISABLED");
@@ -58,7 +118,7 @@ export function Student() {
         document.body.classList.remove('select-none');
       };
     }
-  }, [decryptedHtml, activeFile, examCode]);
+  }, [decryptedHtml, decryptedPdfUrl, activeFile, examCode]);
 
   const handleDecrypt = async () => {
     if (!activeFile || !examCode) return;
@@ -67,16 +127,38 @@ export function Student() {
     setStatus({ type: '', msg: '' });
 
     try {
-      const res = await fetch(import.meta.env.BASE_URL + activeFile.path);
+      // Fetch the .enc file directly from GitHub raw content
+      const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/master/${activeFile.path}`;
+      const res = await fetch(rawUrl, { cache: 'no-store' });
       if(!res.ok) throw new Error("Could not download the encrypted exam file from the server.");
       
       const payloadString = await res.text();
       
       // Decrypt using the Cryptographic Keyring via Student ID
-      const markdown = await decryptWithKeyring(examCode, payloadString);
-      
-      const htmlContent = marked.parse(markdown) as string;
-      setDecryptedHtml(htmlContent);
+      const decryptedContent = await decryptWithKeyring(examCode, payloadString);
+
+      // Detect content type from the marker prefix
+      if (decryptedContent.startsWith('PDF:')) {
+        const base64Data = decryptedContent.substring(4);
+        // Convert base64 to blob URL for rendering
+        const binaryString = atob(base64Data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+        const blobUrl = URL.createObjectURL(blob);
+        setDecryptedPdfUrl(blobUrl);
+        setDecryptedHtml(null);
+      } else {
+        // Strip the MD: prefix if present, or treat as raw markdown for backwards compat
+        const markdown = decryptedContent.startsWith('MD:') 
+          ? decryptedContent.substring(3) 
+          : decryptedContent;
+        const htmlContent = marked.parse(markdown) as string;
+        setDecryptedHtml(htmlContent);
+        setDecryptedPdfUrl(null);
+      }
       
     } catch (err) {
       console.error(err);
@@ -87,12 +169,53 @@ export function Student() {
   };
 
   const closeViewer = () => {
+    // Revoke any blob URLs to prevent memory leaks
+    if (decryptedPdfUrl) {
+      URL.revokeObjectURL(decryptedPdfUrl);
+    }
     setDecryptedHtml(null);
+    setDecryptedPdfUrl(null);
     setActiveFile(null);
     setExamCode('');
     setStatus({ type: '', msg: '' });
   };
 
+  // PDF Viewer
+  if (decryptedPdfUrl && activeFile) {
+    return (
+      <div className="flex-1 w-full h-full absolute inset-0 bg-background z-50 overflow-hidden relative">
+        
+        {/* Dynamic Anti-Cheating Watermark Generator */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-[100] grid grid-cols-4 grid-rows-5 items-center justify-items-center overflow-hidden">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div key={i} className="text-4xl font-display text-white transform -rotate-45 whitespace-nowrap">
+              {examCode.toUpperCase()}
+            </div>
+          ))}
+        </div>
+
+        <div className="w-full h-full flex flex-col">
+          <div className="flex justify-between items-center px-8 py-4 bg-surface border-b border-white/10 relative z-[101]">
+            <div className="flex items-center gap-4">
+              <span className="font-display text-accent tracking-widest uppercase">{activeFile.name}</span>
+              <span className="text-xs font-mono text-[#f85149]">DRM PROTOCOLS ACTIVE</span>
+            </div>
+            <button onClick={closeViewer} className="text-muted hover:text-white font-mono border border-white/20 px-4 py-2 rounded">
+              END SESSION
+            </button>
+          </div>
+          <iframe
+            src={decryptedPdfUrl}
+            className="flex-1 w-full bg-white"
+            title="Exam PDF"
+            sandbox="allow-same-origin"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Markdown Viewer
   if (decryptedHtml && activeFile) {
     return (
       <div className="flex-1 w-full h-full absolute inset-0 bg-background z-50 overflow-hidden relative">
@@ -129,7 +252,12 @@ export function Student() {
   return (
     <div className="flex-1 grid grid-cols-[300px_1fr] relative z-10 w-full">
       <div className="border-r border-white/10 bg-surface/50 backdrop-blur-xl p-6 overflow-y-auto flex flex-col gap-2">
-        <div className="font-mono text-muted text-xs tracking-[0.2em] mb-4 uppercase">Directories</div>
+        <div className="font-mono text-muted text-xs tracking-[0.2em] mb-4 uppercase flex items-center justify-between">
+          <span>Directories</span>
+          <button onClick={fetchCatalog} className="hover:text-accent transition-colors" title="Refresh exam list">
+            <RefreshCw className={`w-3.5 h-3.5 ${catalogLoading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
         {DEPARTMENTS.map(d => (
           <button
             key={d}
@@ -141,7 +269,14 @@ export function Student() {
             }`}
           >
             <span className="capitalize">{d.replace('-', ' ')}</span>
-            <ChevronRight className={`w-4 h-4 transition-transform ${activeDept === d ? 'text-accent opacity-100' : 'opacity-0 group-hover:opacity-50'}`} />
+            <div className="flex items-center gap-2">
+              {(catalog[d]?.length || 0) > 0 && (
+                <span className="text-xs bg-accent/20 text-accent px-1.5 py-0.5 rounded font-mono">
+                  {catalog[d].length}
+                </span>
+              )}
+              <ChevronRight className={`w-4 h-4 transition-transform ${activeDept === d ? 'text-accent opacity-100' : 'opacity-0 group-hover:opacity-50'}`} />
+            </div>
           </button>
         ))}
       </div>
@@ -155,29 +290,36 @@ export function Student() {
             {activeDept.replace('-', ' ')} Exams
           </h2>
 
-          <div className="grid grid-cols-2 gap-4">
-            {exams.length === 0 ? (
-              <div className="col-span-2 p-8 border border-white/5 bg-white/5 rounded-xl text-center text-muted font-mono text-sm empty-state">
-                No encrypted exams currently live on the node.
-              </div>
-            ) : (
-              exams.map(file => (
-                <button
-                  key={file}
-                  onClick={() => setActiveFile({ path: `${activeDept}/${file}`, name: file.replace('.enc', '') })}
-                  className="p-6 bg-surface border border-white/10 hover:border-[#f85149]/50 rounded-xl text-left transition-all hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(248,81,73,0.1)] group flex items-start gap-4"
-                >
-                  <FileText className="w-6 h-6 text-muted group-hover:text-[#f85149] flex-shrink-0" />
-                  <div>
-                    <div className="text-white font-mono text-sm mb-1">{file.replace('.enc', '')}</div>
-                    <div className="text-[#f85149]/60 text-xs flex items-center gap-1 font-mono uppercase tracking-wider">
-                      <Lock className="w-3 h-3" /> Keyring Protected
+          {catalogLoading ? (
+            <div className="col-span-2 p-8 border border-white/5 bg-white/5 rounded-xl text-center text-muted font-mono text-sm">
+              <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-3 text-accent" />
+              Scanning node for live exams...
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {exams.length === 0 ? (
+                <div className="col-span-2 p-8 border border-white/5 bg-white/5 rounded-xl text-center text-muted font-mono text-sm empty-state">
+                  No encrypted exams currently live on the node.
+                </div>
+              ) : (
+                exams.map(file => (
+                  <button
+                    key={file}
+                    onClick={() => setActiveFile({ path: `${activeDept}/${file}`, name: file.replace('.enc', '') })}
+                    className="p-6 bg-surface border border-white/10 hover:border-[#f85149]/50 rounded-xl text-left transition-all hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(248,81,73,0.1)] group flex items-start gap-4"
+                  >
+                    <FileText className="w-6 h-6 text-muted group-hover:text-[#f85149] flex-shrink-0" />
+                    <div>
+                      <div className="text-white font-mono text-sm mb-1">{file.replace('.enc', '')}</div>
+                      <div className="text-[#f85149]/60 text-xs flex items-center gap-1 font-mono uppercase tracking-wider">
+                        <Lock className="w-3 h-3" /> Keyring Protected
+                      </div>
                     </div>
-                  </div>
-                </button>
-              ))
-            )}
-          </div>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
 

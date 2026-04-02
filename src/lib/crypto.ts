@@ -160,7 +160,7 @@ export async function decryptWithKeyring(studentId: string, encryptedJsonString:
         studentKey,
         wrappedMasterBytes
       );
-  } catch(e) {
+  } catch {
       throw new Error("ACCESS_DENIED"); // In case of data tampering
   }
   
