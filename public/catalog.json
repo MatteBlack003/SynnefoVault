@@ -1,6 +1,7 @@
 {
   "networking": [
-    "test.enc"
+    "test.enc",
+    "test-2.enc"
   ],
   "devops": [
     "test.enc"
