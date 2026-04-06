@@ -1,7 +1,11 @@
 {
-  "networking": ["test.enc"],
-  "devops": ["test2.enc"],
-  "python-full-stack": ["p-test.enc"],
+  "networking": [
+    "test.enc"
+  ],
+  "devops": [
+    "test.enc"
+  ],
+  "python-full-stack": [],
   "mern-stack": [],
   "flutter": [],
   "cyber-security": [],
