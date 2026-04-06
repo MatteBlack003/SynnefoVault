@@ -140,7 +140,7 @@ export async function fetchFullCatalogFromAPI(
 
   try {
     const res = await fetch(
-      `https://api.github.com/repos/${repoOwner}/${repoName}/git/trees/master?recursive=1`,
+      `https://api.github.com/repos/${repoOwner}/${repoName}/git/trees/main?recursive=1`,
       { headers, cache: 'no-store' }
     );
 

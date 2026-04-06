@@ -61,7 +61,7 @@ export function Student() {
 
     // Step 2: Fetch catalog.json from raw.githubusercontent.com
     try {
-      const rawCatalogUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/master/public/catalog.json`;
+      const rawCatalogUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/public/catalog.json`;
       const res = await fetch(rawCatalogUrl, { cache: 'no-store' });
       if (res.ok) {
         const data: Catalog = await res.json();
@@ -143,7 +143,7 @@ export function Student() {
 
     try {
       // Fetch the .enc file directly from GitHub raw content
-      const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/master/${activeFile.path}`;
+      const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${activeFile.path}`;
       const res = await fetch(rawUrl, { cache: 'no-store' });
       if(!res.ok) throw new Error("Could not download the encrypted exam file from the server.");
       
@@ -177,7 +177,12 @@ export function Student() {
       
     } catch (err) {
       console.error(err);
-      setStatus({ type: 'error', msg: 'ACCESS DENIED: Mathematical Keyring Rejection / Invalid Cryptographic Signature.' });
+      const errMsg = err instanceof Error ? err.message : '';
+      if (errMsg.includes('Could not download')) {
+        setStatus({ type: 'error', msg: 'ERROR: Could not download the exam file. It may have been removed or the exam has ended.' });
+      } else {
+        setStatus({ type: 'error', msg: 'ACCESS DENIED: Invalid Student ID — Cryptographic Keyring Rejection.' });
+      }
     } finally {
       setLoading(false);
     }

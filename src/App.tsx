@@ -1,11 +1,11 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { ParticleBackground } from './components/ParticleBackground';
 import { Admin } from './pages/Admin';
 import { Student } from './pages/Student';
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       {/* Persistent Animated Background */}
       <ParticleBackground />
       
@@ -33,7 +33,7 @@ function App() {
           </Routes>
         </main>
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
