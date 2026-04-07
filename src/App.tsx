@@ -26,7 +26,7 @@ function App() {
         </header>
 
         {/* Page Content Routes */}
-        <main className="flex-1 flex overflow-hidden">
+        <main className="flex-1 flex">
           <Routes>
             <Route path="/" element={<Student />} />
             <Route path="/admin" element={<Admin />} />

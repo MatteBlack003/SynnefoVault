@@ -83,10 +83,16 @@ export async function deleteFromGitHub(params: {
   });
 
   if (!deleteRes.ok) {
-    const errData = await deleteRes.json();
-    throw new Error(errData.message || 'Failed to physically delete exam file.');
+    let errMsg = 'Failed to physically delete exam file.';
+    try {
+      const errData = await deleteRes.json();
+      errMsg = errData.message || errMsg;
+    } catch { /* response may not have JSON body */ }
+    throw new Error(errMsg);
   }
 
+  // GitHub DELETE can return 200 (with JSON body) or 204 (no content)
+  if (deleteRes.status === 204) return {};
   return deleteRes.json();
 }
 

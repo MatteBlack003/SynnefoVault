@@ -203,7 +203,7 @@ export function Student() {
   // PDF Viewer
   if (decryptedPdfUrl && activeFile) {
     return (
-      <div className="flex-1 w-full h-full absolute inset-0 bg-background z-50 overflow-hidden relative">
+      <div className="flex-1 w-full h-full absolute inset-0 bg-background z-50 overflow-hidden">
         
         {/* Dynamic Anti-Cheating Watermark Generator */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-[100] grid grid-cols-4 grid-rows-5 items-center justify-items-center overflow-hidden">
@@ -228,7 +228,6 @@ export function Student() {
             src={decryptedPdfUrl}
             className="flex-1 w-full bg-white"
             title="Exam PDF"
-            sandbox="allow-same-origin"
           />
         </div>
       </div>
@@ -238,7 +237,7 @@ export function Student() {
   // Markdown Viewer
   if (decryptedHtml && activeFile) {
     return (
-      <div className="flex-1 w-full h-full absolute inset-0 bg-background z-50 overflow-hidden relative">
+      <div className="flex-1 w-full h-full absolute inset-0 bg-background z-50 overflow-y-auto">
         
         {/* Dynamic Anti-Cheating Watermark Generator */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-[100] grid grid-cols-4 grid-rows-5 items-center justify-items-center overflow-hidden">
