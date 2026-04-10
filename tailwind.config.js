@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       fontFamily: {
@@ -11,22 +8,28 @@ export default {
         sans: ['"Space Mono"', 'Courier New', 'monospace'],
       },
       colors: {
-        bg:       '#0d0f14',
-        surface:  '#141720',
-        surface2: '#1c2030',
-        border:   '#262d3d',
-        border2:  '#334155',
-        ink:      '#cbd5e1',  // main text
-        muted:    '#64748b',  // secondary text
-        dim:      '#475569',  // dim text
-        accent:   '#6366f1',  // indigo
-        success:  '#22c55e',
-        danger:   '#ef4444',
+        bg:       '#09090e',
+        surface:  '#111318',
+        surface2: '#181c24',
+        surface3: '#1e2330',
+        border:   '#232836',
+        border2:  '#2e3548',
+        border3:  '#3d4a63',
+        ink:      '#e8ecf0',
+        muted:    '#8892a4',
+        dim:      '#4a5568',
+        accent:   '#4a7fc1',
+        accent2:  '#6fa3e0',
+        success:  '#34d399',
+        danger:   '#f87171',
       },
       boxShadow: {
-        'accent-glow': '0 0 24px rgba(99,102,241,0.3)',
-        'danger-glow': '0 0 24px rgba(239,68,68,0.25)',
-        'panel':       '0 4px 24px rgba(0,0,0,0.4)',
+        'accent-glow': '0 0 28px rgba(74,127,193,0.3)',
+        'panel':       '0 4px 32px rgba(0,0,0,0.5)',
+        'viewport':    'inset 0 0 80px rgba(74,127,193,0.07)',
+      },
+      borderRadius: {
+        'pill': '9999px',
       },
     },
   },
