@@ -7,18 +7,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "#0d1117",
-        foreground: "#f0f6fc",
-        muted: "#8b949e",
-        surface: "rgba(22, 27, 34, 0.7)",
-        accent: "#58a6ff"
+        background: '#0a0a0a',
+        surface: '#121212',
+        accent: '#e5e5e5',
+        muted: '#666666',
+        danger: '#ff453a',
       },
       fontFamily: {
+        sans: ['Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
-        display: ['Monument Extended', 'system-ui', 'sans-serif'],
-        ui: ['Outfit', 'system-ui', 'sans-serif']
+      },
+      boxShadow: {
+        'soft-glow': '0 4px 40px rgba(0, 0, 0, 0.4)',
+        'minimal': '0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1)',
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 }

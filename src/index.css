@@ -4,21 +4,42 @@
 
 @layer base {
   body {
-    @apply bg-background text-foreground font-ui overflow-hidden m-0 p-0;
+    @apply bg-background text-[#e5e5e5] font-sans antialiased selection:bg-[#333333] selection:text-white overflow-x-hidden;
   }
 }
 
-/* Scrollbar customization */
+@layer utilities {
+  .minimal-panel {
+    @apply bg-[#111111] border border-[#2a2a2a] shadow-minimal rounded-2xl;
+  }
+}
+
+/* Super smooth scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
+
 ::-webkit-scrollbar-track {
-  background: rgba(13, 17, 23, 0.5); 
+  background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: rgba(139, 148, 158, 0.3); 
-  border-radius: 4px;
+  background: #333333;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(88, 166, 255, 0.5); 
+  background: #555555; 
+}
+
+/* Minimal Markdown Overrides */
+.prose {
+  @apply text-[#cccccc];
+}
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  @apply text-[#f5f5f5] font-sans font-semibold tracking-tight;
+}
+.prose a {
+  @apply text-[#e5e5e5] underline decoration-[#333333] underline-offset-4 transition-colors hover:decoration-[#e5e5e5];
 }

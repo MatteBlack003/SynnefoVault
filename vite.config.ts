@@ -5,4 +5,18 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/SynnefoVault/',
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('framer-motion')) return 'framer';
+            if (id.includes('react')) return 'vendor';
+            if (id.includes('marked')) return 'markdown';
+            return 'modules';
+          }
+        }
+      }
+    }
+  }
 })

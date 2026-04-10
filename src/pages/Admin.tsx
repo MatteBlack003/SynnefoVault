@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { encryptWithKeyring } from '../lib/crypto';
 import { uploadToGitHub, deleteFromGitHub, fetchFullCatalogFromAPI, updateCatalogInRepo } from '../lib/github';
 
@@ -247,22 +248,23 @@ export function Admin() {
     }
   };
 
-  const inputClass = "w-full bg-[#010409] border border-white/20 text-white rounded p-3 mb-4 focus:outline-none focus:border-accent font-mono";
-  const labelClass = "block text-muted text-sm font-bold mb-2 uppercase tracking-widest";
+  const inputClass = "w-full bg-[#0a0a0a] border border-[#2a2a2a] text-[#e5e5e5] rounded-xl p-4 mb-5 focus:outline-none focus:border-[#666] focus:ring-1 focus:ring-[#666] transition-all duration-200 font-sans text-sm";
+  const labelClass = "block text-muted text-xs font-semibold mb-2";
 
   // LOGIN GATEWAY
   if (!isLoggedIn) {
     return (
-      <div className="flex-1 overflow-y-auto p-12 relative z-10 flex flex-col items-center justify-center font-mono">
-        <button 
+      <div className="flex-1 overflow-y-auto p-12 relative z-10 flex flex-col items-center justify-center font-sans bg-background">
+        <motion.button 
+          initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}
           onClick={() => navigate('/')} 
-          className="mb-8 text-muted hover:text-white border border-white/10 px-4 py-2 rounded text-sm transition-colors flex items-center gap-2"
+          className="mb-8 text-muted hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 hover:bg-[#1a1a1a]"
         >
           &larr; Return to Portal
-        </button>
-        <div className="w-full max-w-md bg-surface backdrop-blur-3xl border border-white/10 rounded-xl p-10 shadow-2xl text-center">
-          <h2 className="font-display text-accent text-xl tracking-widest mb-6">FACULTY AUTHORIZATION GATEWAY</h2>
-          <div className="text-left">
+        </motion.button>
+        <motion.div initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} className="w-full max-w-[420px] minimal-panel p-10 flex flex-col gap-2 relative">
+          <h2 className="font-sans font-semibold text-[#e5e5e5] text-2xl tracking-tight mb-8 text-center">Faculty Login</h2>
+          <div className="text-left relative z-10 flex flex-col gap-1">
             <label className={labelClass}>Master Team Lead Key</label>
             <input type="password" value={token} onChange={e => setToken(e.target.value)} className={inputClass} placeholder="ghp_xxxxxxxxxxxx" />
             
@@ -272,40 +274,40 @@ export function Admin() {
             <label className={labelClass}>Repository Name</label>
             <input type="text" value={repo} onChange={e => setRepo(e.target.value)} className={inputClass} placeholder="SynnefoVault" />
             
-            <button onClick={handleLogin} className="w-full bg-[#238636] text-white p-3 rounded font-bold hover:bg-[#2ea043] mt-4">AUTHORIZE ACCESS</button>
+            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleLogin} className="w-full bg-[#e5e5e5] text-black p-4 rounded-xl font-semibold hover:bg-white mt-4 shadow-sm transition-all duration-200">Sign In</motion.button>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   // SYSTEM DASHBOARD
   return (
-    <div className="flex-1 overflow-y-auto p-8 relative z-10 font-mono flex gap-8">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-[1] overflow-y-auto p-12 relative z-10 font-sans flex gap-10 bg-background max-w-[1400px] w-full mx-auto">
       {/* Upload Panel */}
-      <div className="flex-[2] bg-surface backdrop-blur-3xl border border-white/10 rounded-xl p-8 shadow-2xl h-fit">
-        <div className="flex justify-between items-center border-b border-white/10 pb-4 mb-6">
+      <div className="flex-[2] minimal-panel p-10 h-fit">
+        <div className="flex justify-between items-center border-b border-[#2a2a2a] pb-6 mb-8">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => navigate('/')} 
-              className="text-muted hover:text-white text-lg font-bold border border-white/10 px-3 py-1 rounded transition-colors"
+              className="text-muted hover:text-white text-lg font-medium border border-[#2a2a2a] px-3 py-1 rounded-lg transition-colors hover:bg-[#1a1a1a]"
               title="Return to Portal"
             >
               &larr;
             </button>
-            <h2 className="font-display text-xl text-accent">EXAM KEYRING GENERATOR</h2>
+            <h2 className="font-sans font-semibold text-2xl tracking-tight text-[#e5e5e5]">Keyring Generator</h2>
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => fetchLiveCatalog()} className="text-xs border border-accent text-accent px-3 py-1 rounded hover:bg-accent/10">REFRESH</button>
-            <button onClick={handleLogout} className="text-xs border border-[#f85149] text-[#f85149] px-3 py-1 rounded hover:bg-[#f85149]/10">DISCONNECT</button>
+          <div className="flex gap-3">
+            <button onClick={() => fetchLiveCatalog()} className="text-xs font-medium border border-[#2a2a2a] text-[#e5e5e5] px-4 py-2 rounded-lg hover:bg-[#1a1a1a] transition-colors">Refresh</button>
+            <button onClick={handleLogout} className="text-xs font-medium border border-[#ff453a]/30 text-[#ff453a] px-4 py-2 rounded-lg hover:bg-[#ff453a]/10 transition-colors">Disconnect</button>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6 mb-4">
+        <div className="grid grid-cols-3 gap-6 mb-6">
           <div>
             <label className={labelClass}>Department</label>
             <select value={dept} onChange={e => setDept(e.target.value)} className={inputClass}>
-              {DEPARTMENTS.map(d => <option key={d} value={d}>{d.toUpperCase()}</option>)}
+              {DEPARTMENTS.map(d => <option key={d} value={d}>{d.replace('-', ' ')}</option>)}
             </select>
           </div>
           <div>
@@ -313,34 +315,34 @@ export function Admin() {
             <input type="text" value={filename} onChange={e => setFilename(e.target.value)} className={inputClass} placeholder="e.g. mock-04" />
           </div>
           <div>
-            <label className={labelClass}>Class Size (IDs to Generate)</label>
+            <label className={labelClass}>Class Size</label>
             <input type="number" min="1" max="200" value={studentCount} onChange={e => setStudentCount(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className={inputClass} placeholder="e.g. 3" />
           </div>
         </div>
 
         {/* Content Type Toggle */}
-        <div className="mb-4">
+        <div className="mb-6">
           <label className={labelClass}>Content Type</label>
           <div className="flex gap-2">
             <button
               onClick={() => { setContentType('markdown'); setPdfFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-              className={`flex-1 p-3 rounded font-bold text-sm border transition-all ${
+              className={`flex-1 p-3 rounded-xl font-medium text-sm border transition-all ${
                 contentType === 'markdown'
-                  ? 'bg-accent/20 border-accent text-accent'
-                  : 'border-white/20 text-muted hover:border-white/40'
+                  ? 'bg-white text-black border-white'
+                  : 'border-[#2a2a2a] text-muted hover:border-[#444] hover:bg-[#1a1a1a]'
               }`}
             >
-              ✍️ MARKDOWN TEXT
+              Markdown Text
             </button>
             <button
               onClick={() => { setContentType('pdf'); setContent(''); }}
-              className={`flex-1 p-3 rounded font-bold text-sm border transition-all ${
+              className={`flex-1 p-3 rounded-xl font-medium text-sm border transition-all ${
                 contentType === 'pdf'
-                  ? 'bg-accent/20 border-accent text-accent'
-                  : 'border-white/20 text-muted hover:border-white/40'
+                  ? 'bg-white text-black border-white'
+                  : 'border-[#2a2a2a] text-muted hover:border-[#444] hover:bg-[#1a1a1a]'
               }`}
             >
-              📄 PDF UPLOAD
+              PDF Upload
             </button>
           </div>
         </div>
@@ -349,12 +351,12 @@ export function Admin() {
         {contentType === 'markdown' ? (
           <div>
             <label className={labelClass}>Question Paper Markdown</label>
-            <textarea value={content} onChange={e => setContent(e.target.value)} className={`${inputClass} h-64 font-mono text-sm leading-relaxed`} placeholder="# Question 1..." />
+            <textarea value={content} onChange={e => setContent(e.target.value)} className={`${inputClass} min-h-[240px] font-mono text-[13px] leading-relaxed resize-y`} placeholder="# Question 1..." />
           </div>
         ) : (
           <div>
             <label className={labelClass}>Upload Question Paper (PDF)</label>
-            <div className={`${inputClass} h-40 flex flex-col items-center justify-center border-dashed cursor-pointer hover:border-accent/50 transition-colors`}
+            <div className={`${inputClass} min-h-[200px] flex flex-col items-center justify-center border-dashed border-[#444] cursor-pointer hover:border-[#666] hover:bg-[#151515] transition-colors`}
               onClick={() => fileInputRef.current?.click()}
             >
               <input
@@ -366,16 +368,16 @@ export function Admin() {
               />
               {pdfFile ? (
                 <div className="text-center">
-                  <div className="text-accent text-lg mb-2">📄</div>
-                  <div className="text-accent text-sm font-bold">{pdfFile.name}</div>
+                  <div className="text-[#e5e5e5] text-lg mb-2">📄</div>
+                  <div className="text-[#e5e5e5] text-sm font-medium">{pdfFile.name}</div>
                   <div className="text-muted text-xs mt-1">{(pdfFile.size / 1024).toFixed(1)} KB</div>
-                  <div className="text-muted text-xs mt-2">Click to change file</div>
+                  <div className="text-muted text-xs mt-3 bg-[#1a1a1a] px-3 py-1 rounded-full border border-[#2a2a2a]">Click to change file</div>
                 </div>
               ) : (
                 <div className="text-center">
-                  <div className="text-muted text-3xl mb-2">⬆️</div>
-                  <div className="text-muted text-sm">Click to select a PDF file</div>
-                  <div className="text-muted text-xs mt-1">Only .pdf files accepted</div>
+                  <div className="text-muted text-2xl mb-3">⬆️</div>
+                  <div className="text-[#e5e5e5] text-sm font-medium">Click to select PDF</div>
+                  <div className="text-muted text-xs mt-1">Maximum generic file size limit applies</div>
                 </div>
               )}
             </div>
@@ -383,79 +385,83 @@ export function Admin() {
         )}
 
         {status.msg && (
-          <div className={`p-4 rounded border mb-6 text-sm ${status.type === 'error' ? 'bg-[#f85149]/10 border-[#f85149] text-[#ff7b72]' : 'bg-[#238636]/10 border-[#238636] text-[#3fb950]'}`}>
+          <div className={`p-4 rounded-xl border mb-6 text-sm font-medium ${status.type === 'error' ? 'bg-[#ff453a]/10 border-[#ff453a]/30 text-[#ff453a]' : 'bg-[#32d74b]/10 border-[#32d74b]/30 text-[#32d74b]'}`}>
             {status.msg}
           </div>
         )}
 
         {generatedIds.length > 0 && (
-          <div className="mb-6 bg-[#010409] border border-accent/20 p-4 rounded h-40 overflow-y-auto">
-             <div className="text-white text-xs mb-2">Generated Cryptographic Keys for {filename || 'exam'}:</div>
-             <div className="grid grid-cols-4 gap-2 text-accent text-xs">
-               {generatedIds.map(id => <div key={id} className="bg-accent/10 px-2 py-1 rounded select-all">{id}</div>)}
+          <div className="mb-6 bg-[#0a0a0a] border border-[#2a2a2a] p-5 rounded-xl h-48 overflow-y-auto">
+             <div className="text-[#e5e5e5] text-sm font-medium mb-3">Generated Cryptographic Keys for: {filename || 'exam'}</div>
+             <div className="grid grid-cols-4 gap-3 text-muted text-xs font-mono">
+               {generatedIds.map(id => <div key={id} className="bg-[#111111] border border-[#2a2a2a] px-3 py-2 rounded-lg select-all text-center">{id}</div>)}
              </div>
           </div>
         )}
 
-        <button onClick={handleCreateExam} disabled={loading} className="w-full bg-accent text-[#0d1117] font-bold tracking-widest p-4 rounded hover:bg-[#79b8ff] disabled:opacity-50">
-          {loading ? 'GENERATING KEYRING & INJECTING TO NODE...' : 'GENERATE IDS & SECURE EXAM'}
-        </button>
+        <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} onClick={handleCreateExam} disabled={loading} className="w-full bg-[#e5e5e5] text-black font-semibold p-4 rounded-xl hover:bg-white shadow-sm disabled:opacity-50 transition-all">
+          {loading ? 'Injecting Nodes...' : 'Generate IDs & Secure Exam'}
+        </motion.button>
       </div>
 
       {/* Control Panel (End Exam) */}
-      <div className="flex-1 bg-surface backdrop-blur-3xl border border-white/10 rounded-xl p-8 shadow-2xl h-fit">
-        <h2 className="font-display text-lg text-[#f85149] border-b border-[#f85149]/30 pb-4 mb-6">LIVE EXAM CONTROL</h2>
-        <p className="text-muted text-xs mb-6">Clicking END EXAM will physically delete the encrypted file off the GitHub repository, irrevocably revoking access for all Student IDs on the Keyring.</p>
-        
-        <div className="flex flex-col gap-4 max-h-[600px] overflow-y-auto">
-          {Object.entries(catalog).flatMap(([d, files]) => 
-            files.map(file => (
-               <div key={`${d}/${file}`} className="flex justify-between items-center bg-[#010409] p-3 rounded border border-white/5 group hover:border-[#f85149]/50">
-                  <div className="flex flex-col">
-                    <span className="text-xs text-muted uppercase">{d}</span>
-                    <span className="text-white text-sm">{file}</span>
-                  </div>
-                  <button 
-                    onClick={() => setConfirmDelete({ dept: d, file: file })} 
-                    disabled={loading} 
-                    className="text-xs bg-[#f85149]/20 text-[#f85149] hover:bg-[#f85149] hover:text-white px-3 py-2 rounded"
-                  >
-                    END EXAM
-                  </button>
-               </div>
-            ))
-          )}
-          {Object.values(catalog).flat().length === 0 && (
-             <div className="text-muted text-sm text-center">No live exams currently on node.</div>
-          )}
+      <div className="flex-[1.2] flex flex-col h-fit">
+        <div className="minimal-panel p-8 relative overflow-hidden flex-1">
+          <h2 className="font-sans font-semibold text-xl text-[#e5e5e5] border-b border-[#2a2a2a] pb-4 mb-6">Live Formations</h2>
+          <p className="text-muted text-sm mb-8 leading-relaxed">Clicking End Exam physically deletes the encrypted file payload globally, instantly locking out active hex sessions.</p>
+          
+          <div className="flex flex-col gap-3 max-h-[600px] overflow-y-auto pr-2">
+            {Object.entries(catalog).flatMap(([d, files]) => 
+              files.map(file => (
+                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} key={`${d}/${file}`} className="flex justify-between items-center bg-[#0a0a0a] p-4 rounded-xl border border-[#2a2a2a] group hover:border-[#ff453a]/50 transition-colors shadow-sm">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[11px] text-muted tracking-wider">{d.replace('-', ' ')}</span>
+                      <span className="text-[#e5e5e5] text-sm font-medium">{file}</span>
+                    </div>
+                    <button 
+                      onClick={() => setConfirmDelete({ dept: d, file: file })} 
+                      disabled={loading} 
+                      className="text-xs bg-[#1a1a1a] border border-[#ff453a]/30 text-[#ff453a] hover:bg-[#ff453a] hover:text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200"
+                    >
+                      End Exam
+                    </button>
+                 </motion.div>
+              ))
+            )}
+            {Object.values(catalog).flat().length === 0 && (
+               <div className="text-muted text-sm text-center py-10 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl border-dashed">No formations active.</div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Confirmation Modal */}
-      {confirmDelete && (
-        <div className="absolute inset-0 z-[100] bg-black/80 flex items-center justify-center backdrop-blur-md">
-          <div className="bg-[#0d1117] border border-[#f85149] p-8 rounded-xl max-w-md w-full shadow-[0_0_50px_rgba(248,81,73,0.2)]">
-            <h3 className="text-[#f85149] font-display text-xl mb-4 text-center">PURGE EXAM FILE</h3>
-            <p className="text-muted mb-8 text-center text-sm">
-              Are you absolutely certain you wish to purge <span className="text-white font-mono bg-white/10 px-1 rounded">{confirmDelete.file}</span>? This action is permanent and irrevocably revokes student access.
-            </p>
-            <div className="flex gap-4">
-              <button 
-                onClick={() => setConfirmDelete(null)} 
-                className="flex-1 p-3 border border-white/20 text-white hover:bg-white/10 rounded font-mono text-sm transition-colors"
-              >
-                CANCEL
-              </button>
-              <button 
-                onClick={() => { handleEndExam(confirmDelete.dept, confirmDelete.file); setConfirmDelete(null); }} 
-                className="flex-1 p-3 bg-[#f85149]/20 border border-[#f85149] text-[#f85149] hover:bg-[#f85149] hover:text-white rounded font-mono text-sm font-bold transition-colors"
-              >
-                CONFIRM PURGE
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      {/* Physics Confirmation Modal */}
+      <AnimatePresence>
+        {confirmDelete && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="absolute inset-0 z-[100] bg-[#0a0a0a]/90 backdrop-blur-md flex items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.95, y: 10, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 400 }} className="bg-[#111111] border border-[#2a2a2a] p-8 rounded-3xl max-w-[420px] w-full shadow-minimal flex flex-col gap-4">
+              <h3 className="text-[#ff453a] font-sans font-semibold text-xl text-center mb-2">Confirm Delete Payload</h3>
+              <p className="text-muted mb-8 text-center text-sm leading-relaxed">
+                Are you sure you want to completely purge <span className="text-[#e5e5e5] bg-[#1a1a1a] px-2 py-0.5 rounded border border-[#2a2a2a] font-mono text-xs">{confirmDelete.file}</span>? This action is permanent.
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setConfirmDelete(null)} 
+                  className="flex-1 p-3.5 bg-[#1a1a1a] border border-[#2a2a2a] text-[#e5e5e5] hover:bg-[#222222] rounded-xl font-sans font-semibold transition-all text-sm"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => { handleEndExam(confirmDelete.dept, confirmDelete.file); setConfirmDelete(null); }} 
+                  className="flex-1 p-3.5 bg-[#ff453a] text-white hover:bg-[#ff3b30] rounded-xl font-sans font-semibold transition-all shadow-sm text-sm"
+                >
+                  End Exam Now
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
