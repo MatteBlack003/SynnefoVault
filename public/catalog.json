@@ -1,7 +1,6 @@
 {
   "networking": [
-    "mdtest.enc",
-    "pdf-test.enc"
+    "mdtest.enc"
   ],
   "devops": [
     "pdftest.enc"
