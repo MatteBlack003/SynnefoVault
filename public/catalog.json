@@ -1,7 +1,6 @@
 {
   "networking": [
-    "test-2.enc",
-    "test.enc"
+    "test-2.enc"
   ],
   "devops": [],
   "python-full-stack": [],
