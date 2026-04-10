@@ -1,10 +1,6 @@
 {
-  "networking": [
-    "test1.enc"
-  ],
-  "devops": [
-    "pdftest.enc"
-  ],
+  "networking": [],
+  "devops": [],
   "python-full-stack": [],
   "mern-stack": [],
   "flutter": [],
