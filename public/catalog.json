@@ -1,8 +1,13 @@
 {
   "networking": [
-    "test1.enc"
+    "test.enc",
+    "test-2.enc",
+    "linux101.enc",
+    "test1.enc",
+    "test-delete-this.enc"
   ],
   "devops": [
+    "test.enc",
     "pdftest.enc"
   ],
   "python-full-stack": [],
