@@ -1,6 +1,12 @@
 {
-  "networking": [],
-  "devops": [],
+  "networking": [
+    "test-delete-this.enc",
+    "mdtest.enc",
+    "pdf-test.enc"
+  ],
+  "devops": [
+    "pdftest.enc"
+  ],
   "python-full-stack": [],
   "mern-stack": [],
   "flutter": [],
