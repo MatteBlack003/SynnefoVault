@@ -1,6 +1,5 @@
 {
   "networking": [
-    "linux101.enc",
     "test1.enc",
     "test-delete-this.enc"
   ],
