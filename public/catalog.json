@@ -1,6 +1,7 @@
 {
   "networking": [
-    "mdtest.enc"
+    "mdtest.enc",
+    "pdf-test.enc"
   ],
   "devops": [],
   "python-full-stack": [],
