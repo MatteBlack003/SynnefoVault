@@ -106,6 +106,52 @@ export function Student() {
     fetchCatalog();
   }, []);
 
+  // Live Kill Switch Daemon (Instant boot and real-time reflection)
+  useEffect(() => {
+    // 1. Storage Listener for Instant Local Revocation (Same machine/network testing)
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === CATALOG_STORAGE_KEY && e.newValue) {
+        try {
+          const freshCatalog: Catalog = JSON.parse(e.newValue);
+          setCatalog(freshCatalog); // update UI
+          
+          if (activeFile) {
+            const [dept, fileName] = activeFile.path.split('/');
+            if (!freshCatalog[dept] || !freshCatalog[dept].includes(fileName)) {
+              alert("ADMINISTRATOR INITIATED PURGE: EXAM SESSION FORCE TERMINATED.");
+              closeViewer();
+            }
+          }
+        } catch { /* parsing fail */ }
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+
+    // 2. Active Polling for Globally Distributed Readers
+    let interval: ReturnType<typeof setInterval>;
+    if (activeFile) {
+      interval = setInterval(async () => {
+        try {
+          const rawCatalogUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/public/catalog.json?t=${Date.now()}`;
+          const res = await fetch(rawCatalogUrl, { cache: 'no-store' });
+          if (res.ok) {
+            const freshCatalog: Catalog = await res.json();
+            const [dept, fileName] = activeFile.path.split('/');
+            if (!freshCatalog[dept] || !freshCatalog[dept].includes(fileName)) {
+              alert("ADMINISTRATOR INITIATED PURGE: EXAM SESSION FORCE TERMINATED.");
+              closeViewer();
+            }
+          }
+        } catch { /* network fail, ignore */ }
+      }, 20000); // 20s poller
+    }
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      if (interval) clearInterval(interval);
+    };
+  }, [activeFile]);
+
   // DRM & Anti-Cheating Engine Protection Layer
   useEffect(() => {
     if ((decryptedHtml || decryptedPdfUrl) && activeFile && examCode) {
