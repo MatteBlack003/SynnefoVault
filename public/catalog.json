@@ -1,7 +1,6 @@
 {
   "networking": [],
   "devops": [
-    "test.enc",
     "pdftest.enc"
   ],
   "python-full-stack": [],
