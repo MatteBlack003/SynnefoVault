@@ -1,12 +1,11 @@
 {
-  "networking": [
-    "test01.enc"
-  ],
+  "networking": [],
   "devops": [],
   "python-full-stack": [],
   "mern-stack": [],
   "flutter": [],
   "cyber-security": [],
   "digital-marketing": [],
-  "data-science": []
+  "data-science": [],
+  "_durations": {}
 }
