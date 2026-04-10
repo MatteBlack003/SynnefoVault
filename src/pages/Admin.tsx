@@ -36,6 +36,7 @@ export function Admin() {
   const [owner, setOwner] = useState('');
   const [repo, setRepo] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<{dept: string, file: string} | null>(null);
 
   // Upload State
   const [dept, setDept] = useState('networking');
@@ -208,8 +209,6 @@ export function Admin() {
   };
 
   const handleEndExam = async (targetDept: string, targetFile: string) => {
-    if (!confirm(`Are you certain you wish to purge and revoke all access to ${targetFile}? This is permanent.`)) return;
-
     setLoading(true);
     setStatus({ type: '', msg: '' });
     const targetPath = `${targetDept}/${targetFile}`;
@@ -234,7 +233,6 @@ export function Admin() {
       try {
         await updateCatalogInRepo({ repoOwner: owner, repoName: repo, catalog: updatedCatalog, token });
       } catch { /* non-critical */ }
-
     } catch(err: unknown) {
       console.error(err);
       const message = err instanceof Error ? err.message : 'Failed to execute deletion protocol.';
@@ -412,7 +410,11 @@ export function Admin() {
                     <span className="text-xs text-muted uppercase">{d}</span>
                     <span className="text-white text-sm">{file}</span>
                   </div>
-                  <button onClick={() => handleEndExam(d, file)} disabled={loading} className="text-xs bg-[#f85149]/20 text-[#f85149] hover:bg-[#f85149] hover:text-white px-3 py-2 rounded">
+                  <button 
+                    onClick={() => setConfirmDelete({ dept: d, file: file })} 
+                    disabled={loading} 
+                    className="text-xs bg-[#f85149]/20 text-[#f85149] hover:bg-[#f85149] hover:text-white px-3 py-2 rounded"
+                  >
                     END EXAM
                   </button>
                </div>
@@ -423,6 +425,32 @@ export function Admin() {
           )}
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmDelete && (
+        <div className="absolute inset-0 z-[100] bg-black/80 flex items-center justify-center backdrop-blur-md">
+          <div className="bg-[#0d1117] border border-[#f85149] p-8 rounded-xl max-w-md w-full shadow-[0_0_50px_rgba(248,81,73,0.2)]">
+            <h3 className="text-[#f85149] font-display text-xl mb-4 text-center">PURGE EXAM FILE</h3>
+            <p className="text-muted mb-8 text-center text-sm">
+              Are you absolutely certain you wish to purge <span className="text-white font-mono bg-white/10 px-1 rounded">{confirmDelete.file}</span>? This action is permanent and irrevocably revokes student access.
+            </p>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setConfirmDelete(null)} 
+                className="flex-1 p-3 border border-white/20 text-white hover:bg-white/10 rounded font-mono text-sm transition-colors"
+              >
+                CANCEL
+              </button>
+              <button 
+                onClick={() => { handleEndExam(confirmDelete.dept, confirmDelete.file); setConfirmDelete(null); }} 
+                className="flex-1 p-3 bg-[#f85149]/20 border border-[#f85149] text-[#f85149] hover:bg-[#f85149] hover:text-white rounded font-mono text-sm font-bold transition-colors"
+              >
+                CONFIRM PURGE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
