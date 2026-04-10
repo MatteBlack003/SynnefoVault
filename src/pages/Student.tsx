@@ -76,7 +76,7 @@ export function Student() {
 
     // Step 2: Fetch catalog.json from raw.githubusercontent.com
     try {
-      const rawCatalogUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/public/catalog.json`;
+      const rawCatalogUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/public/catalog.json?t=${Date.now()}`;
       const res = await fetch(rawCatalogUrl, { cache: 'no-store' });
       if (res.ok) {
         const data: Catalog = await res.json();
@@ -92,8 +92,8 @@ export function Student() {
     try {
       const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const catalogUrl = isLocal 
-        ? (import.meta.env.BASE_URL + 'catalog.json')
-        : (PAGES_BASE_URL + 'catalog.json');
+        ? (import.meta.env.BASE_URL + `catalog.json?t=${Date.now()}`)
+        : (PAGES_BASE_URL + `catalog.json?t=${Date.now()}`);
 
       const res = await fetch(catalogUrl, { cache: 'no-store' });
       if (res.ok) {
@@ -204,7 +204,9 @@ export function Student() {
 
     try {
       // Fetch the .enc file directly from GitHub raw content
-      const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${activeFile.path}`;
+      // Appending Date.now() bypasses GitHub's heavily aggressive Fastly edge node caches
+      // so when a file is physically deleted, the cache isn't erroneously served for 5 minutes.
+      const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${activeFile.path}?t=${Date.now()}`;
       const res = await fetch(rawUrl, { cache: 'no-store' });
       if(!res.ok) throw new Error("Could not download the encrypted exam file from the server.");
       
