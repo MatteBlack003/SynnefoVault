@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Admin } from './pages/Admin';
 import { Student } from './pages/Student';
 
@@ -7,53 +7,42 @@ function Shell() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-background text-[#e5e5e5] font-sans selection:bg-[#333] selection:text-white relative overflow-hidden">
-      {/* Background Soft Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-white/[0.02] blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] rounded-full bg-white/[0.01] blur-[100px] pointer-events-none" />
+    <div className="min-h-screen w-full relative overflow-hidden bg-transparent">
+      {/* Absolute Corner Meta-data Indicators */}
+      <div className="absolute top-10 left-12 z-50 pointer-events-none select-none">
+         <div className="text-3xl font-bold tracking-widest text-[#1a1a1a]">SYNNEFO_VAULT</div>
+         <div className="text-xs text-[#666] mt-2 tracking-widest uppercase">/// System Core Node</div>
+         <div className="text-[10px] text-[#888] mt-2 opacity-80">Copyright © {new Date().getFullYear()}<br/>Synnefo Inc. All Rights Reserved.</div>
+      </div>
 
-      {/* Global Header */}
-      <motion.header 
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, type: 'spring', bounce: 0, damping: 20 }}
-        className="flex justify-between items-center px-10 py-5 border-b border-white/5 bg-background/80 backdrop-blur-md z-50 sticky top-0"
-      >
-        <div className="flex items-center gap-6">
-          <h1 className="font-sans font-semibold text-xl tracking-tight text-white flex items-center gap-2">
-            <span className="w-5 h-5 rounded-md bg-white text-black flex items-center justify-center font-bold text-xs select-none">S</span>
-            SynnefoVault
-          </h1>
-          <div className="text-xs text-muted border-l border-white/10 pl-6 flex items-center gap-2">
-             <div className="w-2 h-2 rounded-full bg-[#3fb950]" />
-             <span>System Secured</span>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <motion.button 
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/admin')}
-            className="text-xs font-medium text-muted hover:text-white px-4 py-2 rounded-full hover:bg-white/5 transition-colors"
-          >
-            Faculty Gateway
-          </motion.button>
-          <div className="text-xs font-semibold text-background bg-[#e5e5e5] px-4 py-2 rounded-full select-none cursor-default shadow-sm border border-transparent">
-            MOCK EXAMS
-          </div>
-        </div>
-      </motion.header>
+      <div className="absolute top-10 right-12 z-50 pointer-events-auto flex items-end flex-col">
+         <div className="text-[10px] font-bold tracking-[0.2em] text-[#333] mb-4 uppercase">/// Operating Normal</div>
+         <button 
+           onClick={() => navigate('/admin')}
+           className="relative group bg-[rgba(255,255,255,0.4)] backdrop-blur-xl border border-[rgba(0,0,0,0.05)] px-6 py-3 hover:bg-white transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,1)] uppercase text-xs tracking-widest font-bold text-[#1a1a1a] overflow-hidden bracket-card"
+         >
+           [ FACULTY GATEWAY ]
+         </button>
+         <div className="text-[10px] text-[#666] mt-4 opacity-80 text-right pr-2 border-r border-[#ccc] uppercase">Scroll down to<br/>discover.</div>
+      </div>
 
-      {/* Page Content Routes */}
-      <main className="flex-1 flex w-full max-w-[1600px] mx-auto z-10 relative">
+      <div className="absolute bottom-10 left-12 z-50 pointer-events-none select-none">
+        <div className="text-[11px] text-[#666] flex font-bold tracking-widest uppercase items-center gap-3">
+          <span>{`{ status }`}</span>
+          <span className="w-2.5 h-2.5 rounded-full bg-[#1e90ff] shadow-[0_0_12px_rgba(30,144,255,0.8)] animate-pulse"></span>
+          <span className="text-[#1a1a1a]">Secured</span>
+        </div>
+      </div>
+
+      {/* Main Container */}
+      <div className="relative z-10 w-full h-screen flex flex-col pt-40 px-12 pb-12">
         <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<Student />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>
         </AnimatePresence>
-      </main>
+      </div>
     </div>
   );
 }

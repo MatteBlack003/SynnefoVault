@@ -6,20 +6,24 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {
-        background: '#0a0a0a',
-        surface: '#121212',
-        accent: '#e5e5e5',
-        muted: '#666666',
-        danger: '#ff453a',
-      },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        mono: ['"Space Mono"', 'monospace'],
+        sans: ['"Space Mono"', 'monospace'], // Force monospace globally
+      },
+      colors: {
+        background: '#f8f9fa',
+        surface: 'rgba(255, 255, 255, 0.4)',
+        accent: '#ffffff',
+        muted: '#7a7a85',
+        danger: '#ff4b4b',
+        charcoal: '#1a1a1a',
+        frostblue: '#eaf0f8',
       },
       boxShadow: {
-        'soft-glow': '0 4px 40px rgba(0, 0, 0, 0.4)',
-        'minimal': '0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1)',
+        'glow-white': '0 0 40px rgba(255,255,255,0.9)',
+        'glow-blue': '0 0 60px rgba(180,210,255,0.4)',
+        'frost-edge': 'inset 0 0 100px rgba(100, 150, 255, 0.15)',
+        'glass-panel': '0 8px 32px 0 rgba(31, 38, 135, 0.05)',
       }
     },
   },

@@ -248,33 +248,33 @@ export function Admin() {
     }
   };
 
-  const inputClass = "w-full bg-[#0a0a0a] border border-[#2a2a2a] text-[#e5e5e5] rounded-xl p-4 mb-5 focus:outline-none focus:border-[#666] focus:ring-1 focus:ring-[#666] transition-all duration-200 font-sans text-sm";
-  const labelClass = "block text-muted text-xs font-semibold mb-2";
+  const inputClass = "w-full bg-transparent border-b-2 border-charcoal/20 text-charcoal rounded-none px-4 py-3 mb-6 focus:outline-none focus:border-blue-500 transition-all duration-300 font-mono text-sm placeholder:opacity-40";
+  const labelClass = "block text-charcoal text-[10px] tracking-widest font-bold mb-2 uppercase";
 
   // LOGIN GATEWAY
   if (!isLoggedIn) {
     return (
-      <div className="flex-1 overflow-y-auto p-12 relative z-10 flex flex-col items-center justify-center font-sans bg-background">
+      <div className="flex-1 overflow-y-auto p-12 relative z-10 flex flex-col items-center justify-center bg-transparent">
         <motion.button 
           initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}
           onClick={() => navigate('/')} 
-          className="mb-8 text-muted hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 hover:bg-[#1a1a1a]"
+          className="mb-8 text-charcoal hover:bg-black hover:text-white px-6 py-2 border border-charcoal text-xs font-mono font-bold tracking-widest uppercase transition-all flex items-center gap-2 bracket-card"
         >
-          &larr; Return to Portal
+          [ RETURN_TO_SYSTEM ]
         </motion.button>
-        <motion.div initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} className="w-full max-w-[420px] minimal-panel p-10 flex flex-col gap-2 relative">
-          <h2 className="font-sans font-semibold text-[#e5e5e5] text-2xl tracking-tight mb-8 text-center">Faculty Login</h2>
-          <div className="text-left relative z-10 flex flex-col gap-1">
-            <label className={labelClass}>Master Team Lead Key</label>
+        <motion.div initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} className="w-full max-w-[480px] bg-white/60 backdrop-blur-3xl p-12 flex flex-col gap-4 relative bracket-card shadow-glow-white border border-white">
+          <h2 className="font-mono font-bold text-charcoal text-3xl tracking-[0.2em] mb-10 text-center uppercase">FACULTY_GATEWAY</h2>
+          <div className="text-left relative z-10 flex flex-col gap-2">
+            <label className={labelClass}>/// Master Team Lead Key</label>
             <input type="password" value={token} onChange={e => setToken(e.target.value)} className={inputClass} placeholder="ghp_xxxxxxxxxxxx" />
             
-            <label className={labelClass}>Institute Repo Owner</label>
+            <label className={labelClass}>/// Institute Repo Owner</label>
             <input type="text" value={owner} onChange={e => setOwner(e.target.value)} className={inputClass} placeholder="e.g. MatteBlack003" />
             
-            <label className={labelClass}>Repository Name</label>
+            <label className={labelClass}>/// Repository Name</label>
             <input type="text" value={repo} onChange={e => setRepo(e.target.value)} className={inputClass} placeholder="SynnefoVault" />
             
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleLogin} className="w-full bg-[#e5e5e5] text-black p-4 rounded-xl font-semibold hover:bg-white mt-4 shadow-sm transition-all duration-200">Sign In</motion.button>
+            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleLogin} className="w-full bg-charcoal text-white tracking-widest p-4 text-xs font-mono font-bold hover:bg-black mt-6 shadow-glow-blue transition-all duration-300 uppercase">[ AUTHENTICATE ]</motion.button>
           </div>
         </motion.div>
       </div>
@@ -283,80 +283,80 @@ export function Admin() {
 
   // SYSTEM DASHBOARD
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-[1] overflow-y-auto p-12 relative z-10 font-sans flex gap-10 bg-background max-w-[1400px] w-full mx-auto">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-[1] overflow-y-auto p-12 relative z-10 flex gap-10 bg-transparent max-w-[1400px] w-full mx-auto font-mono">
       {/* Upload Panel */}
-      <div className="flex-[2] minimal-panel p-10 h-fit">
-        <div className="flex justify-between items-center border-b border-[#2a2a2a] pb-6 mb-8">
-          <div className="flex items-center gap-4">
+      <div className="flex-[2] bracket-card p-12 h-fit bg-surface">
+        <div className="flex justify-between items-center border-b border-charcoal/10 pb-6 mb-8">
+          <div className="flex items-center gap-6">
             <button 
               onClick={() => navigate('/')} 
-              className="text-muted hover:text-white text-lg font-medium border border-[#2a2a2a] px-3 py-1 rounded-lg transition-colors hover:bg-[#1a1a1a]"
+              className="text-charcoal hover:bg-black hover:text-white font-bold tracking-widest border border-charcoal px-4 py-2 text-xs uppercase transition-colors"
               title="Return to Portal"
             >
-              &larr;
+              [ ESC ]
             </button>
-            <h2 className="font-sans font-semibold text-2xl tracking-tight text-[#e5e5e5]">Keyring Generator</h2>
+            <h2 className="font-mono font-bold text-2xl tracking-[0.2em] uppercase text-charcoal">KEY_GENERATOR</h2>
           </div>
-          <div className="flex gap-3">
-            <button onClick={() => fetchLiveCatalog()} className="text-xs font-medium border border-[#2a2a2a] text-[#e5e5e5] px-4 py-2 rounded-lg hover:bg-[#1a1a1a] transition-colors">Refresh</button>
-            <button onClick={handleLogout} className="text-xs font-medium border border-[#ff453a]/30 text-[#ff453a] px-4 py-2 rounded-lg hover:bg-[#ff453a]/10 transition-colors">Disconnect</button>
+          <div className="flex gap-4">
+            <button onClick={() => fetchLiveCatalog()} className="text-[10px] font-bold tracking-widest border border-charcoal/20 text-charcoal px-5 py-2 uppercase hover:bg-charcoal hover:text-white transition-colors">[ REFRESH ]</button>
+            <button onClick={handleLogout} className="text-[10px] font-bold tracking-widest border border-danger/40 text-danger px-5 py-2 uppercase hover:bg-danger hover:text-white transition-colors">[ DISCONNECT ]</button>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6 mb-6">
+        <div className="grid grid-cols-3 gap-8 mb-8">
           <div>
-            <label className={labelClass}>Department</label>
+            <label className={labelClass}>/// Department_Node</label>
             <select value={dept} onChange={e => setDept(e.target.value)} className={inputClass}>
-              {DEPARTMENTS.map(d => <option key={d} value={d}>{d.replace('-', ' ')}</option>)}
+              {DEPARTMENTS.map(d => <option key={d} value={d} className="uppercase tracking-widest text-[#1a1a1a]">{d.replace('-', ' ')}</option>)}
             </select>
           </div>
           <div>
-            <label className={labelClass}>Exam Filename</label>
-            <input type="text" value={filename} onChange={e => setFilename(e.target.value)} className={inputClass} placeholder="e.g. mock-04" />
+            <label className={labelClass}>/// Target_File.enc</label>
+            <input type="text" value={filename} onChange={e => setFilename(e.target.value)} className={inputClass} placeholder="mock-04" />
           </div>
           <div>
-            <label className={labelClass}>Class Size</label>
-            <input type="number" min="1" max="200" value={studentCount} onChange={e => setStudentCount(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className={inputClass} placeholder="e.g. 3" />
+            <label className={labelClass}>/// Class_Size</label>
+            <input type="number" min="1" max="200" value={studentCount} onChange={e => setStudentCount(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className={inputClass} placeholder="MAX_200" />
           </div>
         </div>
 
         {/* Content Type Toggle */}
-        <div className="mb-6">
-          <label className={labelClass}>Content Type</label>
-          <div className="flex gap-2">
+        <div className="mb-8">
+          <label className={labelClass}>/// Payload_Format</label>
+          <div className="flex gap-4">
             <button
               onClick={() => { setContentType('markdown'); setPdfFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-              className={`flex-1 p-3 rounded-xl font-medium text-sm border transition-all ${
+              className={`flex-1 p-3 font-bold text-[10px] tracking-widest uppercase border transition-all ${
                 contentType === 'markdown'
-                  ? 'bg-white text-black border-white'
-                  : 'border-[#2a2a2a] text-muted hover:border-[#444] hover:bg-[#1a1a1a]'
+                  ? 'bg-charcoal text-white border-charcoal shadow-glow-blue'
+                  : 'border-charcoal/20 text-[#666] hover:border-charcoal hover:bg-white'
               }`}
             >
-              Markdown Text
+              [ MD_BUFFER ]
             </button>
             <button
               onClick={() => { setContentType('pdf'); setContent(''); }}
-              className={`flex-1 p-3 rounded-xl font-medium text-sm border transition-all ${
+              className={`flex-1 p-3 font-bold text-[10px] tracking-widest uppercase border transition-all ${
                 contentType === 'pdf'
-                  ? 'bg-white text-black border-white'
-                  : 'border-[#2a2a2a] text-muted hover:border-[#444] hover:bg-[#1a1a1a]'
+                  ? 'bg-charcoal text-white border-charcoal shadow-glow-blue'
+                  : 'border-charcoal/20 text-[#666] hover:border-charcoal hover:bg-white'
               }`}
             >
-              PDF Upload
+              [ PDF_BUFFER ]
             </button>
           </div>
         </div>
 
         {/* Content Input - Markdown or PDF */}
         {contentType === 'markdown' ? (
-          <div>
-            <label className={labelClass}>Question Paper Markdown</label>
-            <textarea value={content} onChange={e => setContent(e.target.value)} className={`${inputClass} min-h-[240px] font-mono text-[13px] leading-relaxed resize-y`} placeholder="# Question 1..." />
+          <div className="mb-8">
+            <label className={labelClass}>/// MD_Stream_Data</label>
+            <textarea value={content} onChange={e => setContent(e.target.value)} className={`${inputClass} min-h-[240px] font-mono text-[11px] leading-loose resize-y border-x-2 border-t-2 placeholder:tracking-[0.2em]`} placeholder="/// INJECT MARKDOWN HEADERS..." />
           </div>
         ) : (
-          <div>
-            <label className={labelClass}>Upload Question Paper (PDF)</label>
-            <div className={`${inputClass} min-h-[200px] flex flex-col items-center justify-center border-dashed border-[#444] cursor-pointer hover:border-[#666] hover:bg-[#151515] transition-colors`}
+          <div className="mb-8">
+            <label className={labelClass}>/// PDF_Binary_Upload</label>
+            <div className={`w-full bg-white/20 border-2 border-charcoal/30 text-charcoal rounded-none p-4 mb-6 transition-all duration-300 font-mono text-sm min-h-[200px] flex flex-col items-center justify-center border-dashed cursor-pointer hover:border-charcoal hover:bg-white/60 hover:shadow-glow-white`}
               onClick={() => fileInputRef.current?.click()}
             >
               <input
@@ -367,17 +367,17 @@ export function Admin() {
                 className="hidden"
               />
               {pdfFile ? (
-                <div className="text-center">
-                  <div className="text-[#e5e5e5] text-lg mb-2">📄</div>
-                  <div className="text-[#e5e5e5] text-sm font-medium">{pdfFile.name}</div>
-                  <div className="text-muted text-xs mt-1">{(pdfFile.size / 1024).toFixed(1)} KB</div>
-                  <div className="text-muted text-xs mt-3 bg-[#1a1a1a] px-3 py-1 rounded-full border border-[#2a2a2a]">Click to change file</div>
+                <div className="text-center font-mono">
+                  <div className="text-charcoal text-2xl mb-4 font-bold">[ PDF ]</div>
+                  <div className="text-charcoal text-[11px] font-bold tracking-widest uppercase">{pdfFile.name}</div>
+                  <div className="text-blue-500 text-[10px] mt-2 mb-4 font-bold tracking-widest uppercase">SIZE: {(pdfFile.size / 1024).toFixed(1)} KB</div>
+                  <div className="text-charcoal text-[10px] font-bold uppercase tracking-[0.2em] border border-charcoal px-4 py-2 hover:bg-charcoal hover:text-white transition-colors">/// LOAD_NEW_BINARY</div>
                 </div>
               ) : (
-                <div className="text-center">
-                  <div className="text-muted text-2xl mb-3">⬆️</div>
-                  <div className="text-[#e5e5e5] text-sm font-medium">Click to select PDF</div>
-                  <div className="text-muted text-xs mt-1">Maximum generic file size limit applies</div>
+                <div className="text-center font-mono">
+                  <div className="text-[#666] text-3xl mb-4">+</div>
+                  <div className="text-charcoal text-xs font-bold tracking-widest uppercase">INITIALIZE_FILE_UPLOAD</div>
+                  <div className="text-[#888] text-[9px] font-bold tracking-[0.1em] mt-2 uppercase">STRICTLY .PDF ONLY</div>
                 </div>
               )}
             </div>
@@ -385,51 +385,51 @@ export function Admin() {
         )}
 
         {status.msg && (
-          <div className={`p-4 rounded-xl border mb-6 text-sm font-medium ${status.type === 'error' ? 'bg-[#ff453a]/10 border-[#ff453a]/30 text-[#ff453a]' : 'bg-[#32d74b]/10 border-[#32d74b]/30 text-[#32d74b]'}`}>
-            {status.msg}
+          <div className={`p-4 border mb-8 text-[10px] font-bold tracking-widest uppercase ${status.type === 'error' ? 'bg-danger/5 border-danger/40 text-danger' : 'bg-blue-500/5 border-blue-500/40 text-blue-600'}`}>
+            /// {status.msg}
           </div>
         )}
 
         {generatedIds.length > 0 && (
-          <div className="mb-6 bg-[#0a0a0a] border border-[#2a2a2a] p-5 rounded-xl h-48 overflow-y-auto">
-             <div className="text-[#e5e5e5] text-sm font-medium mb-3">Generated Cryptographic Keys for: {filename || 'exam'}</div>
-             <div className="grid grid-cols-4 gap-3 text-muted text-xs font-mono">
-               {generatedIds.map(id => <div key={id} className="bg-[#111111] border border-[#2a2a2a] px-3 py-2 rounded-lg select-all text-center">{id}</div>)}
+          <div className="mb-8 bg-charcoal/5 border border-charcoal/10 p-6 h-56 overflow-y-auto relative">
+             <div className="text-charcoal text-[10px] font-bold tracking-widest mb-4 uppercase border-b border-charcoal/10 pb-2">/// ACTIVE KEYRING MAP</div>
+             <div className="grid grid-cols-4 gap-4 text-charcoal text-[11px] font-mono tracking-wider font-bold">
+               {generatedIds.map(id => <div key={id} className="bg-white border-l-2 border-charcoal px-3 py-2 select-all text-center shadow-sm">{id}</div>)}
              </div>
           </div>
         )}
 
-        <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} onClick={handleCreateExam} disabled={loading} className="w-full bg-[#e5e5e5] text-black font-semibold p-4 rounded-xl hover:bg-white shadow-sm disabled:opacity-50 transition-all">
-          {loading ? 'Injecting Nodes...' : 'Generate IDs & Secure Exam'}
+        <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} onClick={handleCreateExam} disabled={loading} className="w-full bg-charcoal text-white text-[11px] uppercase tracking-[0.3em] font-bold p-5 hover:bg-black hover:shadow-glow-blue disabled:opacity-50 transition-all bracket-card border border-charcoal">
+          {loading ? '[ INJECTING... ]' : '[ EXECUTE_ENCRYPTION_AND_DEPLOY ]'}
         </motion.button>
       </div>
 
       {/* Control Panel (End Exam) */}
       <div className="flex-[1.2] flex flex-col h-fit">
-        <div className="minimal-panel p-8 relative overflow-hidden flex-1">
-          <h2 className="font-sans font-semibold text-xl text-[#e5e5e5] border-b border-[#2a2a2a] pb-4 mb-6">Live Formations</h2>
-          <p className="text-muted text-sm mb-8 leading-relaxed">Clicking End Exam physically deletes the encrypted file payload globally, instantly locking out active hex sessions.</p>
+        <div className="bracket-card p-10 relative overflow-hidden flex-1 bg-surface">
+          <h2 className="font-mono font-bold text-xl text-charcoal tracking-[0.2em] border-b border-charcoal/10 pb-4 mb-6 uppercase">ACTIVE_NODES</h2>
+          <p className="text-[#666] text-[10px] tracking-widest uppercase mb-10 leading-loose border-l-2 border-danger/30 pl-4 font-bold">/// WARNING: TERMINATION INSTANTLY PURGES THE PAYLOAD. THIS ACTION CANNOT BE UNDONE.</p>
           
-          <div className="flex flex-col gap-3 max-h-[600px] overflow-y-auto pr-2">
+          <div className="flex flex-col gap-4 max-h-[600px] overflow-y-auto pr-2">
             {Object.entries(catalog).flatMap(([d, files]) => 
               files.map(file => (
-                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} key={`${d}/${file}`} className="flex justify-between items-center bg-[#0a0a0a] p-4 rounded-xl border border-[#2a2a2a] group hover:border-[#ff453a]/50 transition-colors shadow-sm">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[11px] text-muted tracking-wider">{d.replace('-', ' ')}</span>
-                      <span className="text-[#e5e5e5] text-sm font-medium">{file}</span>
+                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} key={`${d}/${file}`} className="flex justify-between items-center bg-white p-5 border border-charcoal/10 group hover:border-danger/60 transition-all shadow-sm relative bracket-card">
+                    <div className="flex flex-col gap-2">
+                       <span className="text-[9px] text-[#888] font-bold tracking-[0.2em] uppercase">/// DIR: {d}</span>
+                       <span className="text-charcoal text-sm font-bold tracking-widest uppercase">{file}</span>
                     </div>
                     <button 
                       onClick={() => setConfirmDelete({ dept: d, file: file })} 
                       disabled={loading} 
-                      className="text-xs bg-[#1a1a1a] border border-[#ff453a]/30 text-[#ff453a] hover:bg-[#ff453a] hover:text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200"
+                      className="text-[10px] border border-danger/40 text-danger hover:bg-danger hover:text-white px-4 py-3 font-bold uppercase tracking-widest transition-all duration-200"
                     >
-                      End Exam
+                      [ PURGE ]
                     </button>
                  </motion.div>
               ))
             )}
             {Object.values(catalog).flat().length === 0 && (
-               <div className="text-muted text-sm text-center py-10 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl border-dashed">No formations active.</div>
+               <div className="text-[#888] text-[10px] font-bold tracking-widest uppercase text-center py-12 bg-charcoal/5 border border-charcoal/10 border-dashed">/// NULL SET</div>
             )}
           </div>
         </div>
@@ -438,24 +438,24 @@ export function Admin() {
       {/* Physics Confirmation Modal */}
       <AnimatePresence>
         {confirmDelete && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="absolute inset-0 z-[100] bg-[#0a0a0a]/90 backdrop-blur-md flex items-center justify-center p-4">
-            <motion.div initial={{ scale: 0.95, y: 10, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 400 }} className="bg-[#111111] border border-[#2a2a2a] p-8 rounded-3xl max-w-[420px] w-full shadow-minimal flex flex-col gap-4">
-              <h3 className="text-[#ff453a] font-sans font-semibold text-xl text-center mb-2">Confirm Delete Payload</h3>
-              <p className="text-muted mb-8 text-center text-sm leading-relaxed">
-                Are you sure you want to completely purge <span className="text-[#e5e5e5] bg-[#1a1a1a] px-2 py-0.5 rounded border border-[#2a2a2a] font-mono text-xs">{confirmDelete.file}</span>? This action is permanent.
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="absolute inset-0 z-[100] bg-white/40 backdrop-blur-3xl flex items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.95, y: 10, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 400 }} className="bg-white/80 border border-danger/20 p-12 max-w-[500px] w-full flex flex-col gap-8 shadow-[0_0_80px_rgba(255,0,0,0.1)] bracket-card">
+              <h3 className="text-danger font-mono font-bold text-2xl text-center mb-2 tracking-[0.2em] uppercase">SYS_PURGE_CONFIRM</h3>
+              <p className="text-[#666] mb-4 text-center text-[10px] leading-loose font-bold tracking-widest uppercase">
+                ARE YOU SURE YOU WANT TO COMPLETELY PURGE <br/><span className="text-charcoal bg-charcoal/5 px-3 py-1 border-l-2 border-charcoal mt-2 inline-block font-mono text-sm shadow-sm">{confirmDelete!.file}</span><br/><br/>THIS IS A LEVEL 0 IRREVERSIBLE COMMAND.
               </p>
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 <button 
                   onClick={() => setConfirmDelete(null)} 
-                  className="flex-1 p-3.5 bg-[#1a1a1a] border border-[#2a2a2a] text-[#e5e5e5] hover:bg-[#222222] rounded-xl font-sans font-semibold transition-all text-sm"
+                  className="flex-1 p-4 bg-transparent border border-charcoal text-charcoal hover:bg-charcoal hover:text-white font-mono font-bold tracking-widest uppercase transition-all text-xs"
                 >
-                  Cancel
+                  [ ABORT ]
                 </button>
                 <button 
-                  onClick={() => { handleEndExam(confirmDelete.dept, confirmDelete.file); setConfirmDelete(null); }} 
-                  className="flex-1 p-3.5 bg-[#ff453a] text-white hover:bg-[#ff3b30] rounded-xl font-sans font-semibold transition-all shadow-sm text-sm"
+                  onClick={() => { handleEndExam(confirmDelete!.dept, confirmDelete!.file); setConfirmDelete(null); }} 
+                  className="flex-[1.5] p-4 bg-danger text-white hover:bg-[#cc0000] font-mono font-bold tracking-widest uppercase transition-all shadow-sm text-xs"
                 >
-                  End Exam Now
+                  [ EXECUTE PURGE ]
                 </button>
               </div>
             </motion.div>

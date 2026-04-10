@@ -4,33 +4,84 @@
 
 @layer base {
   body {
-    @apply bg-background text-[#e5e5e5] font-sans antialiased selection:bg-[#333333] selection:text-white overflow-x-hidden;
+    @apply bg-background text-charcoal font-mono antialiased selection:bg-frostblue selection:text-charcoal overflow-x-hidden;
+    background-image: 
+      radial-gradient(#d1d1d1 1px, transparent 0),
+      radial-gradient(#d1d1d1 1px, transparent 0);
+    background-position: 0 0, 20px 20px;
+    background-size: 40px 40px;
+    background-attachment: fixed;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* The Frost Vignette effect */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 160px rgba(160, 200, 255, 0.25);
+    z-index: 9999;
+  }
+
+  /* Deep Blur environmental lighting */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 100vh;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(248,249,250,0) 80%);
+    pointer-events: none;
+    z-index: 0;
   }
 }
 
-@layer utilities {
-  .minimal-panel {
-    @apply bg-[#111111] border border-[#2a2a2a] shadow-minimal rounded-2xl;
+@layer components {
+  /* Thin brackets utility */
+  .bracket-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.4s ease;
+  }
+  
+  .bracket-card::before, .bracket-card::after {
+    content: '+';
+    position: absolute;
+    color: #666;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 300;
+  }
+
+  .bracket-card::before { top: 4px; left: 6px; }
+  .bracket-card::after { bottom: 4px; right: 6px; }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 40px rgba(255, 255, 255, 1);
+    border-color: #fff;
+    transform: scale(1.02);
   }
 }
 
-/* Super smooth scrollbars */
+/* Custom Webkit Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #333333;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  background: rgba(180, 200, 230, 0.5);
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #555555; 
+  background: rgba(100, 150, 255, 0.6);
 }
 
 /* Minimal Markdown Overrides */

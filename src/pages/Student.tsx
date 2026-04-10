@@ -4,7 +4,7 @@ import type { Variants } from 'framer-motion';
 import { decryptWithKeyring } from '../lib/crypto';
 import { fetchFullCatalogFromAPI } from '../lib/github';
 import { marked } from 'marked';
-import { Lock, FileText, ChevronRight, RefreshCw } from 'lucide-react';
+import { Lock, ChevronRight, RefreshCw } from 'lucide-react';
 
 const DEPARTMENTS = [
   'networking', 'devops', 'python-full-stack', 'mern-stack', 'flutter', 'cyber-security', 'digital-marketing', 'data-science'
@@ -269,27 +269,27 @@ export function Student() {
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.3 }} className="flex-1 w-full h-full absolute inset-0 bg-background z-50 overflow-hidden">
         
         {/* Dynamic Anti-Cheating Watermark Generator */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-[100] grid grid-cols-4 grid-rows-5 items-center justify-items-center overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none opacity-5 z-[100] grid grid-cols-4 grid-rows-5 items-center justify-items-center overflow-hidden">
           {Array.from({ length: 20 }).map((_, i) => (
-            <div key={i} className="text-4xl font-display text-white transform -rotate-45 whitespace-nowrap">
+            <div key={i} className="text-4xl font-mono text-charcoal transform -rotate-45 whitespace-nowrap font-bold tracking-widest">
               {examCode.toUpperCase()}
             </div>
           ))}
         </div>
 
         <div className="w-full h-full flex flex-col">
-          <div className="flex justify-between items-center px-8 py-4 bg-surface border-b border-white/10 relative z-[101]">
-            <div className="flex items-center gap-4">
-              <span className="font-display text-accent tracking-widest uppercase">{activeFile.name}</span>
-              <span className="text-xs font-mono text-[#f85149]">DRM PROTOCOLS ACTIVE</span>
+          <div className="flex justify-between items-center px-8 py-4 bg-surface backdrop-blur-xl border-b border-charcoal/10 relative z-[101]">
+            <div className="flex items-center gap-6">
+              <span className="font-mono font-bold text-charcoal tracking-widest uppercase text-xl">{activeFile.name}</span>
+              <span className="text-[10px] font-mono text-danger tracking-[0.2em] uppercase font-bold animate-pulse">/// DRM ACTIVE</span>
             </div>
-            <button onClick={closeViewer} className="text-muted hover:text-white font-mono border border-white/20 px-4 py-2 rounded">
-              END SESSION
+            <button onClick={closeViewer} className="text-charcoal hover:bg-black hover:text-white font-mono font-bold text-xs tracking-widest px-6 py-2 uppercase transition-all bracket-card">
+              [ TERMINATE ]
             </button>
           </div>
           <iframe
             src={decryptedPdfUrl}
-            className="flex-1 w-full bg-white"
+            className="flex-1 w-full bg-white relative z-[99]"
             title="Exam PDF"
           />
         </div>
@@ -301,16 +301,19 @@ export function Student() {
   if (decryptedHtml && activeFile) {
     return (
       <motion.div initial={{ opacity: 0, scale: 0.98, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: 10 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} className="flex-1 w-full h-full absolute inset-0 bg-background z-50 overflow-y-auto">
-        <div className="w-full max-w-3xl mx-auto p-10 min-h-screen flex flex-col pt-20 pb-32">
-          <div className="flex justify-between items-center mb-16 border-b border-[#2a2a2a] pb-8">
-            <div className="text-white font-sans text-2xl font-semibold tracking-tight">
-              {activeFile.name}
+        <div className="w-full max-w-4xl mx-auto p-12 min-h-screen flex flex-col pt-24 pb-32">
+          <div className="flex justify-between items-center mb-16 border-b border-charcoal/10 pb-8">
+            <div className="flex items-center gap-6">
+              <div className="text-charcoal font-mono text-3xl font-bold tracking-[0.1em] uppercase">
+                {activeFile.name}
+              </div>
+              <span className="text-[10px] font-mono text-danger tracking-[0.2em] uppercase font-bold animate-pulse">/// DRM ACTIVE</span>
             </div>
-            <button onClick={closeViewer} className="text-sm font-medium bg-[#1a1a1a] border border-[#2a2a2a] text-muted hover:text-white px-4 py-2 rounded-lg transition-all hover:bg-[#222222]">
-              End Session
+            <button onClick={closeViewer} className="text-charcoal hover:bg-black hover:text-white font-mono font-bold text-xs tracking-widest px-6 py-3 uppercase transition-all bracket-card border border-charcoal/20">
+              [ TERMINATE ]
             </button>
           </div>
-          <div className="prose prose-invert max-w-none text-base leading-[1.8]" dangerouslySetInnerHTML={{ __html: decryptedHtml }} />
+          <div className="prose prose-lg max-w-none text-charcoal font-mono prose-headings:font-mono prose-h1:text-charcoal prose-a:text-blue-500 leading-loose" dangerouslySetInnerHTML={{ __html: decryptedHtml }} />
         </div>
       </motion.div>
     );
@@ -319,11 +322,11 @@ export function Student() {
   const exams = catalog[activeDept] || [];
 
   return (
-    <div className="flex-1 grid grid-cols-[280px_1fr] relative z-10 w-full">
-      <motion.div variants={containerVariants} initial="hidden" animate="show" className="border-r border-[#2a2a2a] bg-[#0a0a0a] p-8 overflow-y-auto flex flex-col gap-1">
-        <div className="text-muted text-xs font-semibold tracking-wider mb-6 uppercase flex items-center justify-between">
-          <span>Categories</span>
-          <button onClick={fetchCatalog} className="hover:text-white transition-colors" title="Refresh">
+    <div className="flex-1 grid grid-cols-[300px_1fr] relative z-10 w-full gap-8">
+      <motion.div variants={containerVariants} initial="hidden" animate="show" className="border-r border-[#1a1a1a]/10 bg-transparent p-6 overflow-y-auto flex flex-col gap-2">
+        <div className="text-[#666] text-[10px] font-bold tracking-[0.2em] mb-8 uppercase flex items-center justify-between border-b border-[#1a1a1a]/10 pb-4">
+          <span>/// Directories</span>
+          <button onClick={fetchCatalog} className="hover:text-black transition-colors" title="Refresh">
             <RefreshCw className={`w-3.5 h-3.5 ${catalogLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
@@ -332,13 +335,13 @@ export function Student() {
             variants={itemVariants}
             key={d}
             onClick={() => setActiveDept(d)}
-            className={`w-full text-left px-4 py-2.5 font-sans text-sm font-medium rounded-lg flex justify-between items-center transition-all duration-200 group ${
+            className={`w-full text-left px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest rounded-none flex justify-between items-center transition-all duration-300 group bracket-card ${
               activeDept === d 
-                ? 'bg-[#ffffff] text-black shadow-sm' 
-                : 'bg-transparent text-muted hover:bg-[#1a1a1a] hover:text-white'
+                ? 'bg-white text-black shadow-glow-white border-white' 
+                : 'bg-transparent text-[#666] hover:bg-white/50 border-transparent hover:border-white'
             }`}
           >
-            <span className="capitalize">{d.replace('-', ' ')}</span>
+            <span className="">{d.replace('-', ' ')}</span>
             <div className="flex items-center gap-2">
               <ChevronRight className={`w-4 h-4 transition-all duration-300 opacity-50 ${activeDept === d ? 'translate-x-1 text-black' : 'opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100'}`} />
             </div>
@@ -346,38 +349,46 @@ export function Student() {
         ))}
       </motion.div>
 
-      <div className="p-16 flex justify-center items-start overflow-y-auto bg-[#0a0a0a]">
-        <div className="w-full max-w-4xl">
-          <motion.h2 initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="font-sans font-semibold text-3xl mb-12 border-b border-[#2a2a2a] pb-6 text-[#e5e5e5] capitalize tracking-tight flex items-center gap-4">
+      <div className="p-8 flex justify-center items-start overflow-y-auto bg-transparent">
+        <div className="w-full max-w-5xl">
+          <motion.h2 initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="font-mono font-bold text-4xl mb-12 border-b border-[#1a1a1a]/10 pb-6 text-charcoal uppercase tracking-[0.2em] flex items-center gap-4">
             {activeDept.replace('-', ' ')}
+            <span className="text-xs font-mono text-muted tracking-wide opacity-50 self-end mb-2">/// {exams.length} NODE{exams.length !== 1 ? 'S' : ''} DETECTED</span>
           </motion.h2>
 
           {catalogLoading ? (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-12 minimal-panel text-center text-muted font-sans text-sm flex flex-col items-center">
-              <RefreshCw className="w-5 h-5 animate-spin mb-4" />
-              Syncing protocols...
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-16 bracket-card hover-glow text-center text-charcoal font-mono text-xs flex flex-col items-center">
+              <RefreshCw className="w-6 h-6 animate-spin mb-6 text-blue-500" />
+              <div className="tracking-[0.2em] font-bold">SYNCING PROTOCOLS...</div>
             </motion.div>
           ) : (
-            <motion.div key={`${activeDept}-${exams.length}`} variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-2 gap-6">
+            <motion.div key={`${activeDept}-${exams.length}`} variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-2 gap-8">
               {exams.length === 0 ? (
-                <motion.div variants={cardVariants} className="col-span-2 p-12 minimal-panel text-center text-muted font-sans text-sm">
-                  No evaluations available.
+                <motion.div variants={cardVariants} className="col-span-2 p-16 bracket-card text-center text-charcoal font-mono text-xs uppercase tracking-[0.2em]">
+                  <span className="opacity-50">/// Null Sector</span>
                 </motion.div>
               ) : (
-                exams.map(file => (
+                exams.map((file, i) => (
                   <motion.button
                     variants={cardVariants}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     key={file}
                     onClick={() => setActiveFile({ path: `${activeDept}/${file}`, name: file.replace('.enc', '') })}
-                    className="p-6 bg-[#111111] hover:bg-[#151515] border border-[#2a2a2a] hover:border-[#444444] rounded-2xl text-left transition-all duration-300 flex items-start gap-4 cursor-pointer"
+                    className="p-8 bracket-card hover-glow text-left flex flex-col justify-between min-h-[160px] group"
                   >
-                    <FileText className="w-6 h-6 text-muted mt-1 flex-shrink-0" />
+                    <div className="flex justify-between items-start w-full mb-6">
+                      <div className="text-[10px] text-[#888] font-mono tracking-widest border border-[#888]/30 px-2 py-1 uppercase group-hover:border-blue-400 group-hover:text-blue-500 transition-colors">
+                        ID_{String(i + 1).padStart(3, '0')}
+                      </div>
+                      <Lock className="w-4 h-4 text-[#888] group-hover:text-blue-500 transition-colors" />
+                    </div>
                     <div>
-                      <div className="text-[#e5e5e5] font-sans font-medium text-lg leading-tight mb-1">{file.replace('.enc', '')}</div>
-                      <div className="text-muted text-xs flex items-center gap-1.5 font-mono">
-                        <Lock className="w-3 h-3" /> Encrypted
+                      <div className="text-charcoal font-mono font-bold text-xl uppercase tracking-widest leading-tight mb-2 truncate">
+                        {file.replace('.enc', '')}
+                      </div>
+                      <div className="text-[#666] text-[10px] uppercase tracking-[0.2em] opacity-80">
+                        {`[ `}ENCRYPTED PAYLOAD{` ]`}
                       </div>
                     </div>
                   </motion.button>
@@ -388,19 +399,19 @@ export function Student() {
         </div>
       </div>
 
-      {/* The Minimal Decryption Modal */}
+      {/* The Igloo Decryption Modal */}
       <AnimatePresence>
         {activeFile && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="absolute inset-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-md flex items-center justify-center p-4">
-            <motion.div initial={{ scale: 0.95, y: 10, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} className="w-full max-w-[420px] bg-[#111111] border border-[#2a2a2a] p-8 rounded-3xl shadow-minimal flex flex-col gap-6">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="absolute inset-0 z-50 bg-white/30 backdrop-blur-3xl flex items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.95, y: 10, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} className="w-full max-w-[480px] bg-white/70 border border-white p-10 shadow-glow-white flex flex-col gap-8 bracket-card">
               <div className="text-center mt-2">
-                <div className="w-12 h-12 bg-[#1a1a1a] rounded-full flex items-center justify-center mx-auto mb-5 border border-[#2a2a2a]">
-                  <Lock className="w-5 h-5 text-[#e5e5e5]" />
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-glow-blue border border-[#ccc]">
+                  <Lock className="w-6 h-6 text-blue-500" />
                 </div>
-                <h3 className="text-[#e5e5e5] font-sans font-semibold text-xl mb-2">
-                   Access Pattern
+                <h3 className="text-charcoal font-mono font-bold text-2xl mb-3 tracking-[0.2em] uppercase">
+                   ACCESS REQUEST
                 </h3>
-                <p className="text-muted text-sm leading-relaxed max-w-[280px] mx-auto">This evaluation is locked. Verify your identity code to proceed.</p>
+                <p className="text-[#666] text-[10px] tracking-widest leading-loose max-w-[280px] mx-auto uppercase">/// TARGET: {activeFile.name}<br/>/// AUTHORIZATION REQUIRED</p>
               </div>
               
               <div>
@@ -410,32 +421,32 @@ export function Student() {
                   value={examCode}
                   onChange={e => setExamCode(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleDecrypt()}
-                  className="w-full bg-[#050505] border border-[#2a2a2a] text-[#e5e5e5] rounded-xl p-4 font-mono text-center tracking-[0.2em] placeholder:tracking-normal focus:border-[#555] focus:ring-1 focus:ring-[#555] focus:outline-none transition-all duration-200"
-                  placeholder="e.g. NET-A1"
+                  className="w-full bg-transparent border-b-2 border-charcoal/20 text-charcoal rounded-none px-4 py-4 font-mono text-2xl text-center tracking-[0.3em] focus:border-blue-500 focus:outline-none transition-all duration-300 placeholder:opacity-20 placeholder:text-charcoal/50"
+                  placeholder="CODE"
                 />
               </div>
               
               <AnimatePresence>
                 {status.msg && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="text-[#ff453a] font-sans text-center text-sm font-medium">
-                    {status.msg}
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="text-danger font-mono tracking-widest uppercase text-center text-[10px] font-bold">
+                    [ ! ] {status.msg}
                   </motion.div>
                 )}
               </AnimatePresence>
               
-              <div className="flex gap-3 mt-4">
+              <div className="flex gap-4 mt-4">
                 <button 
                   onClick={() => setActiveFile(null)} 
-                  className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-[#2a2a2a] text-[#e5e5e5] hover:bg-[#222222] font-semibold font-sans rounded-xl transition-all"
+                  className="flex-1 px-4 py-4 bg-transparent border border-charcoal text-charcoal hover:bg-charcoal hover:text-white font-bold font-mono text-xs tracking-widest uppercase transition-all"
                 >
-                  Cancel
+                  [ ABORT ]
                 </button>
                 <button 
                   onClick={handleDecrypt} 
                   disabled={loading || !examCode}
-                  className="flex-1 px-4 py-3 bg-[#e5e5e5] text-black hover:bg-white font-semibold font-sans disabled:opacity-50 transition-all rounded-xl shadow-sm"
+                  className="flex-1 px-4 py-4 bg-charcoal text-white hover:bg-black font-bold font-mono text-xs tracking-widest uppercase disabled:opacity-50 transition-all shadow-glow-blue"
                 >
-                  {loading ? 'Verifying...' : 'Unlock'}
+                  {loading ? '[ VERIFYING... ]' : '[ INITIATE ]'}
                 </button>
               </div>
             </motion.div>
