@@ -356,7 +356,7 @@ export function Student() {
               Syncing protocols...
             </motion.div>
           ) : (
-            <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-2 gap-6">
+            <motion.div key={`${activeDept}-${exams.length}`} variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-2 gap-6">
               {exams.length === 0 ? (
                 <motion.div variants={cardVariants} className="col-span-2 p-12 minimal-panel text-center text-muted font-sans text-sm">
                   No evaluations available.
