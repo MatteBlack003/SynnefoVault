@@ -41,7 +41,7 @@ export function Admin() {
   // Upload State
   const [dept, setDept] = useState('networking');
   const [filename, setFilename] = useState('');
-  const [studentCount, setStudentCount] = useState(50);
+  const [studentCount, setStudentCount] = useState<number | ''>('');
   const [content, setContent] = useState('');
   const [contentType, setContentType] = useState<'markdown' | 'pdf'>('markdown');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -148,6 +148,11 @@ export function Admin() {
     const hasContent = contentType === 'pdf' ? pdfFile !== null : content.trim() !== '';
     if(!filename || !hasContent) {
       setStatus({ type: 'error', msg: 'Filename and Content (PDF or Markdown) are strictly required.' });
+      return;
+    }
+
+    if (typeof studentCount !== 'number' || isNaN(studentCount) || studentCount < 1 || studentCount > 200) {
+      setStatus({ type: 'error', msg: 'ERROR: Class size must be a number between 1 and 200.' });
       return;
     }
 
@@ -309,7 +314,7 @@ export function Admin() {
           </div>
           <div>
             <label className={labelClass}>Class Size (IDs to Generate)</label>
-            <input type="number" min="1" max="200" value={studentCount} onChange={e => setStudentCount(parseInt(e.target.value, 10))} className={inputClass} />
+            <input type="number" min="1" max="200" value={studentCount} onChange={e => setStudentCount(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className={inputClass} placeholder="e.g. 3" />
           </div>
         </div>
 
