@@ -1,7 +1,5 @@
 {
-  "networking": [
-    "test-delete-this.enc"
-  ],
+  "networking": [],
   "devops": [
     "test.enc",
     "pdftest.enc"
