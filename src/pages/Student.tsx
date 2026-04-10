@@ -178,10 +178,10 @@ export function Student() {
     } catch (err) {
       console.error(err);
       const errMsg = err instanceof Error ? err.message : '';
-      if (errMsg.includes('Could not download')) {
-        setStatus({ type: 'error', msg: 'ERROR: Could not download the exam file. It may have been removed or the exam has ended.' });
+      if (errMsg.includes('Could not download') || errMsg.includes('Failed to fetch')) {
+        setStatus({ type: 'error', msg: 'ERROR [NETWORK_FETCH]: Could not download the encrypted exam file. Ensure it exists on the active branch and your network is strong.' });
       } else {
-        setStatus({ type: 'error', msg: 'ACCESS DENIED: Invalid Student ID — Cryptographic Keyring Rejection.' });
+        setStatus({ type: 'error', msg: 'ERROR [ACCESS_DENIED]: Invalid Student ID or Passkey provided. Cryptographic Keyring matched 0 entities.' });
       }
     } finally {
       setLoading(false);

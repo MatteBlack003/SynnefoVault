@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { encryptWithKeyring } from '../lib/crypto';
 import { uploadToGitHub, deleteFromGitHub, fetchFullCatalogFromAPI, updateCatalogInRepo } from '../lib/github';
 
@@ -30,6 +31,7 @@ function loadCatalogLocally(): Catalog | null {
 }
 
 export function Admin() {
+  const navigate = useNavigate();
   const [token, setToken] = useState('');
   const [owner, setOwner] = useState('');
   const [repo, setRepo] = useState('');
@@ -248,7 +250,13 @@ export function Admin() {
   // LOGIN GATEWAY
   if (!isLoggedIn) {
     return (
-      <div className="flex-1 overflow-y-auto p-12 relative z-10 flex items-center justify-center font-mono">
+      <div className="flex-1 overflow-y-auto p-12 relative z-10 flex flex-col items-center justify-center font-mono">
+        <button 
+          onClick={() => navigate('/')} 
+          className="mb-8 text-muted hover:text-white border border-white/10 px-4 py-2 rounded text-sm transition-colors flex items-center gap-2"
+        >
+          &larr; Return to Portal
+        </button>
         <div className="w-full max-w-md bg-surface backdrop-blur-3xl border border-white/10 rounded-xl p-10 shadow-2xl text-center">
           <h2 className="font-display text-accent text-xl tracking-widest mb-6">FACULTY AUTHORIZATION GATEWAY</h2>
           <div className="text-left">
@@ -274,7 +282,16 @@ export function Admin() {
       {/* Upload Panel */}
       <div className="flex-[2] bg-surface backdrop-blur-3xl border border-white/10 rounded-xl p-8 shadow-2xl h-fit">
         <div className="flex justify-between items-center border-b border-white/10 pb-4 mb-6">
-          <h2 className="font-display text-xl text-accent">EXAM KEYRING GENERATOR</h2>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => navigate('/')} 
+              className="text-muted hover:text-white text-lg font-bold border border-white/10 px-3 py-1 rounded transition-colors"
+              title="Return to Portal"
+            >
+              &larr;
+            </button>
+            <h2 className="font-display text-xl text-accent">EXAM KEYRING GENERATOR</h2>
+          </div>
           <div className="flex gap-2">
             <button onClick={() => fetchLiveCatalog()} className="text-xs border border-accent text-accent px-3 py-1 rounded hover:bg-accent/10">REFRESH</button>
             <button onClick={handleLogout} className="text-xs border border-[#f85149] text-[#f85149] px-3 py-1 rounded hover:bg-[#f85149]/10">DISCONNECT</button>

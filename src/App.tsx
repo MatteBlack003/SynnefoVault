@@ -1,11 +1,13 @@
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { ParticleBackground } from './components/ParticleBackground';
 import { Admin } from './pages/Admin';
 import { Student } from './pages/Student';
 
-function App() {
+function Shell() {
+  const navigate = useNavigate();
+
   return (
-    <HashRouter>
+    <>
       {/* Persistent Animated Background */}
       <ParticleBackground />
       
@@ -16,8 +18,14 @@ function App() {
           <div className="flex items-center gap-6">
             <h1 className="font-display font-black text-2xl tracking-tighter text-white">SYNNEFO</h1>
             <div className="font-mono text-xs text-muted border-l border-white/10 pl-6 flex flex-col gap-1">
-              <div><span className="inline-block w-1.5 h-1.5 bg-[#3fb950] rounded-full mr-1.5 shadow-[0_0_10px_#3fb950]"></span> SECURE NODE LINKED</div>
-              <div>AUTH: ZERO_BACKEND_LOCKED</div>
+              <div 
+                onDoubleClick={() => navigate('/admin')}
+                className="cursor-default select-none hover:text-white transition-colors"
+                title="System Status"
+              >
+                <span className="inline-block w-1.5 h-1.5 bg-[#3fb950] rounded-full mr-1.5 shadow-[0_0_10px_#3fb950]"></span> SECURE NODE LINKED
+              </div>
+              <div className="select-none">AUTH: ZERO_BACKEND_LOCKED</div>
             </div>
           </div>
           <div className="font-display font-black text-lg tracking-widest text-accent border border-accent bg-accent/10 px-4 py-2 rounded">
@@ -33,7 +41,15 @@ function App() {
           </Routes>
         </main>
       </div>
-    </HashRouter>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter basename="/SynnefoVault/">
+      <Shell />
+    </BrowserRouter>
   );
 }
 
