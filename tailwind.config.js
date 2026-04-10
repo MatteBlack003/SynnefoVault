@@ -7,24 +7,27 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        mono: ['"Space Mono"', 'monospace'],
-        sans: ['"Space Mono"', 'monospace'], // Force monospace globally
+        mono: ['"Space Mono"', 'Courier New', 'monospace'],
+        sans: ['"Space Mono"', 'Courier New', 'monospace'],
       },
       colors: {
-        background: '#f8f9fa',
-        surface: 'rgba(255, 255, 255, 0.4)',
-        accent: '#ffffff',
-        muted: '#7a7a85',
-        danger: '#ff4b4b',
-        charcoal: '#1a1a1a',
-        frostblue: '#eaf0f8',
+        bg:       '#0d0f14',
+        surface:  '#141720',
+        surface2: '#1c2030',
+        border:   '#262d3d',
+        border2:  '#334155',
+        ink:      '#cbd5e1',  // main text
+        muted:    '#64748b',  // secondary text
+        dim:      '#475569',  // dim text
+        accent:   '#6366f1',  // indigo
+        success:  '#22c55e',
+        danger:   '#ef4444',
       },
       boxShadow: {
-        'glow-white': '0 0 40px rgba(255,255,255,0.9)',
-        'glow-blue': '0 0 60px rgba(180,210,255,0.4)',
-        'frost-edge': 'inset 0 0 100px rgba(100, 150, 255, 0.15)',
-        'glass-panel': '0 8px 32px 0 rgba(31, 38, 135, 0.05)',
-      }
+        'accent-glow': '0 0 24px rgba(99,102,241,0.3)',
+        'danger-glow': '0 0 24px rgba(239,68,68,0.25)',
+        'panel':       '0 4px 24px rgba(0,0,0,0.4)',
+      },
     },
   },
   plugins: [

@@ -11,159 +11,126 @@ const DEPARTMENTS = [
 ];
 
 const REPO_OWNER = 'MatteBlack003';
-const REPO_NAME = 'SynnefoVault';
+const REPO_NAME  = 'SynnefoVault';
+const PAGES_BASE = `https://${REPO_OWNER.toLowerCase()}.github.io/${REPO_NAME}/`;
+const CATALOG_KEY = 'synnefo_live_catalog';
 
-// The deployed GitHub Pages URL where catalog.json is served (no rate limits)
-const PAGES_BASE_URL = `https://${REPO_OWNER.toLowerCase()}.github.io/${REPO_NAME}/`;
-
-const CATALOG_STORAGE_KEY = 'synnefo_live_catalog';
-
-interface Catalog {
-  [dept: string]: string[];
-}
+interface Catalog { [dept: string]: string[]; }
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  show:   { opacity: 1, transition: { staggerChildren: 0.04 } }
 };
 const itemVariants: Variants = {
-  hidden: { opacity: 0, x: -20 },
-  show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  hidden: { opacity: 0, x: -12 },
+  show:   { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
 };
 const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  hidden: { opacity: 0, y: 16 },
+  show:   { opacity: 1, y: 0,  transition: { type: 'spring', stiffness: 300, damping: 24 } }
 };
 
 export function Student() {
-  const [catalog, setCatalog] = useState<Catalog>({});
-  const [activeDept, setActiveDept] = useState('networking');
-  const [catalogLoading, setCatalogLoading] = useState(true);
-  
-  const [activeFile, setActiveFile] = useState<{ path: string, name: string } | null>(null);
-  const [examCode, setExamCode] = useState(''); // This acts as the Student ID
-  const [decryptedHtml, setDecryptedHtml] = useState<string | null>(null);
-  const [decryptedPdfUrl, setDecryptedPdfUrl] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState<number | null>(null); // seconds remaining; null = no limit
-  
-  const [status, setStatus] = useState({ type: '', msg: '' });
+  const [catalog,        setCatalog]       = useState<Catalog>({});
+  const [activeDept,     setActiveDept]    = useState(DEPARTMENTS[0]);
+  const [catalogLoading, setCatalogLoading]= useState(true);
+
+  const [activeFile,     setActiveFile]    = useState<{ path: string; name: string } | null>(null);
+  const [examCode,       setExamCode]      = useState('');
+  const [decryptedHtml,  setDecryptedHtml] = useState<string | null>(null);
+  const [decryptedPdfUrl,setDecryptedPdfUrl] = useState<string | null>(null);
+  const [timeLeft,       setTimeLeft]      = useState<number | null>(null);
+
+  const [status,  setStatus]  = useState({ type: '', msg: '' });
   const [loading, setLoading] = useState(false);
 
-  /** Check if a catalog has any exams */
-  const hasExams = (c: Catalog): boolean => Object.values(c).some(files => files.length > 0);
+  const hasExams = (c: Catalog) => Object.values(c).some(f => Array.isArray(f) && f.length > 0);
 
-  /**
-   * Catalog fetch strategy (checked in priority order):
-   * 1. localStorage (instant — set by admin tab in the same browser)
-   * 2. raw.githubusercontent.com/catalog.json (always fresh, no rate limits)
-   * 3. Local/deployed catalog.json
-   * 4. Git Trees API (last resort, 1 request)
-   */
   const fetchCatalog = async () => {
     setCatalogLoading(true);
 
-    // Step 1: Check localStorage first (instant, set by admin page)
+    // 1. localStorage (instant)
     try {
-      const raw = localStorage.getItem(CATALOG_STORAGE_KEY);
+      const raw = localStorage.getItem(CATALOG_KEY);
       if (raw) {
         const data: Catalog = JSON.parse(raw);
-        if (hasExams(data)) {
-          setCatalog(data);
-          setCatalogLoading(false);
-          return; // We have good data, no need to fetch externally
-        }
+        if (hasExams(data)) { setCatalog(data); setCatalogLoading(false); return; }
       }
-    } catch { /* corrupt localStorage, continue to network sources */ }
+    } catch { /* continue */ }
 
-    // Step 2: Fetch catalog.json from raw.githubusercontent.com
+    // 2. raw.githubusercontent.com
     try {
-      const rawCatalogUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/public/catalog.json?t=${Date.now()}`;
-      const res = await fetch(rawCatalogUrl, { cache: 'no-store' });
+      const res = await fetch(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/public/catalog.json?t=${Date.now()}`, { cache: 'no-store' });
       if (res.ok) {
         const data: Catalog = await res.json();
-        if (hasExams(data)) {
-          setCatalog(data);
-          setCatalogLoading(false);
-          return;
-        }
+        if (hasExams(data)) { setCatalog(data); setCatalogLoading(false); return; }
       }
-    } catch { /* failed, try next */ }
+    } catch { /* continue */ }
 
-    // Step 3: Fallback to local/deployed catalog.json
+    // 3. GitHub Pages catalog.json
     try {
       const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const catalogUrl = isLocal 
-        ? (import.meta.env.BASE_URL + `catalog.json?t=${Date.now()}`)
-        : (PAGES_BASE_URL + `catalog.json?t=${Date.now()}`);
-
-      const res = await fetch(catalogUrl, { cache: 'no-store' });
+      const url = isLocal
+        ? `${import.meta.env.BASE_URL}catalog.json?t=${Date.now()}`
+        : `${PAGES_BASE}catalog.json?t=${Date.now()}`;
+      const res = await fetch(url, { cache: 'no-store' });
       if (res.ok) {
         const data: Catalog = await res.json();
-        if (hasExams(data)) {
-          setCatalog(data);
-          setCatalogLoading(false);
-          return;
-        }
+        if (hasExams(data)) { setCatalog(data); setCatalogLoading(false); return; }
       }
-    } catch { /* failed, try next */ }
+    } catch { /* continue */ }
 
-    // Step 4: Git Trees API as last resort (1 request)
+    // 4. Git Trees API (last resort)
     try {
-      const liveCatalog = await fetchFullCatalogFromAPI(REPO_OWNER, REPO_NAME, DEPARTMENTS);
-      setCatalog(liveCatalog);
-    } catch {
-      console.warn('All catalog sources failed.');
-    }
+      const live = await fetchFullCatalogFromAPI(REPO_OWNER, REPO_NAME, DEPARTMENTS);
+      setCatalog(live);
+    } catch { console.warn('All catalog sources failed.'); }
 
     setCatalogLoading(false);
   };
 
-  useEffect(() => {
-    fetchCatalog();
-  }, []);
+  useEffect(() => { fetchCatalog(); }, []);
 
-  // Live Kill Switch Daemon (Instant boot and real-time reflection)
+  // Kill-switch daemon
   useEffect(() => {
-    // 1. Storage Listener for Instant Local Revocation (Same machine/network testing)
     const handleStorage = (e: StorageEvent) => {
-      if (e.key === CATALOG_STORAGE_KEY && e.newValue) {
+      if (e.key === CATALOG_KEY && e.newValue) {
         try {
-          const freshCatalog: Catalog = JSON.parse(e.newValue);
-          setCatalog(freshCatalog); // update UI
-          
+          const fresh: Catalog = JSON.parse(e.newValue);
+          setCatalog(fresh);
           if (activeFile) {
             const [dept, fileName] = activeFile.path.split('/');
-            // Only purge if the file is explicitly GONE (not if it was never in this dept object)
-            // This prevents false-positive purges when admin uploads a NEW exam and writes catalog
-            const deptFiles = freshCatalog[dept];
+            const deptFiles = fresh[dept];
+            // Only purge if the dept array exists and EXPLICITLY excludes this file
             if (Array.isArray(deptFiles) && !deptFiles.includes(fileName)) {
-              alert("ADMINISTRATOR INITIATED PURGE: EXAM SESSION FORCE TERMINATED.");
+              alert('EXAM TERMINATED: Administrator has ended this session.');
               closeViewer();
             }
           }
-        } catch { /* parsing fail */ }
+        } catch { /* corrupt */ }
       }
     };
     window.addEventListener('storage', handleStorage);
 
-    // 2. Active Polling for Globally Distributed Readers
     let interval: ReturnType<typeof setInterval>;
     if (activeFile) {
       interval = setInterval(async () => {
         try {
-          const rawCatalogUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/public/catalog.json?t=${Date.now()}`;
-          const res = await fetch(rawCatalogUrl, { cache: 'no-store' });
+          const res = await fetch(
+            `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/public/catalog.json?t=${Date.now()}`,
+            { cache: 'no-store' }
+          );
           if (res.ok) {
-            const freshCatalog: Catalog = await res.json();
+            const fresh: Catalog = await res.json();
             const [dept, fileName] = activeFile.path.split('/');
-            const deptFiles = freshCatalog[dept];
+            const deptFiles = fresh[dept];
             if (Array.isArray(deptFiles) && !deptFiles.includes(fileName)) {
-              alert("ADMINISTRATOR INITIATED PURGE: EXAM SESSION FORCE TERMINATED.");
+              alert('EXAM TERMINATED: Administrator has ended this session.');
               closeViewer();
             }
           }
         } catch { /* network fail, ignore */ }
-      }, 30000); // 30s poller
+      }, 30_000);
     }
 
     return () => {
@@ -172,106 +139,69 @@ export function Student() {
     };
   }, [activeFile]);
 
-  // Exam Countdown Timer Engine
+  // Countdown timer
   useEffect(() => {
-    if (timeLeft === null) return; // no limit set
+    if (timeLeft === null) return;
     if (timeLeft <= 0) {
-      alert('SESSION_EXPIRED: Your exam time has ended. Access revoked.');
+      alert('TIME UP: Your exam session has expired.');
       closeViewer();
       return;
     }
-    const tick = setInterval(() => {
-      setTimeLeft(prev => (prev !== null ? prev - 1 : null));
-    }, 1000);
+    const tick = setInterval(() => setTimeLeft(prev => prev !== null ? prev - 1 : null), 1000);
     return () => clearInterval(tick);
   }, [timeLeft]);
 
-  // DRM & Anti-Cheating Engine Protection Layer
+  // DRM / Anti-cheating
   useEffect(() => {
-    if ((decryptedHtml || decryptedPdfUrl) && activeFile && examCode) {
-      const handleContextMenu = (e: MouseEvent) => {
+    if (!(decryptedHtml || decryptedPdfUrl) || !activeFile) return;
+    const blockCtx = (e: MouseEvent) => { e.preventDefault(); };
+    const blockKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && ['c','p','s','x','a'].includes(e.key.toLowerCase())) {
         e.preventDefault();
-        alert("SECURITY ENGINE: RIGHT-CLICK DISABLED");
-      };
-      
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.ctrlKey || e.metaKey) {
-          if (['c', 'p', 's', 'x', 'a'].includes(e.key.toLowerCase())) {
-            e.preventDefault();
-            alert("SECURITY ENGINE: ACTION INTERCEPTED AND BLOCKED");
-          }
-        }
-      };
-
-      document.addEventListener('contextmenu', handleContextMenu);
-      document.addEventListener('keydown', handleKeyDown);
-      document.body.classList.add('select-none'); // Tailwind rule to prevent highlighting
-
-      return () => {
-        document.removeEventListener('contextmenu', handleContextMenu);
-        document.removeEventListener('keydown', handleKeyDown);
-        document.body.classList.remove('select-none');
-      };
-    }
-  }, [decryptedHtml, decryptedPdfUrl, activeFile, examCode]);
+      }
+    };
+    document.addEventListener('contextmenu', blockCtx);
+    document.addEventListener('keydown', blockKey);
+    document.body.classList.add('select-none');
+    return () => {
+      document.removeEventListener('contextmenu', blockCtx);
+      document.removeEventListener('keydown', blockKey);
+      document.body.classList.remove('select-none');
+    };
+  }, [decryptedHtml, decryptedPdfUrl, activeFile]);
 
   const handleDecrypt = async () => {
     if (!activeFile || !examCode) return;
-    
     setLoading(true);
     setStatus({ type: '', msg: '' });
-
     try {
-      // Fetch the .enc file directly from GitHub raw content
-      // Appending Date.now() bypasses GitHub's heavily aggressive Fastly edge node caches
-      // so when a file is physically deleted, the cache isn't erroneously served for 5 minutes.
       const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${activeFile.path}?t=${Date.now()}`;
       const res = await fetch(rawUrl, { cache: 'no-store' });
-      if(!res.ok) throw new Error("Could not download the encrypted exam file from the server.");
-      
+      if (!res.ok) throw new Error('Could not download the exam file from the server.');
       const payloadString = await res.text();
-      
-      // Decrypt using the Cryptographic Keyring via Student ID
-      const decryptedContent = await decryptWithKeyring(examCode, payloadString);
+      const decrypted = await decryptWithKeyring(examCode, payloadString);
 
-      // Detect content type from the marker prefix
-      if (decryptedContent.startsWith('PDF:')) {
-        const base64Data = decryptedContent.substring(4);
-        // Convert base64 to blob URL for rendering
-        const binaryString = atob(base64Data);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        const blob = new Blob([bytes], { type: 'application/pdf' });
-        const blobUrl = URL.createObjectURL(blob);
+      if (decrypted.startsWith('PDF:')) {
+        const bytes = Uint8Array.from(atob(decrypted.substring(4)), c => c.charCodeAt(0));
+        const blobUrl = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
         setDecryptedPdfUrl(blobUrl);
         setDecryptedHtml(null);
       } else {
-        // Strip the MD: prefix if present, or treat as raw markdown for backwards compat
-        const markdown = decryptedContent.startsWith('MD:') 
-          ? decryptedContent.substring(3) 
-          : decryptedContent;
-        const htmlContent = marked.parse(markdown) as string;
-        setDecryptedHtml(htmlContent);
+        const md = decrypted.startsWith('MD:') ? decrypted.substring(3) : decrypted;
+        setDecryptedHtml(marked.parse(md) as string);
         setDecryptedPdfUrl(null);
       }
 
-      // Start the countdown timer if a duration is stored for this exam
-      const durations = (catalog as Record<string, unknown>)['_durations'] as Record<string, number> | undefined;
-      if (durations && durations[activeFile.path]) {
-        setTimeLeft(durations[activeFile.path] * 60); // convert minutes -> seconds
-      } else {
-        setTimeLeft(null); // no time limit
-      }
-      
+      // Start timer if duration stored
+      const durs = (catalog as Record<string, unknown>)['_durations'] as Record<string, number> | undefined;
+      setTimeLeft(durs?.[activeFile.path] ? durs[activeFile.path] * 60 : null);
+
     } catch (err) {
-      console.error(err);
-      const errMsg = err instanceof Error ? err.message : '';
-      if (errMsg.includes('Could not download') || errMsg.includes('Failed to fetch')) {
-        setStatus({ type: 'error', msg: 'ERROR [NETWORK_FETCH]: Could not download the encrypted exam file. Ensure it exists on the active branch and your network is strong.' });
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('download') || msg.includes('fetch')) {
+        setStatus({ type: 'error', msg: 'Network error: could not download the exam file.' });
       } else {
-        setStatus({ type: 'error', msg: 'ERROR [ACCESS_DENIED]: Invalid Student ID or Passkey provided. Cryptographic Keyring matched 0 entities.' });
+        setStatus({ type: 'error', msg: 'Access denied: invalid student ID or passkey.' });
       }
     } finally {
       setLoading(false);
@@ -279,10 +209,7 @@ export function Student() {
   };
 
   const closeViewer = () => {
-    // Revoke any blob URLs to prevent memory leaks
-    if (decryptedPdfUrl) {
-      URL.revokeObjectURL(decryptedPdfUrl);
-    }
+    if (decryptedPdfUrl) URL.revokeObjectURL(decryptedPdfUrl);
     setDecryptedHtml(null);
     setDecryptedPdfUrl(null);
     setActiveFile(null);
@@ -291,214 +218,242 @@ export function Student() {
     setStatus({ type: '', msg: '' });
   };
 
-  /** Format seconds as MM:SS */
-  const formatTime = (secs: number): string => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  };
+  const formatTime = (s: number) =>
+    `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
-  /** Colour class for countdown — turns red in last 5 minutes */
-  const timerClass = timeLeft !== null && timeLeft <= 300 ? 'text-danger animate-pulse' : 'text-blue-500';
+  const timerColor = timeLeft !== null && timeLeft <= 300 ? '#ef4444' : '#6366f1';
 
-  // PDF Viewer
+  // ── Viewer bar shared component ─────────────────────────────────────
+  const ViewerBar = () => (
+    <div className="flex justify-between items-center px-8 py-4 bg-surface border-b border-border relative z-10">
+      <div className="flex items-center gap-4">
+        <span className="text-base font-bold text-ink tracking-wide">{activeFile?.name}</span>
+        <span className="text-[10px] font-bold text-danger uppercase tracking-widest bg-danger/10 px-2 py-0.5 rounded">
+          DRM Active
+        </span>
+      </div>
+      <div className="flex items-center gap-6">
+        {timeLeft !== null && (
+          <div className="font-mono font-bold text-lg" style={{ color: timerColor }}>
+            {formatTime(timeLeft)}
+          </div>
+        )}
+        <button onClick={closeViewer}
+          className="btn-secondary py-2 px-5 text-xs">
+          End Session
+        </button>
+      </div>
+    </div>
+  );
+
+  // ── PDF Viewer ───────────────────────────────────────────────────────
   if (decryptedPdfUrl && activeFile) {
     return (
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.3 }} className="flex-1 w-full h-full absolute inset-0 bg-background z-50 overflow-hidden">
-        
-        {/* Dynamic Anti-Cheating Watermark Generator */}
-        <div className="absolute inset-0 pointer-events-none opacity-5 z-[100] grid grid-cols-4 grid-rows-5 items-center justify-items-center overflow-hidden">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div key={i} className="text-4xl font-mono text-charcoal transform -rotate-45 whitespace-nowrap font-bold tracking-widest">
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="absolute inset-0 z-50 bg-bg flex flex-col overflow-hidden"
+      >
+        {/* Watermark */}
+        <div className="absolute inset-0 pointer-events-none z-20 opacity-[0.04] grid grid-cols-5 grid-rows-6 items-center justify-items-center">
+          {Array.from({ length: 30 }).map((_, i) => (
+            <div key={i} className="text-3xl font-bold text-ink -rotate-30 whitespace-nowrap">
               {examCode.toUpperCase()}
             </div>
           ))}
         </div>
-
-        <div className="w-full h-full flex flex-col">
-          <div className="flex justify-between items-center px-8 py-4 bg-surface backdrop-blur-xl border-b border-charcoal/10 relative z-[101]">
-            <div className="flex items-center gap-6">
-              <span className="font-mono font-bold text-charcoal tracking-widest uppercase text-xl">{activeFile.name}</span>
-              <span className="text-[10px] font-mono text-danger tracking-[0.2em] uppercase font-bold animate-pulse">/// DRM ACTIVE</span>
-            </div>
-            <div className="flex items-center gap-6">
-              {timeLeft !== null && (
-                <div className={`font-mono font-bold text-lg tracking-[0.2em] ${timerClass}`}>
-                  {formatTime(timeLeft)}
-                </div>
-              )}
-              <button onClick={closeViewer} className="text-charcoal hover:bg-black hover:text-white font-mono font-bold text-xs tracking-widest px-6 py-2 uppercase transition-all bracket-card">
-                [ TERMINATE ]
-              </button>
-            </div>
-          </div>
-          <iframe
-            src={decryptedPdfUrl}
-            className="flex-1 w-full bg-white relative z-[99]"
-            title="Exam PDF"
-          />
-        </div>
+        <ViewerBar />
+        <iframe src={decryptedPdfUrl} className="flex-1 w-full border-0 relative z-10" title="Exam PDF" />
       </motion.div>
     );
   }
 
-  // Markdown Viewer
+  // ── Markdown Viewer ───────────────────────────────────────────────────
   if (decryptedHtml && activeFile) {
     return (
-      <motion.div initial={{ opacity: 0, scale: 0.98, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: 10 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} className="flex-1 w-full h-full absolute inset-0 bg-background z-50 overflow-y-auto">
-        <div className="w-full max-w-4xl mx-auto p-12 min-h-screen flex flex-col pt-24 pb-32">
-          <div className="flex justify-between items-center mb-16 border-b border-charcoal/10 pb-8">
-            <div className="flex items-center gap-6">
-              <div className="text-charcoal font-mono text-3xl font-bold tracking-[0.1em] uppercase">
-                {activeFile.name}
-              </div>
-              <span className="text-[10px] font-mono text-danger tracking-[0.2em] uppercase font-bold animate-pulse">/// DRM ACTIVE</span>
-            </div>
-            <div className="flex items-center gap-6">
-              {timeLeft !== null && (
-                <div className={`font-mono font-bold text-2xl tracking-[0.2em] ${timerClass}`}>
-                  {formatTime(timeLeft)}
-                </div>
-              )}
-              <button onClick={closeViewer} className="text-charcoal hover:bg-black hover:text-white font-mono font-bold text-xs tracking-widest px-6 py-3 uppercase transition-all bracket-card border border-charcoal/20">
-                [ TERMINATE ]
-              </button>
-            </div>
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="absolute inset-0 z-50 bg-bg flex flex-col overflow-hidden"
+      >
+        <ViewerBar />
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-3xl mx-auto px-8 py-12">
+            <div
+              className="md-body prose prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: decryptedHtml }}
+            />
           </div>
-          <div className="prose prose-lg max-w-none text-charcoal font-mono prose-headings:font-mono prose-h1:text-charcoal prose-a:text-blue-500 leading-loose" dangerouslySetInnerHTML={{ __html: decryptedHtml }} />
         </div>
       </motion.div>
     );
   }
 
-  const exams = catalog[activeDept] || [];
+  // ── Main Dashboard ────────────────────────────────────────────────────
+  const exams = (catalog[activeDept] || []).filter(f => typeof f === 'string');
 
   return (
-    <div className="flex-1 grid grid-cols-[300px_1fr] relative z-10 w-full gap-8">
-      <motion.div variants={containerVariants} initial="hidden" animate="show" className="border-r border-[#1a1a1a]/10 bg-transparent p-6 overflow-y-auto flex flex-col gap-2">
-        <div className="text-[#666] text-[10px] font-bold tracking-[0.2em] mb-8 uppercase flex items-center justify-between border-b border-[#1a1a1a]/10 pb-4">
-          <span>/// Directories</span>
-          <button onClick={fetchCatalog} className="hover:text-black transition-colors" title="Refresh">
-            <RefreshCw className={`w-3.5 h-3.5 ${catalogLoading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-        {DEPARTMENTS.map(d => (
-          <motion.button
-            variants={itemVariants}
-            key={d}
-            onClick={() => setActiveDept(d)}
-            className={`w-full text-left px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest rounded-none flex justify-between items-center transition-all duration-300 group bracket-card ${
-              activeDept === d 
-                ? 'bg-white text-black shadow-glow-white border-white' 
-                : 'bg-transparent text-[#666] hover:bg-white/50 border-transparent hover:border-white'
-            }`}
-          >
-            <span className="">{d.replace('-', ' ')}</span>
-            <div className="flex items-center gap-2">
-              <ChevronRight className={`w-4 h-4 transition-all duration-300 opacity-50 ${activeDept === d ? 'translate-x-1 text-black' : 'opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100'}`} />
+    <div className="flex-1 grid grid-cols-[260px_1fr] gap-6 min-h-0 overflow-hidden">
+      {/* Sidebar */}
+      <motion.div
+        variants={containerVariants} initial="hidden" animate="show"
+        className="panel flex flex-col overflow-hidden"
+      >
+        <div className="px-5 py-4 border-b border-border">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[10px] text-muted tracking-widest uppercase mb-0.5">/// Navigation</div>
+              <div className="text-sm font-bold text-ink">Departments</div>
             </div>
-          </motion.button>
-        ))}
+            <button onClick={fetchCatalog} title="Refresh" className="text-muted hover:text-ink transition-colors p-1">
+              <RefreshCw className={`w-3.5 h-3.5 ${catalogLoading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto py-2 px-2">
+          {DEPARTMENTS.map(d => (
+            <motion.button
+              variants={itemVariants}
+              key={d}
+              onClick={() => setActiveDept(d)}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm flex justify-between items-center transition-all duration-150 group ${
+                activeDept === d
+                  ? 'bg-accent/20 text-ink border border-accent/30'
+                  : 'text-muted hover:bg-surface2 hover:text-ink'
+              }`}
+            >
+              <span className="capitalize font-medium">{d.replace(/-/g, ' ')}</span>
+              {activeDept === d && (
+                <ChevronRight className="w-3.5 h-3.5 text-accent flex-shrink-0" />
+              )}
+            </motion.button>
+          ))}
+        </div>
       </motion.div>
 
-      <div className="p-8 flex justify-center items-start overflow-y-auto bg-transparent">
-        <div className="w-full max-w-5xl">
-          <motion.h2 initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="font-mono font-bold text-4xl mb-12 border-b border-[#1a1a1a]/10 pb-6 text-charcoal uppercase tracking-[0.2em] flex items-center gap-4">
-            {activeDept.replace('-', ' ')}
-            <span className="text-xs font-mono text-muted tracking-wide opacity-50 self-end mb-2">/// {exams.length} NODE{exams.length !== 1 ? 'S' : ''} DETECTED</span>
-          </motion.h2>
+      {/* Exam grid */}
+      <div className="flex flex-col overflow-hidden">
+        <div className="mb-4 flex items-end justify-between">
+          <div>
+            <div className="text-[10px] text-muted tracking-widest uppercase mb-1">/// Available Exams</div>
+            <h2 className="text-xl font-bold text-ink capitalize">{activeDept.replace(/-/g, ' ')}</h2>
+          </div>
+          {!catalogLoading && (
+            <div className="text-xs text-muted">{exams.length} exam{exams.length !== 1 ? 's' : ''} available</div>
+          )}
+        </div>
 
+        <div className="flex-1 overflow-y-auto">
           {catalogLoading ? (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-16 bracket-card hover-glow text-center text-charcoal font-mono text-xs flex flex-col items-center">
-              <RefreshCw className="w-6 h-6 animate-spin mb-6 text-blue-500" />
-              <div className="tracking-[0.2em] font-bold">SYNCING PROTOCOLS...</div>
-            </motion.div>
+            <div className="panel h-48 flex items-center justify-center gap-3 text-muted">
+              <RefreshCw className="w-4 h-4 animate-spin text-accent" />
+              <span className="text-sm">Loading exams…</span>
+            </div>
           ) : (
-            <motion.div key={`${activeDept}-${exams.length}`} variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-2 gap-8">
+            <motion.div
+              key={`${activeDept}-${exams.length}`}
+              variants={containerVariants} initial="hidden" animate="show"
+              className="grid grid-cols-2 gap-4 pb-4"
+            >
               {exams.length === 0 ? (
-                <motion.div variants={cardVariants} className="col-span-2 p-16 bracket-card text-center text-charcoal font-mono text-xs uppercase tracking-[0.2em]">
-                  <span className="opacity-50">/// Null Sector</span>
+                <motion.div variants={cardVariants}
+                  className="col-span-2 panel h-48 flex items-center justify-center flex-col text-muted">
+                  <div className="text-3xl mb-3 opacity-30">📂</div>
+                  <div className="text-sm">No exams in this department</div>
                 </motion.div>
               ) : (
-                exams.map((file, i) => (
-                  <motion.button
-                    variants={cardVariants}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    key={file}
-                    onClick={() => setActiveFile({ path: `${activeDept}/${file}`, name: file.replace('.enc', '') })}
-                    className="p-8 bracket-card hover-glow text-left flex flex-col justify-between min-h-[160px] group"
-                  >
-                    <div className="flex justify-between items-start w-full mb-6">
-                      <div className="text-[10px] text-[#888] font-mono tracking-widest border border-[#888]/30 px-2 py-1 uppercase group-hover:border-blue-400 group-hover:text-blue-500 transition-colors">
-                        ID_{String(i + 1).padStart(3, '0')}
+                exams.map((file, i) => {
+                  const durs = (catalog as Record<string, unknown>)['_durations'] as Record<string, number> | undefined;
+                  const mins = durs?.[`${activeDept}/${file}`];
+                  return (
+                    <motion.button
+                      variants={cardVariants}
+                      whileHover={{ y: -2, scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      key={file}
+                      onClick={() => setActiveFile({ path: `${activeDept}/${file}`, name: file.replace('.enc', '') })}
+                      className="panel panel-elevated text-left p-5 flex flex-col gap-3 hover:border-accent/40 transition-all group"
+                    >
+                      <div className="flex justify-between items-start">
+                        <span className="text-[10px] text-muted uppercase tracking-widest bg-surface px-2 py-0.5 rounded border border-border">
+                          #{String(i + 1).padStart(2, '0')}
+                        </span>
+                        <Lock className="w-3.5 h-3.5 text-dim group-hover:text-accent transition-colors" />
                       </div>
-                      <Lock className="w-4 h-4 text-[#888] group-hover:text-blue-500 transition-colors" />
-                    </div>
-                    <div>
-                      <div className="text-charcoal font-mono font-bold text-xl uppercase tracking-widest leading-tight mb-2 truncate">
-                        {file.replace('.enc', '')}
+                      <div>
+                        <div className="text-sm font-bold text-ink capitalize mb-1 truncate">
+                          {file.replace('.enc', '')}
+                        </div>
+                        <div className="text-xs text-muted">Encrypted exam</div>
+                        {mins && (
+                          <div className="text-[10px] text-accent mt-1 font-bold">⏱ {mins} min</div>
+                        )}
                       </div>
-                      <div className="text-[#666] text-[10px] uppercase tracking-[0.2em] opacity-80">
-                        {`[ `}ENCRYPTED PAYLOAD{` ]`}
-                      </div>
-                    </div>
-                  </motion.button>
-                ))
+                    </motion.button>
+                  );
+                })
               )}
             </motion.div>
           )}
         </div>
       </div>
 
-      {/* The Igloo Decryption Modal */}
+      {/* ── Access Modal ── */}
       <AnimatePresence>
         {activeFile && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="absolute inset-0 z-50 bg-white/30 backdrop-blur-3xl flex items-center justify-center p-4">
-            <motion.div initial={{ scale: 0.95, y: 10, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} className="w-full max-w-[480px] bg-white/70 border border-white p-10 shadow-glow-white flex flex-col gap-8 bracket-card">
-              <div className="text-center mt-2">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-glow-blue border border-[#ccc]">
-                  <Lock className="w-6 h-6 text-blue-500" />
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 z-50 bg-bg/80 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 12 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+              className="panel w-full max-w-md p-8"
+            >
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 rounded-full bg-accent/10 border border-accent/30 flex items-center justify-center mx-auto mb-4">
+                  <Lock className="w-5 h-5 text-accent" />
                 </div>
-                <h3 className="text-charcoal font-mono font-bold text-2xl mb-3 tracking-[0.2em] uppercase">
-                   ACCESS REQUEST
-                </h3>
-                <p className="text-[#666] text-[10px] tracking-widest leading-loose max-w-[280px] mx-auto uppercase">/// TARGET: {activeFile.name}<br/>/// AUTHORIZATION REQUIRED</p>
+                <h3 className="text-lg font-bold text-ink mb-1">Access Required</h3>
+                <p className="text-sm text-muted leading-relaxed">
+                  <span className="text-ink font-semibold">{activeFile.name}</span> is encrypted.
+                  <br />Enter your student ID to unlock.
+                </p>
               </div>
-              
-              <div>
-                <input 
-                  type="password" 
+
+              <div className="mb-4">
+                <label className="label">Student ID / Passkey</label>
+                <input
+                  type="password"
                   autoFocus
                   value={examCode}
                   onChange={e => setExamCode(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleDecrypt()}
-                  className="w-full bg-transparent border-b-2 border-charcoal/20 text-charcoal rounded-none px-4 py-4 font-mono text-2xl text-center tracking-[0.3em] focus:border-blue-500 focus:outline-none transition-all duration-300 placeholder:opacity-20 placeholder:text-charcoal/50"
-                  placeholder="CODE"
+                  className="input-base text-center text-lg tracking-[0.3em] font-bold"
+                  placeholder="e.g. NET-A1"
                 />
               </div>
-              
+
               <AnimatePresence>
                 {status.msg && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="text-danger font-mono tracking-widest uppercase text-center text-[10px] font-bold">
-                    [ ! ] {status.msg}
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                    className="msg-error mb-4"
+                  >
+                    {status.msg}
                   </motion.div>
                 )}
               </AnimatePresence>
-              
-              <div className="flex gap-4 mt-4">
-                <button 
-                  onClick={() => setActiveFile(null)} 
-                  className="flex-1 px-4 py-4 bg-transparent border border-charcoal text-charcoal hover:bg-charcoal hover:text-white font-bold font-mono text-xs tracking-widest uppercase transition-all"
-                >
-                  [ ABORT ]
+
+              <div className="flex gap-3">
+                <button onClick={() => setActiveFile(null)} className="btn-secondary flex-1 py-3">
+                  Cancel
                 </button>
-                <button 
-                  onClick={handleDecrypt} 
+                <button
+                  onClick={handleDecrypt}
                   disabled={loading || !examCode}
-                  className="flex-1 px-4 py-4 bg-charcoal text-white hover:bg-black font-bold font-mono text-xs tracking-widest uppercase disabled:opacity-50 transition-all shadow-glow-blue"
+                  className="btn-primary flex-1 py-3"
                 >
-                  {loading ? '[ VERIFYING... ]' : '[ INITIATE ]'}
+                  {loading ? 'Verifying…' : 'Unlock Exam'}
                 </button>
               </div>
             </motion.div>

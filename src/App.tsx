@@ -7,35 +7,31 @@ function Shell() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden bg-transparent">
-      {/* Absolute Corner Meta-data Indicators */}
-      <div className="absolute top-10 left-12 z-50 pointer-events-none select-none">
-         <div className="text-3xl font-bold tracking-widest text-[#1a1a1a]">SYNNEFO_VAULT</div>
-         <div className="text-xs text-[#666] mt-2 tracking-widest uppercase">/// System Core Node</div>
-         <div className="text-[10px] text-[#888] mt-2 opacity-80">Copyright © {new Date().getFullYear()}<br/>Synnefo Inc. All Rights Reserved.</div>
+    <div className="min-h-screen w-full relative overflow-hidden bg-bg flex flex-col">
+      {/* Corner meta — top-left */}
+      <div className="absolute top-8 left-10 z-50 pointer-events-none select-none">
+        <div className="text-lg font-bold tracking-[0.2em] text-ink uppercase">SYNNEFO_VAULT</div>
+        <div className="text-[10px] text-muted mt-1 tracking-widest uppercase">/// Secure Exam System</div>
+        <div className="text-[10px] text-dim mt-1">© {new Date().getFullYear()} Synnefo Inc.</div>
       </div>
 
-      <div className="absolute top-10 right-12 z-50 pointer-events-auto flex items-end flex-col">
-         <div className="text-[10px] font-bold tracking-[0.2em] text-[#333] mb-4 uppercase">/// Operating Normal</div>
-         <button 
-           onClick={() => navigate('/admin')}
-           className="relative group bg-[rgba(255,255,255,0.4)] backdrop-blur-xl border border-[rgba(0,0,0,0.05)] px-6 py-3 hover:bg-white transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,1)] uppercase text-xs tracking-widest font-bold text-[#1a1a1a] overflow-hidden bracket-card"
-         >
-           [ FACULTY GATEWAY ]
-         </button>
-         <div className="text-[10px] text-[#666] mt-4 opacity-80 text-right pr-2 border-r border-[#ccc] uppercase">Scroll down to<br/>discover.</div>
-      </div>
-
-      <div className="absolute bottom-10 left-12 z-50 pointer-events-none select-none">
-        <div className="text-[11px] text-[#666] flex font-bold tracking-widest uppercase items-center gap-3">
-          <span>{`{ status }`}</span>
-          <span className="w-2.5 h-2.5 rounded-full bg-[#1e90ff] shadow-[0_0_12px_rgba(30,144,255,0.8)] animate-pulse"></span>
-          <span className="text-[#1a1a1a]">Secured</span>
+      {/* Corner meta — top-right */}
+      <div className="absolute top-8 right-10 z-50 pointer-events-auto flex flex-col items-end gap-3">
+        <div className="text-[10px] font-bold tracking-widest text-muted uppercase">/// System Nominal</div>
+        <button
+          onClick={() => navigate('/admin')}
+          className="btn-secondary text-[10px] px-5 py-2"
+        >
+          Faculty Gateway
+        </button>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="w-2 h-2 rounded-full bg-accent shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+          <span className="text-[10px] text-muted uppercase tracking-widest">Secured</span>
         </div>
       </div>
 
-      {/* Main Container */}
-      <div className="relative z-10 w-full h-screen flex flex-col pt-40 px-12 pb-12">
+      {/* Content area */}
+      <div className="relative z-10 w-full h-screen flex flex-col pt-36 px-10 pb-8">
         <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<Student />} />
