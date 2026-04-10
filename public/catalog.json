@@ -1,12 +1,9 @@
 {
   "networking": [
-    "test.enc",
     "test-2.enc",
-    "linux101.enc"
-  ],
-  "devops": [
     "test.enc"
   ],
+  "devops": [],
   "python-full-stack": [],
   "mern-stack": [],
   "flutter": [],
