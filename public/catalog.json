@@ -1,5 +1,7 @@
 {
-  "networking": [],
+  "networking": [
+    "test1.enc"
+  ],
   "devops": [],
   "python-full-stack": [],
   "mern-stack": [],
