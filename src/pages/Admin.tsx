@@ -43,6 +43,7 @@ export function Admin() {
   const [dept, setDept] = useState('networking');
   const [filename, setFilename] = useState('');
   const [studentCount, setStudentCount] = useState<number | ''>('');
+  const [duration, setDuration] = useState<number | ''>(''); // exam duration in minutes
   const [content, setContent] = useState('');
   const [contentType, setContentType] = useState<'markdown' | 'pdf'>('markdown');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -73,13 +74,17 @@ export function Admin() {
     }
   }, []);
 
-  // Merge two catalogs by union of files per department
+  // Merge two catalogs by union of files per department (preserves _durations)
   const mergeCatalogs = (a: Catalog, b: Catalog): Catalog => {
     const result: Catalog = {};
-    for (const dept of DEPARTMENTS) {
-      const set = new Set([...(a[dept] || []), ...(b[dept] || [])]);
-      result[dept] = Array.from(set);
+    for (const d of DEPARTMENTS) {
+      const set = new Set([...(a[d] || []), ...(b[d] || [])]);
+      result[d] = Array.from(set);
     }
+    // Merge _durations from both sources
+    const durA = (a as Record<string, unknown>)['_durations'] as Record<string, number> || {};
+    const durB = (b as Record<string, unknown>)['_durations'] as Record<string, number> || {};
+    (result as Record<string, unknown>)['_durations'] = { ...durA, ...durB };
     return result;
   };
 
@@ -157,6 +162,11 @@ export function Admin() {
       return;
     }
 
+    if (duration !== '' && (typeof duration !== 'number' || isNaN(duration) || duration < 1 || duration > 600)) {
+      setStatus({ type: 'error', msg: 'ERROR: Duration must be between 1 and 600 minutes (or leave blank for no limit).' });
+      return;
+    }
+
     setLoading(true);
     setStatus({ type: '', msg: '' });
     setGeneratedIds([]);
@@ -191,12 +201,24 @@ export function Admin() {
       setContent('');
       setPdfFile(null);
       setFilename('');
+      setDuration('');
       if (fileInputRef.current) fileInputRef.current.value = '';
       
-      // Update local view AND persist to localStorage for cross-tab sync
-      const updatedCatalog = { ...catalog };
+      // CRITICAL FIX: Always merge against the freshest localStorage to avoid
+      // overwriting other exams that admin's React state may not have loaded yet.
+      const freshLocal = loadCatalogLocally() || {};
+      const updatedCatalog = mergeCatalogs(freshLocal, catalog);
       const dArr = updatedCatalog[dept] || [];
-      updatedCatalog[dept] = [...dArr, `${safeFilename}.enc`];
+      if (!dArr.includes(`${safeFilename}.enc`)) {
+        updatedCatalog[dept] = [...dArr, `${safeFilename}.enc`];
+      }
+
+      // Store duration in _durations map
+      if (typeof duration === 'number' && duration > 0) {
+        const existing = (updatedCatalog as Record<string, unknown>)['_durations'] as Record<string, number> || {};
+        (updatedCatalog as Record<string, unknown>)['_durations'] = { ...existing, [targetPath]: duration };
+      }
+
       setCatalog(updatedCatalog);
       saveCatalogLocally(updatedCatalog);
 
@@ -232,6 +254,11 @@ export function Admin() {
         ...catalog,
         [targetDept]: (catalog[targetDept] || []).filter(f => f !== targetFile)
       };
+      // Also remove duration entry if present
+      const durations = (updatedCatalog as Record<string, unknown>)['_durations'] as Record<string, number> || {};
+      delete durations[targetPath];
+      (updatedCatalog as Record<string, unknown>)['_durations'] = durations;
+
       setCatalog(updatedCatalog);
       saveCatalogLocally(updatedCatalog);
 
@@ -303,7 +330,7 @@ export function Admin() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-4 gap-6 mb-8">
           <div>
             <label className={labelClass}>/// Department_Node</label>
             <select value={dept} onChange={e => setDept(e.target.value)} className={inputClass}>
@@ -317,6 +344,10 @@ export function Admin() {
           <div>
             <label className={labelClass}>/// Class_Size</label>
             <input type="number" min="1" max="200" value={studentCount} onChange={e => setStudentCount(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className={inputClass} placeholder="MAX_200" />
+          </div>
+          <div>
+            <label className={labelClass}>/// Duration_Min <span className="normal-case text-[#aaa] tracking-normal font-normal">(optional)</span></label>
+            <input type="number" min="1" max="600" value={duration} onChange={e => setDuration(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className={inputClass} placeholder="e.g. 90" />
           </div>
         </div>
 

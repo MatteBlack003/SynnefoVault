@@ -44,6 +44,7 @@ export function Student() {
   const [examCode, setExamCode] = useState(''); // This acts as the Student ID
   const [decryptedHtml, setDecryptedHtml] = useState<string | null>(null);
   const [decryptedPdfUrl, setDecryptedPdfUrl] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null); // seconds remaining; null = no limit
   
   const [status, setStatus] = useState({ type: '', msg: '' });
   const [loading, setLoading] = useState(false);
@@ -132,7 +133,10 @@ export function Student() {
           
           if (activeFile) {
             const [dept, fileName] = activeFile.path.split('/');
-            if (!freshCatalog[dept] || !freshCatalog[dept].includes(fileName)) {
+            // Only purge if the file is explicitly GONE (not if it was never in this dept object)
+            // This prevents false-positive purges when admin uploads a NEW exam and writes catalog
+            const deptFiles = freshCatalog[dept];
+            if (Array.isArray(deptFiles) && !deptFiles.includes(fileName)) {
               alert("ADMINISTRATOR INITIATED PURGE: EXAM SESSION FORCE TERMINATED.");
               closeViewer();
             }
@@ -152,13 +156,14 @@ export function Student() {
           if (res.ok) {
             const freshCatalog: Catalog = await res.json();
             const [dept, fileName] = activeFile.path.split('/');
-            if (!freshCatalog[dept] || !freshCatalog[dept].includes(fileName)) {
+            const deptFiles = freshCatalog[dept];
+            if (Array.isArray(deptFiles) && !deptFiles.includes(fileName)) {
               alert("ADMINISTRATOR INITIATED PURGE: EXAM SESSION FORCE TERMINATED.");
               closeViewer();
             }
           }
         } catch { /* network fail, ignore */ }
-      }, 20000); // 20s poller
+      }, 30000); // 30s poller
     }
 
     return () => {
@@ -166,6 +171,20 @@ export function Student() {
       if (interval) clearInterval(interval);
     };
   }, [activeFile]);
+
+  // Exam Countdown Timer Engine
+  useEffect(() => {
+    if (timeLeft === null) return; // no limit set
+    if (timeLeft <= 0) {
+      alert('SESSION_EXPIRED: Your exam time has ended. Access revoked.');
+      closeViewer();
+      return;
+    }
+    const tick = setInterval(() => {
+      setTimeLeft(prev => (prev !== null ? prev - 1 : null));
+    }, 1000);
+    return () => clearInterval(tick);
+  }, [timeLeft]);
 
   // DRM & Anti-Cheating Engine Protection Layer
   useEffect(() => {
@@ -237,6 +256,14 @@ export function Student() {
         setDecryptedHtml(htmlContent);
         setDecryptedPdfUrl(null);
       }
+
+      // Start the countdown timer if a duration is stored for this exam
+      const durations = (catalog as Record<string, unknown>)['_durations'] as Record<string, number> | undefined;
+      if (durations && durations[activeFile.path]) {
+        setTimeLeft(durations[activeFile.path] * 60); // convert minutes -> seconds
+      } else {
+        setTimeLeft(null); // no time limit
+      }
       
     } catch (err) {
       console.error(err);
@@ -260,8 +287,19 @@ export function Student() {
     setDecryptedPdfUrl(null);
     setActiveFile(null);
     setExamCode('');
+    setTimeLeft(null);
     setStatus({ type: '', msg: '' });
   };
+
+  /** Format seconds as MM:SS */
+  const formatTime = (secs: number): string => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  };
+
+  /** Colour class for countdown — turns red in last 5 minutes */
+  const timerClass = timeLeft !== null && timeLeft <= 300 ? 'text-danger animate-pulse' : 'text-blue-500';
 
   // PDF Viewer
   if (decryptedPdfUrl && activeFile) {
@@ -283,9 +321,16 @@ export function Student() {
               <span className="font-mono font-bold text-charcoal tracking-widest uppercase text-xl">{activeFile.name}</span>
               <span className="text-[10px] font-mono text-danger tracking-[0.2em] uppercase font-bold animate-pulse">/// DRM ACTIVE</span>
             </div>
-            <button onClick={closeViewer} className="text-charcoal hover:bg-black hover:text-white font-mono font-bold text-xs tracking-widest px-6 py-2 uppercase transition-all bracket-card">
-              [ TERMINATE ]
-            </button>
+            <div className="flex items-center gap-6">
+              {timeLeft !== null && (
+                <div className={`font-mono font-bold text-lg tracking-[0.2em] ${timerClass}`}>
+                  {formatTime(timeLeft)}
+                </div>
+              )}
+              <button onClick={closeViewer} className="text-charcoal hover:bg-black hover:text-white font-mono font-bold text-xs tracking-widest px-6 py-2 uppercase transition-all bracket-card">
+                [ TERMINATE ]
+              </button>
+            </div>
           </div>
           <iframe
             src={decryptedPdfUrl}
@@ -309,9 +354,16 @@ export function Student() {
               </div>
               <span className="text-[10px] font-mono text-danger tracking-[0.2em] uppercase font-bold animate-pulse">/// DRM ACTIVE</span>
             </div>
-            <button onClick={closeViewer} className="text-charcoal hover:bg-black hover:text-white font-mono font-bold text-xs tracking-widest px-6 py-3 uppercase transition-all bracket-card border border-charcoal/20">
-              [ TERMINATE ]
-            </button>
+            <div className="flex items-center gap-6">
+              {timeLeft !== null && (
+                <div className={`font-mono font-bold text-2xl tracking-[0.2em] ${timerClass}`}>
+                  {formatTime(timeLeft)}
+                </div>
+              )}
+              <button onClick={closeViewer} className="text-charcoal hover:bg-black hover:text-white font-mono font-bold text-xs tracking-widest px-6 py-3 uppercase transition-all bracket-card border border-charcoal/20">
+                [ TERMINATE ]
+              </button>
+            </div>
           </div>
           <div className="prose prose-lg max-w-none text-charcoal font-mono prose-headings:font-mono prose-h1:text-charcoal prose-a:text-blue-500 leading-loose" dangerouslySetInnerHTML={{ __html: decryptedHtml }} />
         </div>
