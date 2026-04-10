@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+        
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -36,14 +36,26 @@ jobs:
         run: npm ci
         
       - name: Generate Catalog
-        run: node scripts/generate-catalog.js
+        run: |
+          if [ -f scripts/generate-catalog.js ]; then
+            node scripts/generate-catalog.js
+          else
+            echo "Catalog generation script not found, skipping."
+          fi
         
       - name: Build project
         run: npm run build
+
+      - name: Copy 404.html for SPA Routing
+        run: cp dist/index.html dist/404.html || true
         
-      - name: Copy Exam Files to Dist (Hosting encrypted blobs publicly)
+      - name: Copy Exam Files to Dist
         run: |
-          cp -r networking devops python-full-stack mern-stack flutter cyber-security digital-marketing data-science dist/ || true
+          for dir in networking devops python-full-stack mern-stack flutter cyber-security digital-marketing data-science; do
+            if [ -d "$dir" ]; then
+              cp -r "$dir" dist/
+            fi
+          done
           
       - name: Setup Pages
         uses: actions/configure-pages@v5
