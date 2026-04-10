@@ -1,6 +1,5 @@
 {
   "networking": [
-    "test-delete-this.enc",
     "mdtest.enc",
     "pdf-test.enc"
   ],
