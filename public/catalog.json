@@ -1,7 +1,8 @@
 {
   "networking": [
     "test102.enc",
-    "test1.enc"
+    "test1.enc",
+    "test2.enc"
   ],
   "devops": [],
   "python-full-stack": [],
@@ -12,6 +13,7 @@
   "data-science": [],
   "_durations": {
     "networking/test102.enc": 4,
-    "networking/test1.enc": 2
+    "networking/test1.enc": 2,
+    "networking/test2.enc": 2
   }
 }
