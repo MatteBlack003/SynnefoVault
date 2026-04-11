@@ -1,7 +1,5 @@
 {
-  "networking": [
-    "test4.enc"
-  ],
+  "networking": [],
   "devops": [],
   "python-full-stack": [],
   "mern-stack": [],
@@ -9,7 +7,5 @@
   "cyber-security": [],
   "digital-marketing": [],
   "data-science": [],
-  "_durations": {
-    "networking/test4.enc": 1
-  }
+  "_durations": {}
 }
