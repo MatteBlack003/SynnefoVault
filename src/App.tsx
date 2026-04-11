@@ -1,82 +1,162 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Admin } from './pages/Admin';
 import { Student } from './pages/Student';
 
-function Shell() {
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const isAdmin   = location.pathname.startsWith('/admin');
-  const now       = new Date();
-  const timeStr   = now.toLocaleTimeString('en-GB', { hour12: false });
-  const dateStr   = now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' });
+/* ── Snow particles ── */
+interface Particle { id: number; x: number; y: number; dur: number; delay: number; dx: number; dy: number; }
 
-  // Mouse position → CSS vars for dot-grid spotlight
+function SnowLayer() {
+  const particles: Particle[] = useMemo(() =>
+    Array.from({ length: 32 }, (_, i) => ({
+      id:    i,
+      x:     Math.random() * 100,
+      y:     20 + Math.random() * 80,
+      dur:   6 + Math.random() * 9,
+      delay: Math.random() * 10,
+      dx:    (Math.random() - 0.5) * 50,
+      dy:    -(50 + Math.random() * 90),
+    })), []);
+
+  return (
+    <div className="fixed inset-0 z-[1] pointer-events-none overflow-hidden">
+      {particles.map(p => (
+        <div
+          key={p.id}
+          className="snow-particle"
+          style={{
+            left:      `${p.x}%`,
+            top:       `${p.y}%`,
+            '--dur':   `${p.dur}s`,
+            '--delay': `${p.delay}s`,
+            '--dx':    `${p.dx}px`,
+            '--dy':    `${p.dy}px`,
+          } as React.CSSProperties}
+        />
+      ))}
+    </div>
+  );
+}
+
+function Shell() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isAdmin  = location.pathname.startsWith('/admin');
+
+  /* Mouse → CSS vars for dot-grid spotlight */
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      const root = document.documentElement;
-      root.style.setProperty('--mouse-x', `${e.clientX}px`);
-      root.style.setProperty('--mouse-y', `${e.clientY}px`);
+      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
     };
     window.addEventListener('mousemove', onMove, { passive: true });
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
+  const now     = new Date();
+  const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
+  const dateStr = now.toLocaleDateString('en-GB');
+
   return (
-    <div className="min-h-screen w-full relative overflow-hidden flex flex-col bg-bg">
+    /* Full-screen container — NOT overflow-hidden so absolute children can escape */
+    <div className="min-h-screen w-full relative flex flex-col" style={{ background: 'var(--bg-deep)' }}>
 
-      {/* ── Background layers ── */}
-      <div className="grid-base"    aria-hidden />
-      <div className="grid-glow"    aria-hidden />
-      <div className="cursor-glow"  aria-hidden />
-      <div className="viewport-glow" aria-hidden />
+      {/* ── igloo background layers (z: 0) ── */}
+      <div className="bg-igloo"        aria-hidden />
+      <div className="grid-base"       aria-hidden />
+      <div className="grid-glow"       aria-hidden />
+      <div className="cursor-glow"     aria-hidden />
+      <SnowLayer />
+      <div className="viewport-border" aria-hidden />
 
-      {/* ── Top navigation bar — Igloo style ── */}
-      <header className="absolute top-0 left-0 right-0 z-50 px-8 pt-7 pb-0 flex items-start justify-between pointer-events-none select-none">
-        {/* Left: brand + system coords */}
-        <div className="pointer-events-none">
-          <div className="flex items-center gap-3 mb-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-accent2 shadow-[0_0_8px_rgba(111,163,224,0.9)]" />
-            <span className="text-[11px] font-bold text-ink tracking-[0.25em] uppercase">SYNNEFO_VAULT</span>
-            <span className="text-[9px] text-dim tracking-widest uppercase border border-border px-2 py-0.5 rounded-full">v2.1</span>
+      {/* ── Header — igloo corner-anchored layout ── */}
+      <header
+        className="fixed top-0 left-0 right-0 z-50 flex items-start justify-between px-8 pt-7 select-none"
+        style={{ pointerEvents: 'none' }}
+      >
+        {/* LEFT — brand block */}
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div
+            className="text-[22px] font-bold leading-none mb-2"
+            style={{ color: 'var(--text)', fontFamily: '"IBM Plex Mono", monospace', letterSpacing: '0.05em' }}
+          >
+            SYNNEFO
           </div>
-          <div className="flex items-center gap-4 pl-4.5">
-            <span className="text-[9px] text-dim tracking-widest uppercase">// Secure Exam Infrastructure</span>
-            <span className="text-[9px] text-dim">|</span>
-            <span className="text-[9px] text-dim font-mono">{dateStr} · {timeStr}</span>
+          <div className="text-[11px] leading-snug" style={{ color: 'var(--text-muted)', letterSpacing: '0.1em' }}>
+            // Copyright © 2026
           </div>
-        </div>
+          <div className="text-[11px]" style={{ color: 'var(--text-dim)', letterSpacing: '0.08em' }}>
+            Synnefo, Inc. All Rights Reserved.
+          </div>
+        </motion.div>
 
-        {/* Right: system status + nav */}
-        <div className="flex items-center gap-4 pointer-events-auto">
-          {/* System status badge */}
-          <div className="badge badge-accent">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent2 shadow-[0_0_6px_rgba(111,163,224,1)]" />
-            SYSTEM NOMINAL
+        {/* RIGHT — console label + nav */}
+        <motion.div
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col items-end gap-2"
+          style={{ pointerEvents: 'auto' }}
+        >
+          <div className="text-[11px]" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em' }}>
+            ////// {isAdmin ? 'Faculty Console' : 'Student Portal'}
           </div>
-          {isAdmin ? (
-            <button onClick={() => navigate('/')} className="btn-secondary text-[10px] py-2 px-5">
-              ← Student Portal
-            </button>
-          ) : (
-            <button onClick={() => navigate('/admin')} className="btn-secondary text-[10px] py-2 px-5">
-              Faculty Gateway →
-            </button>
-          )}
-        </div>
+          <p
+            className="text-[11px] text-right leading-relaxed hidden md:block"
+            style={{ color: 'var(--text-dim)', maxWidth: '200px', letterSpacing: '0.03em' }}
+          >
+            {isAdmin
+              ? 'Encrypted exam deployment\nsystem for faculty control.'
+              : 'Secure cryptographic exam\naccess for registered students.'}
+          </p>
+          {/* Status + nav in same row */}
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="badge badge-accent" style={{ fontSize: '0.57rem' }}>
+              <span
+                className="w-1.5 h-1.5 rounded-full animate-pulse"
+                style={{ background: 'var(--accent)', boxShadow: '0 0 5px var(--accent)' }}
+              />
+              System Nominal
+            </span>
+            {isAdmin ? (
+              <motion.button
+                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                onClick={() => navigate('/')}
+                className="btn-secondary"
+                style={{ padding: '5px 14px', fontSize: '0.63rem' }}
+              >
+                ← Exit
+              </motion.button>
+            ) : (
+              <motion.button
+                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                onClick={() => navigate('/admin')}
+                className="btn-secondary"
+                style={{ padding: '5px 14px', fontSize: '0.63rem' }}
+              >
+                Faculty →
+              </motion.button>
+            )}
+          </div>
+        </motion.div>
       </header>
 
-      {/* ── Page content ── */}
-      <main className="relative z-10 flex flex-col flex-1 pt-24 px-8 pb-6 overflow-hidden h-screen">
+      {/* ── Main content — relative z-10, sits above bg layers ── */}
+      <main className="relative z-10 flex flex-1 pt-[116px] px-6 pb-8" style={{ minHeight: '100vh' }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="flex flex-1 overflow-hidden h-full"
+            initial={{ opacity: 0, y: 12, filter: 'blur(3px)' }}
+            animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+            exit={{    opacity: 0, y: -8,  filter: 'blur(2px)' }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-1 w-full"
+            style={{ minHeight: 0 }}
           >
             <Routes>
               <Route path="/"      element={<Student />} />
@@ -86,16 +166,20 @@ function Shell() {
         </AnimatePresence>
       </main>
 
-      {/* ── Bottom data strip — Igloo metadata bar ── */}
-      <footer className="absolute bottom-0 left-0 right-0 z-50 px-8 py-3 flex items-center justify-between pointer-events-none select-none border-t border-border/50">
-        <div className="flex items-center gap-6">
-          <span className="text-[9px] text-dim uppercase tracking-widest">// NODE CORE · REGION IN-SOUTH</span>
-          <span className="text-[9px] text-dim">ENCRYPTION: AES-256-GCM</span>
-        </div>
-        <div className="flex items-center gap-6">
-          <span className="text-[9px] text-dim">© {now.getFullYear()} SYNNEFO SOLUTIONS</span>
-          <span className="text-[9px] text-dim uppercase tracking-widest">ALL RIGHTS RESERVED</span>
-        </div>
+      {/* ── Footer strip ── */}
+      <footer
+        className="fixed bottom-0 left-0 right-0 z-50 px-8 py-3 flex items-center justify-between select-none"
+        style={{
+          borderTop: '1px solid rgba(26,35,64,0.10)',
+          background: 'rgba(168,180,196,0.20)',
+          backdropFilter: 'blur(8px)',
+          pointerEvents: 'none',
+        }}
+      >
+        <span className="text-[10px]" style={{ color: 'var(--text-dim)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+          // AES-256-GCM · Zero Backend · GitHub Pages
+        </span>
+        <span className="text-[10px]" style={{ color: 'var(--text-dim)' }}>{dateStr} · {timeStr}</span>
       </footer>
     </div>
   );

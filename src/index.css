@@ -1,47 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Igloo.inc Design Tokens ──────────────────────────────────────────────
-   Deep Ink + Icy Blue — exactly as studied from igloo.inc
-────────────────────────────────────────────────────────────────────────────── */
+/* ─── igloo.inc Design System ───────────────────────────────────────────────
+   Background: icy gray-blue ~#a8b4c4 (confirmed from igloo.inc screenshots)
+   Text: Dark navy for body text on light bg, pure white for headings
+   Accent: Electric blue #5b9bd5 — viewport border + glow elements
+   Font: IBM Plex Mono (confirmed from igloo.inc devtools)
+   Surfaces: Frosted white glass panels over the icy bg
+──────────────────────────────────────────────────────────────────────────── */
+
 :root {
-  --bg:         #09090e;   /* deep ink black                     */
-  --surface:    #111318;   /* card/panel background               */
-  --surface2:   #181c24;   /* elevated inputs, headers            */
-  --surface3:   #1e2330;   /* hover states                        */
-  --border:     #232836;   /* default border                      */
-  --border2:    #2e3548;   /* hover / stronger border             */
-  --border3:    #3d4a63;   /* active / accent border              */
+  /* Background — icy arctic gray-blue */
+  --bg:        #a8b4c4;
+  --bg-light:  #b8c4d2;
+  --bg-deep:   #8898b0;
+  --bg-fog:    #c8d0dc;
 
-  --text:       #e8ecf0;   /* primary text — crisp off-white      */
-  --text-muted: #8892a4;   /* secondary / labels                  */
-  --text-dim:   #4a5568;   /* very dim / disabled                 */
+  /* Frosted glass surfaces */
+  --surface:   rgba(255,255,255,0.18);
+  --surface2:  rgba(255,255,255,0.26);
+  --surface3:  rgba(255,255,255,0.34);
 
-  --accent:     #4a7fc1;   /* icy blue — igloo signature          */
-  --accent-2:   #6fa3e0;   /* lighter blue for highlights         */
-  --accent-glow:rgba(74, 127, 193, 0.25);
+  /* Borders */
+  --border:    rgba(255,255,255,0.30);
+  --border2:   rgba(255,255,255,0.50);
+  --border3:   rgba(255,255,255,0.70);
 
-  --success:    #34d399;
-  --danger:     #f87171;
-  --danger-glow:rgba(248, 113, 113, 0.2);
+  /* igloo electric blue — THE signature accent */
+  --accent:        #5b9bd5;
+  --accent-2:      #3a78b8;
+  --accent-border: #4a8bc8;
+  --accent-glow:   rgba(91,155,213,0.40);
 
-  /* Mouse position (updated by JS) */
+  /* Text — dark for readability on light icy bg */
+  --text:        #1a2340;        /* dark navy — primary headings            */
+  --text-soft:   #2c3e5c;        /* slightly lighter navy — body text       */
+  --text-muted:  #4a5e7a;        /* muted — labels, secondary text          */
+  --text-dim:    #6b7e96;        /* dim — placeholders, tertiary            */
+
+  /* Status */
+  --success:     #1e8a52;
+  --danger:      #c0392b;
+  --danger-glow: rgba(192,57,43,0.25);
+
+  /* Mouse tracking for dot spotlight */
   --mouse-x: -9999px;
   --mouse-y: -9999px;
 }
 
 /* ─── Base ──────────────────────────────────────────────────────────────── */
 @layer base {
-  *, *::before, *::after { box-sizing: border-box; margin: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   html { font-size: 14px; }
 
   body {
-    font-family: 'Space Mono', 'Courier New', monospace;
-    background-color: var(--bg);
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    background: var(--bg-deep);
     color: var(--text);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -49,23 +70,30 @@
   #root { position: relative; z-index: 1; }
 }
 
-/* ─── Mouse-Tracking Dot Grid ───────────────────────────────────────────────
-   Three layers:
-   1. grid-base  — faint always-visible dots
-   2. grid-glow  — icy blue dots, appear only near cursor (masked)
-   3. cursor-glow — soft ambient bloom at cursor tip
-───────────────────────────────────────────────────────────────────────────── */
+/* ─── Background System ─────────────────────────────────────────────────── */
 
-.grid-base {
+/* Main icy arctic gradient */
+.bg-igloo {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image: radial-gradient(rgba(74, 127, 193, 0.10) 1px, transparent 0);
-  background-size: 28px 28px;
+  background:
+    radial-gradient(ellipse 110% 70% at 50% -10%,  #d0dce8 0%, transparent 55%),
+    radial-gradient(ellipse 80%  60% at 92% 110%,  #8898b0 0%, transparent 50%),
+    radial-gradient(ellipse 60%  40% at 8%  80%,   #9aacc0 0%, transparent 45%),
+    linear-gradient(170deg, #b8c8d8 0%, #a0b2c8 30%, #8898b4 70%, #7888a8 100%);
 }
 
+/* Static dot grid — always on */
+.grid-base {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: radial-gradient(rgba(255,255,255,0.55) 1px, transparent 0);
+  background-size: 30px 30px;
+}
+
+/* Cursor-lit bright dots */
 .grid-glow {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image: radial-gradient(rgba(111, 163, 224, 0.65) 1px, transparent 0);
-  background-size: 28px 28px;
+  background-image: radial-gradient(rgba(255,255,255,1.0) 1px, transparent 0);
+  background-size: 30px 30px;
   -webkit-mask-image: radial-gradient(
     400px circle at var(--mouse-x) var(--mouse-y),
     white 0%, rgba(255,255,255,0.5) 40%, transparent 70%
@@ -76,269 +104,288 @@
   );
 }
 
+/* Faint blue ambient near cursor */
 .cursor-glow {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background: radial-gradient(
-    600px circle at var(--mouse-x) var(--mouse-y),
-    rgba(74, 127, 193, 0.07) 0%,
-    transparent 65%
+    550px circle at var(--mouse-x) var(--mouse-y),
+    rgba(91,155,213,0.15) 0%, transparent 60%
   );
 }
 
-/* Igloo-style viewport inner border glow */
-.viewport-glow {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  box-shadow: inset 0 0 80px rgba(74, 127, 193, 0.08);
-  border: 1px solid rgba(74, 127, 193, 0.08);
+/* Electric blue viewport frame — igloo's signature */
+.viewport-border {
+  position: fixed; inset: 0; z-index: 200; pointer-events: none;
+  border: 2px solid rgba(91,155,213,0.80);
+  box-shadow:
+    inset 0 0 40px rgba(91,155,213,0.08),
+    0 0 0 1px rgba(91,155,213,0.15);
 }
 
-/* ─── Components ────────────────────────────────────────────────────────── */
+/* Snow/dust particles */
+@keyframes drift {
+  0%   { transform: translateX(0) translateY(0) scale(1); opacity: 0; }
+  15%  { opacity: 0.85; }
+  85%  { opacity: 0.4; }
+  100% {
+    transform: translateX(var(--dx, -20px)) translateY(var(--dy, -80px)) scale(0.4);
+    opacity: 0;
+  }
+}
+
+.snow-particle {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: rgba(255,255,255,0.90);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: drift var(--dur, 6s) ease-in var(--delay, 0s) infinite;
+}
+
+/* ─── Components ─────────────────────────────────────────────────────────── */
 @layer components {
 
-  /* ── Panels ── */
+  /* Frosted glass panel — white glass over icy bg */
   .panel {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 14px;
     position: relative;
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.10),
+      inset 0 1px 0 rgba(255,255,255,0.50);
+    transition: border-color 0.22s, box-shadow 0.22s;
+  }
+  .panel:hover {
+    border-color: var(--border2);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.55);
   }
 
   .panel-elevated {
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 10px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
   }
 
-  /* ── Igloo Pill → rounded-full buttons ── */
+  /* Primary button — dark pill (dark text on light surface) */
   .btn-primary {
-    display: inline-flex; align-items: center; justify-content: center;
-    background: var(--accent);
-    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    background: #1a2340;
+    color: #ffffff;
     border: none;
-    border-radius: 9999px;         /* Igloo signature full pill */
-    padding: 10px 22px;
-    font-family: inherit;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
+    border-radius: 9999px;
+    padding: 9px 22px;
+    font-family: inherit; font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.10em; text-transform: uppercase; cursor: pointer;
     transition: background 0.2s, box-shadow 0.2s, transform 0.12s;
     white-space: nowrap;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.20);
   }
   .btn-primary:hover {
-    background: var(--accent-2);
-    box-shadow: 0 0 24px var(--accent-glow);
+    background: #2c3e5c;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.28);
+    transform: translateY(-1px);
   }
-  .btn-primary:active          { transform: scale(0.97); }
-  .btn-primary:disabled        { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary:active   { transform: scale(0.97) translateY(0); }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
+  /* Ghost pill — frosted white */
   .btn-secondary {
-    display: inline-flex; align-items: center; justify-content: center;
-    background: transparent;
-    color: var(--text-muted);
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    background: rgba(255,255,255,0.30);
+    color: var(--text-soft);
     border: 1px solid var(--border2);
     border-radius: 9999px;
-    padding: 10px 22px;
-    font-family: inherit;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
+    padding: 9px 22px;
+    font-family: inherit; font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.10em; text-transform: uppercase; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
+    backdrop-filter: blur(8px);
   }
   .btn-secondary:hover {
+    background: rgba(255,255,255,0.50);
     border-color: var(--border3);
     color: var(--text);
-    background: var(--surface2);
+    transform: translateY(-1px);
   }
+  .btn-secondary:active { transform: scale(0.97) translateY(0); }
 
+  /* Danger button */
   .btn-danger {
-    display: inline-flex; align-items: center; justify-content: center;
-    background: transparent;
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    background: rgba(192,57,43,0.10);
     color: var(--danger);
-    border: 1px solid rgba(248,113,113,0.25);
+    border: 1px solid rgba(192,57,43,0.30);
     border-radius: 9999px;
-    padding: 7px 16px;
-    font-family: inherit;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
+    padding: 7px 14px;
+    font-family: inherit; font-size: 0.68rem; font-weight: 600;
+    letter-spacing: 0.10em; text-transform: uppercase; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
   }
   .btn-danger:hover {
-    background: var(--danger);
-    color: #fff;
-    border-color: transparent;
+    background: var(--danger); color: #fff; border-color: transparent;
     box-shadow: 0 0 20px var(--danger-glow);
+    transform: translateY(-1px);
   }
+  .btn-danger:active { transform: scale(0.97) translateY(0); }
 
-  /* ── Inputs ── */
+  /* Inputs — frosted glass */
   .input-base {
     width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 9999px;   /* pill shape — igloo style */
-    padding: 10px 16px;
+    background: rgba(255,255,255,0.40);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 10px 14px;
     color: var(--text);
-    font-family: inherit;
-    font-size: 0.82rem;
+    font-family: inherit; font-size: 0.82rem;
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    backdrop-filter: blur(8px);
   }
   .input-base::placeholder { color: var(--text-dim); }
   .input-base:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-glow);
+    background: rgba(255,255,255,0.55);
   }
 
-  /* Textarea — keep rectangular */
   .input-area {
     width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.40);
+    border: 1px solid var(--border2);
     border-radius: 12px;
     padding: 12px 14px;
     color: var(--text);
-    font-family: inherit;
-    font-size: 0.8rem;
-    outline: none;
+    font-family: inherit; font-size: 0.82rem;
+    outline: none; resize: vertical;
     transition: border-color 0.2s, box-shadow 0.2s;
-    resize: vertical;
+    backdrop-filter: blur(8px);
   }
   .input-area::placeholder { color: var(--text-dim); }
   .input-area:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-glow);
+    background: rgba(255,255,255,0.55);
   }
 
-  /* Select — pill shape */
   .input-select {
     width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 9999px;
-    padding: 10px 16px;
+    background: rgba(255,255,255,0.40);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 10px 36px 10px 14px;
     color: var(--text);
-    font-family: inherit;
-    font-size: 0.82rem;
-    outline: none;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238892a4' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 36px;
-    transition: border-color 0.2s;
+    font-family: inherit; font-size: 0.82rem;
+    outline: none; cursor: pointer; appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(26,35,64,0.5)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    transition: border-color 0.2s, background 0.2s;
+    backdrop-filter: blur(8px);
   }
-  .input-select:focus { border-color: var(--accent); }
-  .input-select option { background: var(--surface2); }
+  .input-select:focus { border-color: var(--accent); background-color: rgba(255,255,255,0.55); }
+  .input-select option { background: #b8c4d2; color: #1a2340; }
 
-  /* ── Labels (igloo // prefix style) ── */
+  /* Label — uppercase tracked small-caps */
   .label {
     display: block;
     color: var(--text-muted);
-    font-size: 0.62rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    margin-bottom: 7px;
+    font-size: 0.62rem; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 7px;
   }
-  .label::before { content: '// '; color: var(--accent); opacity: 0.6; }
 
-  /* ── Status messages ── */
+  /* Status messages */
   .msg-success {
     padding: 12px 16px; border-radius: 10px;
-    background: rgba(52,211,153,0.07);
-    border: 1px solid rgba(52,211,153,0.2);
-    color: var(--success);
-    font-size: 0.75rem; font-weight: 600; line-height: 1.6;
+    background: rgba(30,138,82,0.12); border: 1px solid rgba(30,138,82,0.30);
+    color: var(--success); font-size: 0.75rem; font-weight: 600; line-height: 1.6;
+    backdrop-filter: blur(8px);
   }
   .msg-error {
     padding: 12px 16px; border-radius: 10px;
-    background: rgba(248,113,113,0.07);
-    border: 1px solid rgba(248,113,113,0.2);
-    color: var(--danger);
-    font-size: 0.75rem; font-weight: 600; line-height: 1.6;
+    background: rgba(192,57,43,0.10); border: 1px solid rgba(192,57,43,0.28);
+    color: var(--danger); font-size: 0.75rem; font-weight: 600; line-height: 1.6;
+    backdrop-filter: blur(8px);
   }
 
-  /* ── Igloo data badge ── */
+  /* Badge */
   .badge {
     display: inline-flex; align-items: center; gap: 5px;
-    border: 1px solid var(--border2);
-    border-radius: 9999px;
-    padding: 3px 10px;
-    font-size: 0.62rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    border: 1px solid var(--border2); border-radius: 9999px;
+    padding: 4px 11px; font-size: 0.6rem; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
+    background: rgba(255,255,255,0.30);
+    backdrop-filter: blur(6px);
   }
   .badge-accent {
-    border-color: rgba(74,127,193,0.35);
+    border-color: rgba(91,155,213,0.50);
     color: var(--accent-2);
-    background: rgba(74,127,193,0.08);
+    background: rgba(91,155,213,0.12);
   }
   .badge-danger {
-    border-color: rgba(248,113,113,0.3);
+    border-color: rgba(192,57,43,0.35);
     color: var(--danger);
-    background: rgba(248,113,113,0.07);
+    background: rgba(192,57,43,0.10);
   }
 
-  /* ── Igloo leader-line separator ── */
-  .divider {
-    height: 1px;
-    background: linear-gradient(to right, transparent, var(--border2) 20%, var(--border2) 80%, transparent);
-    margin: 0;
-  }
-
-  /* ── Sidebar nav item ── */
+  /* Sidebar nav item */
   .nav-item {
     display: flex; align-items: center; justify-content: space-between;
     width: 100%; padding: 9px 14px; border-radius: 9999px;
-    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em;
+    font-size: 0.75rem; font-weight: 500; letter-spacing: 0.03em;
     color: var(--text-muted); cursor: pointer;
-    transition: all 0.18s; text-align: left; border: 1px solid transparent;
+    transition: all 0.18s ease; text-align: left;
+    border: 1px solid transparent; background: transparent;
     text-transform: capitalize;
   }
-  .nav-item:hover  { background: var(--surface2); color: var(--text); border-color: var(--border); }
-  .nav-item.active {
-    background: rgba(74,127,193,0.12);
-    border-color: rgba(74,127,193,0.3);
+  .nav-item:hover {
+    background: rgba(255,255,255,0.30);
     color: var(--text);
+    border-color: var(--border2);
+    transform: translateX(2px);
+  }
+  .nav-item.active {
+    background: rgba(91,155,213,0.20);
+    border-color: rgba(91,155,213,0.45);
+    color: var(--text);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
   }
 }
 
-/* ─── Scrollbars ─────────────────────────────────────────────────────────── */
+/* ─── Scrollbars ──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--border3); }
+::-webkit-scrollbar-thumb { background: rgba(26,35,64,0.18); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(26,35,64,0.30); }
 
-/* ─── Markdown content ───────────────────────────────────────────────────── */
-.md-body { color: var(--text); line-height: 1.9; font-size: 0.9rem; }
-.md-body h1,.md-body h2,.md-body h3 { color: #e8ecf0; margin: 2em 0 0.6em; font-weight: 700; }
-.md-body h1 { font-size: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
-.md-body p  { margin-bottom: 1.2em; color: var(--text-muted); }
+/* ─── Markdown viewer ────────────────────────────────────────────────────── */
+.md-body { color: var(--text-soft); line-height: 1.9; font-size: 0.92rem; }
+.md-body h1,.md-body h2,.md-body h3 {
+  color: var(--text); margin: 2em 0 0.6em; font-weight: 700;
+}
+.md-body h1 {
+  font-size: 1.5rem;
+  border-bottom: 1px solid rgba(26,35,64,0.12);
+  padding-bottom: 0.5rem;
+}
+.md-body p  { margin-bottom: 1.2em; color: var(--text-soft); }
 .md-body strong { color: var(--text); }
 .md-body code {
-  background: var(--surface2); border: 1px solid var(--border);
+  background: rgba(255,255,255,0.50); border: 1px solid var(--border2);
   padding: 2px 7px; border-radius: 5px; font-size: 0.82em; color: var(--accent-2);
 }
-.md-body pre  {
-  background: var(--surface2); border: 1px solid var(--border);
+.md-body pre {
+  background: rgba(255,255,255,0.40); border: 1px solid var(--border);
   border-radius: 10px; padding: 16px; overflow-x: auto; margin-bottom: 1.2em;
 }
 .md-body blockquote {
-  border-left: 2px solid var(--accent); padding-left: 16px;
+  border-left: 3px solid var(--accent); padding-left: 16px;
   color: var(--text-muted); margin: 0 0 1.2em;
 }
 .md-body ul,.md-body ol { padding-left: 1.5em; margin-bottom: 1em; }
-.md-body li { margin-bottom: 0.5em; color: var(--text-muted); }
-.md-body a { color: var(--accent-2); text-decoration: underline; text-underline-offset: 3px; }
+.md-body li { margin-bottom: 0.5em; color: var(--text-soft); }
+.md-body a  { color: var(--accent-2); text-underline-offset: 3px; }

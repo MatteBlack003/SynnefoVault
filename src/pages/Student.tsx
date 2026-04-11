@@ -20,15 +20,15 @@ interface Catalog { [dept: string]: string[]; }
 
 const containerV: Variants = {
   hidden: { opacity: 0 },
-  show:   { opacity: 1, transition: { staggerChildren: 0.04 } },
+  show:   { opacity: 1, transition: { staggerChildren: 0.05 } },
 };
 const itemV: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  show:   { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 26 } },
+  hidden: { opacity: 0, x: -8 },
+  show:   { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 280, damping: 28 } },
 };
 const cardV: Variants = {
-  hidden: { opacity: 0, y: 14, scale: 0.98 },
-  show:   { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 24 } },
+  hidden: { opacity: 0, y: 12, scale: 0.98 },
+  show:   { opacity: 1, y: 0,  scale: 1, transition: { type: 'spring', stiffness: 280, damping: 24 } },
 };
 
 export function Student() {
@@ -50,7 +50,6 @@ export function Student() {
 
   const fetchCatalog = async () => {
     setCatalogLoading(true);
-    // 1. localStorage
     try {
       const raw = localStorage.getItem(CATALOG_KEY);
       if (raw) {
@@ -58,26 +57,25 @@ export function Student() {
         if (hasExams(d)) { setCatalog(d); setCatalogLoading(false); return; }
       }
     } catch { /**/ }
-    // 2. raw.githubusercontent
     try {
       const res = await fetch(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/public/catalog.json?t=${Date.now()}`, { cache: 'no-store' });
       if (res.ok) { const d: Catalog = await res.json(); if (hasExams(d)) { setCatalog(d); setCatalogLoading(false); return; } }
     } catch { /**/ }
-    // 3. Pages
     try {
-      const isLocal = ['localhost','127.0.0.1'].includes(window.location.hostname);
-      const url = isLocal ? `${import.meta.env.BASE_URL}catalog.json?t=${Date.now()}` : `${PAGES_BASE}catalog.json?t=${Date.now()}`;
+      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      const url = isLocal
+        ? `${import.meta.env.BASE_URL}catalog.json?t=${Date.now()}`
+        : `${PAGES_BASE}catalog.json?t=${Date.now()}`;
       const res = await fetch(url, { cache: 'no-store' });
       if (res.ok) { const d: Catalog = await res.json(); if (hasExams(d)) { setCatalog(d); setCatalogLoading(false); return; } }
     } catch { /**/ }
-    // 4. Git Trees API
     try { setCatalog(await fetchFullCatalogFromAPI(REPO_OWNER, REPO_NAME, DEPARTMENTS)); } catch { /**/ }
     setCatalogLoading(false);
   };
 
   useEffect(() => { fetchCatalog(); }, []);
 
-  // Kill switch
+  /* Kill switch — listen for catalog updates from admin in same browser */
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === CATALOG_KEY && e.newValue) {
@@ -100,7 +98,10 @@ export function Student() {
     if (activeFile) {
       interval = setInterval(async () => {
         try {
-          const res = await fetch(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/public/catalog.json?t=${Date.now()}`, { cache: 'no-store' });
+          const res = await fetch(
+            `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/public/catalog.json?t=${Date.now()}`,
+            { cache: 'no-store' }
+          );
           if (res.ok) {
             const fresh: Catalog = await res.json();
             const [dept, fileName] = activeFile.path.split('/');
@@ -113,10 +114,13 @@ export function Student() {
         } catch { /**/ }
       }, 30_000);
     }
-    return () => { window.removeEventListener('storage', onStorage); if (interval) clearInterval(interval); };
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      if (interval) clearInterval(interval);
+    };
   }, [activeFile]);
 
-  // Countdown timer
+  /* Countdown timer */
   useEffect(() => {
     if (timeLeft === null) return;
     if (timeLeft <= 0) { alert('TIME EXPIRED — Your exam session has ended.'); closeViewer(); return; }
@@ -124,27 +128,37 @@ export function Student() {
     return () => clearInterval(t);
   }, [timeLeft]);
 
-  // DRM
+  /* DRM — disable copy/print/context-menu while exam is open */
   useEffect(() => {
     if (!(decryptedHtml || decryptedPdfUrl) || !activeFile) return;
-    const bc = (e: MouseEvent)   => e.preventDefault();
-    const bk = (e: KeyboardEvent) => { if ((e.ctrlKey || e.metaKey) && 'cpsx a'.includes(e.key.toLowerCase())) e.preventDefault(); };
+    const bc = (e: MouseEvent)    => e.preventDefault();
+    const bk = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && 'cpsx a'.includes(e.key.toLowerCase())) e.preventDefault();
+    };
     document.addEventListener('contextmenu', bc);
     document.addEventListener('keydown', bk);
     document.body.classList.add('select-none');
-    return () => { document.removeEventListener('contextmenu', bc); document.removeEventListener('keydown', bk); document.body.classList.remove('select-none'); };
+    return () => {
+      document.removeEventListener('contextmenu', bc);
+      document.removeEventListener('keydown', bk);
+      document.body.classList.remove('select-none');
+    };
   }, [decryptedHtml, decryptedPdfUrl, activeFile]);
 
   const handleDecrypt = async () => {
-    if (!activeFile || !examCode) return;
-    setLoading(true); setStatus({ type: '', msg: '' });
+    if (!activeFile || !examCode.trim()) return;
+    setLoading(true);
+    setStatus({ type: '', msg: '' });
     try {
-      const res = await fetch(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${activeFile.path}?t=${Date.now()}`, { cache: 'no-store' });
-      if (!res.ok) throw new Error('Could not retrieve exam file from server.');
+      const res = await fetch(
+        `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${activeFile.path}?t=${Date.now()}`,
+        { cache: 'no-store' }
+      );
+      if (!res.ok) throw new Error('NETWORK_ERROR');
       const payload   = await res.text();
-      const decrypted = await decryptWithKeyring(examCode, payload);
+      const decrypted = await decryptWithKeyring(examCode.trim(), payload);
       if (decrypted.startsWith('PDF:')) {
-        const bytes   = Uint8Array.from(atob(decrypted.substring(4)), c => c.charCodeAt(0));
+        const bytes = Uint8Array.from(atob(decrypted.substring(4)), c => c.charCodeAt(0));
         setDecryptedPdfUrl(URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })));
         setDecryptedHtml(null);
       } else {
@@ -156,14 +170,24 @@ export function Student() {
       setTimeLeft(durs?.[activeFile.path] ? durs[activeFile.path] * 60 : null);
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
-      setStatus({ type: 'error', msg: msg.includes('retrieve') ? 'Network error — could not download the exam.' : 'Access denied — invalid student ID.' });
-    } finally { setLoading(false); }
+      setStatus({
+        type: 'error',
+        msg: msg === 'NETWORK_ERROR'
+          ? 'Network error — could not download the exam file.'
+          : 'Access denied — invalid student ID.',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const closeViewer = () => {
     if (decryptedPdfUrl) URL.revokeObjectURL(decryptedPdfUrl);
-    setDecryptedHtml(null); setDecryptedPdfUrl(null);
-    setActiveFile(null); setExamCode(''); setTimeLeft(null);
+    setDecryptedHtml(null);
+    setDecryptedPdfUrl(null);
+    setActiveFile(null);
+    setExamCode('');
+    setTimeLeft(null);
     setStatus({ type: '', msg: '' });
   };
 
@@ -171,37 +195,54 @@ export function Student() {
     `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
   const timerDanger = timeLeft !== null && timeLeft <= 300;
 
-  // Viewer toolbar
+  /* ── Viewer toolbar ── */
   const ViewerBar = () => (
-    <div className="flex items-center justify-between px-8 py-4 border-b border-border/60 bg-surface/80 backdrop-blur-sm">
+    <div
+      className="flex items-center justify-between px-8 py-4 flex-shrink-0"
+      style={{
+        borderBottom: '1px solid rgba(26,35,64,0.12)',
+        background: 'rgba(184,196,210,0.75)',
+        backdropFilter: 'blur(16px)',
+      }}
+    >
       <div className="flex items-center gap-4">
-        <ShieldCheck className="w-4 h-4 text-accent2" />
-        <span className="text-sm font-bold text-ink tracking-wide">{activeFile?.name}</span>
+        <ShieldCheck className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+        <span className="text-sm font-bold" style={{ color: 'var(--text)' }}>{activeFile?.name}</span>
         <span className="badge badge-danger" style={{ fontSize: '0.6rem' }}>
-          <span className="w-1.5 h-1.5 rounded-full bg-danger animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--danger)' }} />
           DRM ACTIVE
         </span>
       </div>
       <div className="flex items-center gap-5">
         {timeLeft !== null && (
-          <div className={`flex items-center gap-2 ${timerDanger ? 'text-danger animate-pulse' : 'text-accent2'}`}>
+          <div
+            className={`flex items-center gap-2 ${timerDanger ? 'animate-pulse' : ''}`}
+            style={{ color: timerDanger ? 'var(--danger)' : 'var(--accent-2)' }}
+          >
             <Timer className="w-3.5 h-3.5" />
             <span className="font-mono font-bold text-base tracking-widest">{fmtTime(timeLeft)}</span>
           </div>
         )}
-        <button onClick={closeViewer} className="btn-secondary py-2 px-5 text-[10px]">
+        <button onClick={closeViewer} className="btn-primary" style={{ padding: '7px 18px', fontSize: '0.68rem' }}>
           End Session
         </button>
       </div>
     </div>
   );
 
+  /* ── PDF Viewer ── rendered as full-screen fixed overlay */
   if (decryptedPdfUrl && activeFile) return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 z-50 bg-bg flex flex-col">
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+      className="fixed inset-0 z-[100] flex flex-col"
+      style={{ background: 'var(--bg-deep)' }}
+    >
       {/* Watermark */}
-      <div className="absolute inset-0 pointer-events-none z-20 opacity-[0.04] grid grid-cols-5 grid-rows-6 items-center justify-items-center">
+      <div className="absolute inset-0 pointer-events-none z-20 opacity-[0.04]
+        grid grid-cols-5 grid-rows-6 items-center justify-items-center">
         {Array.from({ length: 30 }).map((_, i) => (
-          <div key={i} className="text-2xl font-bold text-ink -rotate-30 whitespace-nowrap tracking-widest">
+          <div key={i} className="text-2xl font-bold -rotate-30 whitespace-nowrap tracking-widest"
+            style={{ color: 'var(--text)' }}>
             {examCode.toUpperCase()}
           </div>
         ))}
@@ -211,8 +252,13 @@ export function Student() {
     </motion.div>
   );
 
+  /* ── Markdown Viewer ── rendered as full-screen fixed overlay */
   if (decryptedHtml && activeFile) return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 z-50 bg-bg flex flex-col">
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+      className="fixed inset-0 z-[100] flex flex-col"
+      style={{ background: 'var(--bg-light)' }}
+    >
       <ViewerBar />
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-8 py-12">
@@ -225,19 +271,29 @@ export function Student() {
   const exams = (catalog[activeDept] || []).filter(f => typeof f === 'string');
 
   return (
-    <div className="flex flex-1 gap-5 overflow-hidden min-h-0 w-full">
+    /* Main layout — flex row filling available space */
+    <div className="flex flex-1 gap-5 w-full" style={{ minHeight: 0, paddingBottom: '48px' }}>
+
       {/* ── Sidebar ── */}
       <motion.nav
         variants={containerV} initial="hidden" animate="show"
-        className="flex flex-col panel overflow-hidden"
-        style={{ minWidth: '220px', maxWidth: '220px' }}
+        className="panel flex flex-col flex-shrink-0 overflow-hidden"
+        style={{ width: '220px', minHeight: 0 }}
       >
-        <div className="px-4 py-4 border-b border-border/60">
-          <div className="label mb-1" style={{ fontSize: '0.6rem' }}>Departments</div>
+        <div className="px-4 py-4" style={{ borderBottom: '1px solid rgba(26,35,64,0.10)' }}>
+          <div className="label mb-1" style={{ fontSize: '0.59rem' }}>Departments</div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-ink font-bold">{DEPARTMENTS.length} Nodes</span>
-            <button onClick={fetchCatalog} title="Refresh" className="p-1 rounded-full text-dim hover:text-accent2 transition-colors">
-              <RefreshCw className={`w-3 h-3 ${catalogLoading ? 'animate-spin text-accent2' : ''}`} />
+            <span className="text-xs font-bold" style={{ color: 'var(--text)' }}>
+              {DEPARTMENTS.length} Nodes
+            </span>
+            <button
+              onClick={fetchCatalog}
+              title="Refresh"
+              className="p-1 rounded-full transition-colors"
+              style={{ color: 'var(--text-dim)' }}
+            >
+              <RefreshCw className={`w-3 h-3 ${catalogLoading ? 'animate-spin' : ''}`}
+                style={{ color: catalogLoading ? 'var(--accent)' : undefined }} />
             </button>
           </div>
         </div>
@@ -249,24 +305,26 @@ export function Student() {
               className={`nav-item ${activeDept === d ? 'active' : ''}`}
             >
               <span>{d.replace(/-/g, ' ')}</span>
-              {activeDept === d && <ChevronRight className="w-3 h-3 text-accent2 flex-shrink-0" />}
+              {activeDept === d && (
+                <ChevronRight className="w-3 h-3 flex-shrink-0" style={{ color: 'var(--accent)' }} />
+              )}
             </motion.button>
           ))}
         </div>
       </motion.nav>
 
       {/* ── Exam grid ── */}
-      <div className="flex flex-col flex-1 overflow-hidden min-h-0">
+      <div className="flex flex-col flex-1 overflow-hidden" style={{ minHeight: 0 }}>
         {/* Section header */}
-        <div className="flex items-end justify-between mb-5 flex-shrink-0">
+        <div className="flex items-end justify-between mb-4 flex-shrink-0">
           <div>
-            <div className="label mb-1">// Active Formation</div>
-            <h2 className="text-xl font-bold text-ink capitalize tracking-tight">
+            <div className="label mb-1" style={{ fontSize: '0.59rem' }}>// Active Formation</div>
+            <h2 className="text-xl font-bold capitalize" style={{ color: 'var(--text)', letterSpacing: '0.01em' }}>
               {activeDept.replace(/-/g, ' ')}
             </h2>
           </div>
           {!catalogLoading && (
-            <span className="badge" style={{ fontSize: '0.6rem' }}>
+            <span className="badge" style={{ fontSize: '0.59rem' }}>
               {exams.length} exam{exams.length !== 1 ? 's' : ''}
             </span>
           )}
@@ -274,9 +332,9 @@ export function Student() {
 
         <div className="flex-1 overflow-y-auto pb-4 pr-1">
           {catalogLoading ? (
-            <div className="panel h-44 flex items-center justify-center gap-3 text-muted">
-              <RefreshCw className="w-4 h-4 animate-spin text-accent2" />
-              <span className="text-sm">Syncing catalog…</span>
+            <div className="panel h-44 flex items-center justify-center gap-3">
+              <RefreshCw className="w-4 h-4 animate-spin" style={{ color: 'var(--accent)' }} />
+              <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Syncing catalog…</span>
             </div>
           ) : (
             <motion.div
@@ -285,11 +343,15 @@ export function Student() {
               className="grid grid-cols-2 gap-4"
             >
               {exams.length === 0 ? (
-                <motion.div variants={cardV}
-                  className="col-span-2 panel h-44 flex items-center justify-center flex-col gap-3 text-muted">
-                  <div className="text-3xl opacity-20">◻</div>
-                  <span className="text-sm">No exams scheduled</span>
-                  <span className="text-[10px] text-dim uppercase tracking-widest">// null sector</span>
+                <motion.div
+                  variants={cardV}
+                  className="col-span-2 panel h-44 flex items-center justify-center flex-col gap-3"
+                >
+                  <div className="text-3xl opacity-20" style={{ color: 'var(--text)' }}>◻</div>
+                  <span className="text-sm" style={{ color: 'var(--text-muted)' }}>No exams scheduled</span>
+                  <span className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-dim)' }}>
+                    // null sector
+                  </span>
                 </motion.div>
               ) : exams.map((file, i) => {
                 const durs = (catalog as Record<string, unknown>)['_durations'] as Record<string, number> | undefined;
@@ -297,36 +359,48 @@ export function Student() {
                 return (
                   <motion.button
                     variants={cardV}
-                    whileHover={{ y: -2 }}
-                    whileTap={{ scale: 0.99 }}
+                    whileHover={{ y: -3, scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
                     key={file}
                     onClick={() => setActiveFile({ path: `${activeDept}/${file}`, name: file.replace('.enc', '') })}
-                    className="panel text-left p-5 flex flex-col gap-4 group hover:border-border2 transition-all duration-200"
-                    style={{ minHeight: '140px' }}
+                    className="panel text-left p-5 flex flex-col gap-4 group"
+                    style={{ minHeight: '140px', cursor: 'pointer' }}
                   >
                     {/* Top row */}
                     <div className="flex items-start justify-between w-full">
-                      <span className="badge" style={{ fontSize: '0.58rem', padding: '2px 8px' }}>
+                      <span className="badge" style={{ fontSize: '0.57rem', padding: '2px 9px' }}>
                         #{String(i + 1).padStart(2, '0')}
                       </span>
-                      <Lock className="w-3.5 h-3.5 text-dim group-hover:text-accent2 transition-colors" />
+                      <Lock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--text-dim)' }} />
                     </div>
                     {/* Title */}
                     <div className="flex-1">
-                      <div className="text-sm font-bold text-ink capitalize leading-tight mb-1 truncate group-hover:text-accent2 transition-colors">
+                      <div
+                        className="text-sm font-bold capitalize leading-tight mb-1 truncate transition-colors"
+                        style={{ color: 'var(--text)' }}
+                      >
                         {file.replace('.enc', '')}
                       </div>
-                      <div className="text-[10px] text-dim uppercase tracking-widest">Encrypted payload</div>
+                      <div className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-dim)' }}>
+                        Encrypted payload
+                      </div>
                     </div>
                     {/* Footer */}
-                    <div className="flex items-center justify-between pt-2 border-t border-border/60">
+                    <div
+                      className="flex items-center justify-between pt-3"
+                      style={{ borderTop: '1px solid rgba(26,35,64,0.10)' }}
+                    >
                       {mins ? (
-                        <div className="flex items-center gap-1.5 text-accent2">
+                        <div className="flex items-center gap-1.5" style={{ color: 'var(--accent-2)' }}>
                           <Timer className="w-3 h-3" />
                           <span className="text-[10px] font-bold">{mins} min</span>
                         </div>
-                      ) : <span className="text-[10px] text-dim">No time limit</span>}
-                      <span className="text-[10px] text-dim uppercase tracking-widest">Click to open →</span>
+                      ) : (
+                        <span className="text-[10px]" style={{ color: 'var(--text-dim)' }}>No time limit</span>
+                      )}
+                      <span className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-dim)' }}>
+                        Click to open →
+                      </span>
                     </div>
                   </motion.button>
                 );
@@ -336,43 +410,53 @@ export function Student() {
         </div>
       </div>
 
-      {/* ── Access Modal ── */}
+      {/* ── Access Modal ── fixed overlay, not clipped by parent */}
       <AnimatePresence>
-        {activeFile && (
+        {activeFile && !(decryptedHtml || decryptedPdfUrl) && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="absolute inset-0 z-50 bg-bg/75 backdrop-blur-md flex items-center justify-center p-4"
+            className="fixed inset-0 z-[99] flex items-center justify-center p-4"
+            style={{ background: 'rgba(136,152,176,0.60)', backdropFilter: 'blur(16px)' }}
           >
             <motion.div
-              initial={{ scale: 0.95, y: 14 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 14 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 26 }}
-              className="panel w-full max-w-md p-8"
+              initial={{ scale: 0.94, y: 16 }} animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.94, y: 16 }}
+              transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+              className="panel w-full p-8"
+              style={{ maxWidth: '420px' }}
             >
               {/* Header */}
-              <div className="flex items-center gap-4 mb-6 pb-5 border-b border-border/60">
-                <div className="w-10 h-10 rounded-full bg-accent/10 border border-accent/30 flex items-center justify-center flex-shrink-0">
-                  <Lock className="w-4 h-4 text-accent2" />
+              <div className="flex items-center gap-4 mb-6 pb-5"
+                style={{ borderBottom: '1px solid rgba(26,35,64,0.12)' }}>
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'rgba(91,155,213,0.15)', border: '1px solid rgba(91,155,213,0.35)' }}
+                >
+                  <Lock className="w-4 h-4" style={{ color: 'var(--accent-2)' }} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-ink">Access Required</h3>
-                  <p className="text-[11px] text-muted mt-0.5 truncate max-w-xs">{activeFile.name}</p>
+                  <h3 className="text-base font-bold" style={{ color: 'var(--text)' }}>Access Required</h3>
+                  <p className="text-[11px] mt-0.5 truncate max-w-xs" style={{ color: 'var(--text-muted)' }}>
+                    {activeFile.name}
+                  </p>
                 </div>
               </div>
 
-              <p className="text-xs text-muted leading-relaxed mb-5">
+              <p className="text-xs leading-relaxed mb-5" style={{ color: 'var(--text-muted)' }}>
                 This exam is cryptographically locked. Enter your assigned Student ID to decrypt and access the paper.
               </p>
 
               <div className="mb-4">
                 <label className="label" style={{ fontSize: '0.6rem' }}>Student ID / Passkey</label>
                 <input
-                  type="password" autoFocus
+                  type="password"
+                  autoFocus
                   value={examCode}
                   onChange={e => setExamCode(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleDecrypt()}
                   className="input-base text-center text-lg font-bold tracking-[0.3em]"
-                  placeholder="NET-A1"
+                  placeholder="NET-A1B2"
                   style={{ borderRadius: '12px' }}
                 />
               </div>
@@ -380,7 +464,8 @@ export function Student() {
               <AnimatePresence>
                 {status.msg && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     className="msg-error mb-4"
                   >
@@ -390,10 +475,17 @@ export function Student() {
               </AnimatePresence>
 
               <div className="flex gap-3 mt-2">
-                <button onClick={() => setActiveFile(null)} className="btn-secondary flex-1 py-3">
+                <button
+                  onClick={() => { setActiveFile(null); setStatus({ type: '', msg: '' }); setExamCode(''); }}
+                  className="btn-secondary flex-1 py-3"
+                >
                   Cancel
                 </button>
-                <button onClick={handleDecrypt} disabled={loading || !examCode} className="btn-primary flex-1 py-3">
+                <button
+                  onClick={handleDecrypt}
+                  disabled={loading || !examCode.trim()}
+                  className="btn-primary flex-1 py-3"
+                >
                   {loading ? 'Verifying…' : 'Unlock Exam'}
                 </button>
               </div>
