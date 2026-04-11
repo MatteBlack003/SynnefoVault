@@ -1,7 +1,5 @@
 {
-  "networking": [
-    "tes101.enc"
-  ],
+  "networking": [],
   "devops": [],
   "python-full-stack": [],
   "mern-stack": [],
@@ -9,7 +7,5 @@
   "cyber-security": [],
   "digital-marketing": [],
   "data-science": [],
-  "_durations": {
-    "networking/tes101.enc": 3
-  }
+  "_durations": {}
 }
