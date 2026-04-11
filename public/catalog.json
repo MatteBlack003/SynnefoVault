@@ -1,6 +1,5 @@
 {
   "networking": [
-    "test3.enc",
     "test4.enc",
     "test5.enc"
   ],
@@ -12,7 +11,6 @@
   "digital-marketing": [],
   "data-science": [],
   "_durations": {
-    "networking/test3.enc": 4,
     "networking/test4.enc": 1,
     "networking/test5.enc": 2
   }
