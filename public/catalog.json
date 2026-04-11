@@ -1,5 +1,7 @@
 {
-  "networking": [],
+  "networking": [
+    "test-exam-01.enc"
+  ],
   "devops": [],
   "python-full-stack": [],
   "mern-stack": [],
@@ -7,5 +9,7 @@
   "cyber-security": [],
   "digital-marketing": [],
   "data-science": [],
-  "_durations": {}
+  "_durations": {
+    "networking/test-exam-01.enc": 60
+  }
 }
