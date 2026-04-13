@@ -1,11 +1,15 @@
 {
   "networking": [],
-  "devops": [],
+  "devops": [
+    "101.enc"
+  ],
   "python-full-stack": [],
   "mern-stack": [],
   "flutter": [],
   "cyber-security": [],
   "digital-marketing": [],
   "data-science": [],
-  "_durations": {}
+  "_durations": {
+    "devops/101.enc": 180
+  }
 }
