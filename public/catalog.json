@@ -1,15 +1,11 @@
 {
   "networking": [],
-  "devops": [
-    "mock101.enc"
-  ],
+  "devops": [],
   "python-full-stack": [],
   "mern-stack": [],
   "flutter": [],
   "cyber-security": [],
   "digital-marketing": [],
   "data-science": [],
-  "_durations": {
-    "devops/mock101.enc": 3
-  }
+  "_durations": {}
 }
