@@ -2,7 +2,9 @@
   "networking": [
     "mock101.enc"
   ],
-  "devops": [],
+  "devops": [
+    "mock101.enc"
+  ],
   "python-full-stack": [],
   "mern-stack": [],
   "flutter": [],
@@ -10,6 +12,7 @@
   "digital-marketing": [],
   "data-science": [],
   "_durations": {
-    "networking/mock101.enc": 3
+    "networking/mock101.enc": 3,
+    "devops/mock101.enc": 3
   }
 }
