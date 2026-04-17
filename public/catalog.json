@@ -1,7 +1,5 @@
 {
-  "networking": [
-    "mock3.enc"
-  ],
+  "networking": [],
   "devops": [],
   "python-full-stack": [],
   "mern-stack": [],
@@ -9,7 +7,5 @@
   "cyber-security": [],
   "digital-marketing": [],
   "data-science": [],
-  "_durations": {
-    "networking/mock3.enc": 2
-  }
+  "_durations": {}
 }
