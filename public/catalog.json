@@ -1,7 +1,5 @@
 {
-  "networking": [
-    "mock101.enc"
-  ],
+  "networking": [],
   "devops": [
     "mock101.enc"
   ],
@@ -12,7 +10,6 @@
   "digital-marketing": [],
   "data-science": [],
   "_durations": {
-    "networking/mock101.enc": 3,
     "devops/mock101.enc": 3
   }
 }
