@@ -1,6 +1,7 @@
 {
   "networking": [
-    "mock1.enc"
+    "mock1.enc",
+    "mock2.enc"
   ],
   "devops": [],
   "python-full-stack": [],
@@ -10,6 +11,7 @@
   "digital-marketing": [],
   "data-science": [],
   "_durations": {
-    "networking/mock1.enc": 2
+    "networking/mock1.enc": 2,
+    "networking/mock2.enc": 2
   }
 }
