@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { decryptWithKeyring } from '../lib/crypto';
@@ -99,17 +99,12 @@ export function Student() {
       interval = setInterval(async () => {
         try {
           const res = await fetch(
-            `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/public/catalog.json?t=${Date.now()}`,
-            { cache: 'no-store' }
+            `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${activeFile.path}?t=${Date.now()}`,
+            { method: 'HEAD', cache: 'no-store' }
           );
-          if (res.ok) {
-            const fresh: Catalog = await res.json();
-            const [dept, fileName] = activeFile.path.split('/');
-            const arr = fresh[dept];
-            if (Array.isArray(arr) && !arr.includes(fileName)) {
-              alert('SESSION TERMINATED — Administrator has ended this exam.');
-              closeViewer();
-            }
+          if (res.status === 404) {
+            alert('SESSION TERMINATED — Administrator has ended this exam.');
+            closeViewer();
           }
         } catch { /**/ }
       }, 30_000);
@@ -120,13 +115,24 @@ export function Student() {
     };
   }, [activeFile]);
 
+  // Ref to hold the current exam code strictly for interval/closure safety
+  const codeRef = useRef('');
+  useEffect(() => { codeRef.current = examCode; }, [examCode]);
+
   /* Countdown timer */
   useEffect(() => {
     if (timeLeft === null) return;
-    if (timeLeft <= 0) { alert('TIME EXPIRED — Your exam session has ended.'); closeViewer(); return; }
-    const t = setInterval(() => setTimeLeft(p => p !== null ? p - 1 : null), 1000);
+    if (timeLeft <= 0) {
+      closeViewer();
+      // Setting status AFTER closeViewer ensures the exam is gone before the message displays
+      setStatus({ type: 'error', msg: 'TIME EXPIRED — Your exam session has ended.' });
+      return;
+    }
+    const t = setInterval(() => {
+      setTimeLeft(p => (p !== null && p > 0 ? p - 1 : 0));
+    }, 1000);
     return () => clearInterval(t);
-  }, [timeLeft]);
+  }, [timeLeft === null, timeLeft <= 0]);
 
   /* DRM — disable copy/print/context-menu while exam is open */
   useEffect(() => {
@@ -147,6 +153,25 @@ export function Student() {
 
   const handleDecrypt = async () => {
     if (!activeFile || !examCode.trim()) return;
+
+    const code = examCode.trim().toUpperCase();
+    const sessionsStr = localStorage.getItem('synnefo_sessions');
+    const sessions = sessionsStr ? JSON.parse(sessionsStr) : {};
+    const existingSession = sessions[code];
+
+    if (existingSession) {
+      if (existingSession.completed) {
+        setStatus({ type: 'error', msg: 'Access denied — Passkey has already been used and session is finalized.' });
+        return;
+      }
+      if (existingSession.endTime !== null && Date.now() >= existingSession.endTime) {
+        existingSession.completed = true;
+        localStorage.setItem('synnefo_sessions', JSON.stringify(sessions));
+        setStatus({ type: 'error', msg: 'Access denied — Your exam time has expired.' });
+        return;
+      }
+    }
+
     setLoading(true);
     setStatus({ type: '', msg: '' });
     try {
@@ -156,7 +181,7 @@ export function Student() {
       );
       if (!res.ok) throw new Error('NETWORK_ERROR');
       const payload   = await res.text();
-      const decrypted = await decryptWithKeyring(examCode.trim(), payload);
+      const decrypted = await decryptWithKeyring(code, payload);
       if (decrypted.startsWith('PDF:')) {
         const bytes = Uint8Array.from(atob(decrypted.substring(4)), c => c.charCodeAt(0));
         setDecryptedPdfUrl(URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })));
@@ -166,8 +191,24 @@ export function Student() {
         setDecryptedHtml(marked.parse(md) as string);
         setDecryptedPdfUrl(null);
       }
+      
       const durs = (catalog as Record<string, unknown>)['_durations'] as Record<string, number> | undefined;
-      setTimeLeft(durs?.[activeFile.path] ? durs[activeFile.path] * 60 : null);
+      const durationMins = durs?.[activeFile.path];
+      
+      let newTimeLeft = null;
+      if (existingSession && existingSession.endTime !== null) {
+          newTimeLeft = Math.floor((existingSession.endTime - Date.now()) / 1000);
+          if (newTimeLeft < 0) newTimeLeft = 0;
+      } else if (durationMins) {
+          newTimeLeft = durationMins * 60;
+          sessions[code] = { endTime: Date.now() + newTimeLeft * 1000, completed: false };
+          localStorage.setItem('synnefo_sessions', JSON.stringify(sessions));
+      } else {
+          sessions[code] = { endTime: null, completed: false };
+          localStorage.setItem('synnefo_sessions', JSON.stringify(sessions));
+      }
+      
+      setTimeLeft(newTimeLeft);
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
       setStatus({
@@ -182,6 +223,19 @@ export function Student() {
   };
 
   const closeViewer = () => {
+    // Determine the code to finalize: prefer the ref which is immune to interval closures
+    const currentCode = codeRef.current || examCode;
+    if (currentCode) {
+      const code = currentCode.trim().toUpperCase();
+      const sessionsStr = localStorage.getItem('synnefo_sessions');
+      if (sessionsStr) {
+        const sessions = JSON.parse(sessionsStr);
+        if (sessions[code]) {
+          sessions[code].completed = true;
+          localStorage.setItem('synnefo_sessions', JSON.stringify(sessions));
+        }
+      }
+    }
     if (decryptedPdfUrl) URL.revokeObjectURL(decryptedPdfUrl);
     setDecryptedHtml(null);
     setDecryptedPdfUrl(null);
@@ -223,7 +277,7 @@ export function Student() {
             <span className="font-mono font-bold text-base tracking-widest">{fmtTime(timeLeft)}</span>
           </div>
         )}
-        <button onClick={closeViewer} className="btn-primary" style={{ padding: '7px 18px', fontSize: '0.68rem' }}>
+        <button onClick={closeViewer} className="btn-primary btn-sm">
           End Session
         </button>
       </div>
@@ -359,8 +413,6 @@ export function Student() {
                 return (
                   <motion.button
                     variants={cardV}
-                    whileHover={{ y: -3, scale: 1.01 }}
-                    whileTap={{ scale: 0.98 }}
                     key={file}
                     onClick={() => setActiveFile({ path: `${activeDept}/${file}`, name: file.replace('.enc', '') })}
                     className="panel text-left p-5 flex flex-col gap-4 group"
@@ -477,14 +529,14 @@ export function Student() {
               <div className="flex gap-3 mt-2">
                 <button
                   onClick={() => { setActiveFile(null); setStatus({ type: '', msg: '' }); setExamCode(''); }}
-                  className="btn-secondary flex-1 py-3"
+                  className="btn-secondary btn-lg flex-1"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDecrypt}
                   disabled={loading || !examCode.trim()}
-                  className="btn-primary flex-1 py-3"
+                  className="btn-primary btn-lg flex-1"
                 >
                   {loading ? 'Verifying…' : 'Unlock Exam'}
                 </button>

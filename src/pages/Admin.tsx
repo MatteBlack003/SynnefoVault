@@ -251,15 +251,10 @@ export function Admin() {
             <h2 className="text-base font-bold" style={{ color: 'var(--text)' }}>Key Generator</h2>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => refreshCatalog()}
-              className="btn-secondary flex items-center gap-1.5"
-              style={{ padding: '6px 14px', fontSize: '0.68rem' }}
-            >
+            <button onClick={() => refreshCatalog()} className="btn-secondary btn-sm flex items-center gap-1.5">
               <RefreshCw className="w-3 h-3" /> Refresh
             </button>
-            <button onClick={handleLogout} className="btn-danger flex items-center gap-1.5"
-              style={{ padding: '6px 14px' }}>
+            <button onClick={handleLogout} className="btn-danger btn-sm flex items-center gap-1.5">
               <LogOut className="w-3 h-3" /> Disconnect
             </button>
           </div>
@@ -478,8 +473,7 @@ export function Admin() {
                 <button
                   onClick={() => setConfirmDelete({ dept: d, file: f })}
                   disabled={loading}
-                  className="btn-danger flex-shrink-0 flex items-center gap-1.5"
-                  style={{ padding: '6px 12px', fontSize: '0.62rem' }}
+                  className="btn-danger btn-sm"
                 >
                   <Trash2 className="w-3 h-3" /> End
                 </button>

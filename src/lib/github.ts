@@ -146,30 +146,44 @@ export async function fetchFullCatalogFromAPI(
 
   try {
     const res = await fetch(
+      `https://api.github.com/repos/${repoOwner}/${repoName}/contents/public/catalog.json`,
+      { headers, cache: 'no-store' }
+    );
+
+    if (res.ok) {
+      const data = await res.json();
+      // Decode base64 content safely handles typical JSON
+      const decodedUtf8 = decodeURIComponent(escape(atob(data.content)));
+      const parsed = JSON.parse(decodedUtf8);
+      // Merge into catalog object safely ensuring standard structure
+      Object.assign(catalog, parsed);
+      return catalog;
+    }
+  } catch {
+    // If API lookup fails, fallback to git tree below
+  }
+
+  try {
+    const res = await fetch(
       `https://api.github.com/repos/${repoOwner}/${repoName}/git/trees/main?recursive=1`,
       { headers, cache: 'no-store' }
     );
 
-    if (!res.ok) return catalog;
-
-    const data: { tree: Array<{ path: string; type: string }> } = await res.json();
-
-    for (const item of data.tree) {
-      if (item.type !== 'blob' || !item.path.endsWith('.enc')) continue;
-
-      // item.path looks like "networking/test.enc"
-      const parts = item.path.split('/');
-      if (parts.length === 2) {
-        const dept = parts[0];
-        const filename = parts[1];
-        if (catalog[dept] !== undefined) {
-          catalog[dept].push(filename);
+    if (res.ok) {
+      const data: { tree: Array<{ path: string; type: string }> } = await res.json();
+      for (const item of data.tree) {
+        if (item.type !== 'blob' || !item.path.endsWith('.enc')) continue;
+        const parts = item.path.split('/');
+        if (parts.length === 2) {
+          const dept = parts[0];
+          const filename = parts[1];
+          if (catalog[dept] !== undefined) {
+            catalog[dept].push(filename);
+          }
         }
       }
     }
-  } catch {
-    // Network error — return whatever we have (empty catalog)
-  }
+  } catch { /**/ }
 
   return catalog;
 }
